@@ -1,0 +1,108 @@
+/* Neue Optik: gruener Kopf, helle Flaeche, weisse Karten. Liegt ueber stil.css. */
+:root{--gruen:#3d7d12;--kopf:#4c8f16;--hell:#e9f5dc;--bg:#f5f8f1;--linie:#dbe4d1;--tinte:#1f2a1a;--leise:#5d6757;--rot:#c3262e;
+  --rahmen:#fff;--licht:#d9efbf;--schild:#fff;--f-text:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;--f-schild:var(--f-text);--schatten:0 1px 4px rgba(31,42,26,.12)}
+html{background:var(--bg)}
+body{background:var(--bg);color:var(--tinte);-webkit-tap-highlight-color:transparent;min-height:100dvh;height:auto}
+:focus-visible{outline:3px solid #2f6fb5;outline-offset:2px;box-shadow:none}
+header{position:sticky;top:0;z-index:20;background:var(--kopf);flex-wrap:nowrap;gap:8px 12px;padding:calc(8px + env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) 8px max(12px,env(safe-area-inset-left));min-height:56px}
+header h1{font-size:19px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+#runde{font-size:16px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#punkte{font-size:16px;white-space:nowrap}
+.kopfknopf{background:rgba(0,0,0,.2);border:0;border-radius:10px;padding:9px 13px;white-space:nowrap}
+.kopfknopf:hover{background:rgba(0,0,0,.34)}
+#bMenue{order:-1}
+main{padding:16px 0;justify-content:flex-start;width:min(1180px,100% - 28px)}
+body[data-modus="haus"] main{justify-content:flex-end}
+#menue,#tafel,#karte,#schreiben{border:0;border-radius:18px;box-shadow:var(--schatten);margin:0 auto}
+#karte,#tafel,#schreiben{background:#fff}
+#menue{background:none;box-shadow:none;padding:4px 0;width:min(860px,100%)}
+#menue h2{font-size:26px}#menue p{color:var(--leise)}
+#spiele{grid-template-columns:minmax(0,1fr);gap:10px}
+#spiele.kacheln{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.spiel{border:0;border-radius:15px;box-shadow:var(--schatten);padding:14px 16px;align-items:center;flex-wrap:nowrap;gap:12px;font-size:16px}
+.spiel b{font-size:18px;display:block}.spiel small{color:var(--leise);font-size:15px;display:block}
+.spiel .tx{flex:1;min-width:0}
+.spiel .stand{font-size:14px;background:var(--hell);color:var(--gruen);border-radius:20px;padding:4px 11px;white-space:nowrap}
+.spiel .stand:empty{display:none}
+.spiel:hover:not(:disabled){background:#fbfef7;box-shadow:0 3px 10px rgba(31,42,26,.16)}
+.spiel:disabled{background:#eceee8;box-shadow:none;color:#666e60}.spiel:disabled small{color:#666e60}.spiel:disabled .stand{background:#dfe2d9;color:#5a6154}
+.kacheln .spiel{flex-direction:column;text-align:center;gap:6px;padding:18px 12px;justify-content:flex-start}
+.kacheln .spiel .tx{flex:0 0 auto;width:100%}
+.spiel .ic{font-size:40px;line-height:1.1}
+.bar{display:block;width:100%;height:9px;background:#e1e7da;border-radius:6px;overflow:hidden}.bar i{display:block;height:100%;background:var(--kopf);border-radius:6px}
+.gesamt{grid-column:1/-1;background:#fff;border-radius:15px;box-shadow:var(--schatten);padding:14px 16px;display:grid;gap:8px}
+.fussleiste{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:10px;justify-content:center;padding-top:8px}
+.fussleiste button{background:none;border:1px solid var(--linie);border-radius:10px;padding:9px 15px;font-size:15px;color:var(--leise)}
+.fussleiste button:hover{background:#fff}
+footer{background:#fff;border-top:1px solid var(--linie);box-shadow:0 -2px 10px rgba(31,42,26,.06);padding-bottom:calc(12px + env(safe-area-inset-bottom));position:sticky;bottom:0;z-index:10}
+body[data-modus="menue"] footer{display:none}
+#tipp{color:var(--tinte)}#tipp.schlecht{color:#a3470c}#tipp.gut{color:var(--gruen)}
+#ende{color:var(--tinte)}.sterne{color:#d08a00}
+.haupt,.neben{border-radius:12px;border:2px solid var(--kopf)}
+.haupt,dialog .haupt{background:var(--kopf);border-color:var(--kopf);color:#fff}.haupt:hover{background:#3d7d12}
+.neben{background:#fff;color:var(--gruen);border-color:var(--linie)}.neben:hover{background:var(--hell)}
+.wort{border:2px solid #b9c6ab;border-bottom-width:4px;border-radius:12px;color:var(--tinte);user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.wort:hover{background:var(--hell)}.wort.gewaehlt{background:var(--licht);border-color:var(--kopf)}
+.aufgabe .pruefen{background:var(--kopf);color:#fff;border:0;border-radius:12px;padding:11px 26px}
+.aufgabe .pruefen:hover{background:#3d7d12}
+.aufgabe .hoeren{border:2px solid var(--linie);border-radius:12px;font-size:18px;color:var(--gruen)}
+.aufgabe .pruefen,.aufgabe .hoeren{font-size:18px}
+.aufgabe input,#text{border:2px solid var(--linie);border-radius:12px}
+.aufgabe .satzgross{line-height:1.4}
+.aufgabe .auftrag,.vokabel .zusatz,.aufgabe .muster{color:var(--leise)}
+.aufgabe.ziel,.zeile.ziel,.vokabel .merk{background:var(--hell)}
+.platz,.vokabel .linie{border-color:#a9b79b;border-radius:10px}
+.zeile{border-color:var(--linie);border-radius:10px}.zeile .p small{color:var(--leise)}
+.serie i{border-color:#a9b79b}
+.themen button{border-color:var(--linie);border-radius:10px}.themen button[aria-pressed="true"]{border-color:var(--kopf)}
+.wand{border-radius:0 0 12px 12px}.dach{margin:0}.zimmer{border-radius:8px}
+dialog{border:0;border-radius:18px;box-shadow:0 10px 40px rgba(0,0,0,.3)}dialog::backdrop{background:rgba(20,32,14,.6)}
+th{color:var(--leise)}td{border-color:#e6ecdf}
+.fach{border:0;border-radius:12px;box-shadow:var(--schatten)}.fach small{color:var(--leise)}
+.einstellung{max-height:none;background:#fff;border-radius:15px;box-shadow:var(--schatten);padding:16px}
+.einstellung .spiel,.einstellung>button{justify-self:start}
+.einstellung .spiel{background:var(--kopf);color:#fff}
+/* Elternbereich */
+.eltern{background:none;box-shadow:none;padding:0;gap:12px;font-size:16px;user-select:text;-webkit-user-select:text}
+.eltern section,.eltern form,.eltern>label{background:#fff;border-radius:15px;box-shadow:var(--schatten);padding:15px 16px;display:grid;gap:9px;min-width:0;grid-template-columns:minmax(0,1fr)}
+.eltern form,.eltern>label{max-width:460px}
+.eltern form>label,.eltern section>label{display:block}
+.eltern h3{margin:0;font-size:18px}.eltern p{margin:0}
+.eltern input[type=text],.eltern input[type=password],.eltern input[type=date],.eltern select{font:inherit;padding:9px 11px;border:2px solid var(--linie);border-radius:10px;background:#fff;color:inherit;max-width:100%}
+.eltern input[type=text],.eltern input[type=password]{width:100%;margin-top:4px;user-select:text;-webkit-user-select:text}
+.eltern .meld{color:#a3470c;min-height:1.2em}.eltern .meld:empty{display:none}
+.zahlen{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;text-align:center}.zahlen b{font-size:24px;display:block;font-variant-numeric:tabular-nums}
+.zeile2{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px}.zeile2 .bar{grid-column:1/-1}
+.reihe2,.bilder{display:flex;flex-wrap:wrap;gap:8px}.reihe2 .haupt,.reihe2 .neben{font-size:16px;padding:9px 15px;cursor:pointer}
+.bilder button{font-size:24px;border:2px solid transparent;background:#f1f5ec;border-radius:10px;padding:4px 8px}.bilder button[aria-pressed="true"]{border-color:var(--kopf);background:var(--hell)}
+.rot{color:var(--rot)}
+.eltern td,.eltern td:first-child,.eltern td:nth-child(2){font-size:15px;overflow-wrap:anywhere}
+.eltern ul{margin:0;padding-left:20px;line-height:1.5}
+.eltern .kasten .fach{background:#f5f8f1;box-shadow:none}
+@media (max-width:760px){
+  #spiele.kacheln{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  header h1{font-size:17px}body:not([data-modus="menue"]) header h1{display:none}
+  #bTabelle{font-size:14px;padding:9px 10px}#bTon{font-size:14px;padding:9px 10px}#punkte{font-size:14px}#runde{font-size:14px}
+  .kasten{grid-template-columns:repeat(4,minmax(0,1fr))}.kasten .fach small{font-size:12px}
+  .zahlen{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .spiel .stand{white-space:normal;text-align:center}
+  .aufgabe .pruefen,.aufgabe .hoeren{padding:11px 18px;font-size:17px}
+  .wort{min-height:44px}
+  body[data-modus="tabelle"] #rechts .wort{min-height:40px}
+  footer{min-height:60px;max-height:48dvh;overflow:auto}
+}
+@media (max-width:760px){
+  header{flex-wrap:wrap;row-gap:4px}
+  body:not([data-modus="menue"]) #runde{flex:1 1 60px}
+  body[data-modus="menue"] #runde,#punkte:empty{display:none}
+  header h1{flex:1}
+  #bTon{margin-left:auto}
+  #punkte{order:9;flex-basis:100%;margin:0}
+  .kopfknopf{padding:9px 11px;font-size:15px}
+}
+.kacheln .spiel .stand{margin:2px auto 0}
+@media (max-width:760px){
+  body:not([data-modus="menue"]) #runde{white-space:normal;line-height:1.2;max-height:2.4em}
+  #links,#rechts{grid-template-rows:repeat(8,minmax(40px,48px))}
+  .person small{font-size:12px}.zimmer svg{max-width:62%;margin-left:auto}
+}

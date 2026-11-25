@@ -1,0 +1,197 @@
+/* Layout: ein Backsteinhaus am Abend, acht Fenster = acht Zeilen der Tabelle; Wortschilder liegen unten auf dem Gehweg. */
+:root{
+  --himmel-oben:#27406b; --himmel-unten:#e9a877;
+  --ziegel:#a94f3d; --ziegel-dunkel:#8a3d2e; --fuge:#c4725c;
+  --rahmen:#fbf7ee; --glas:#2c3d57; --licht:#ffdc85;
+  --schild:#ffffff; --tinte:#1b2333; --rot:#c3262e; --gruen:#1f7a4d; --gehweg:#4b5262;
+  --f-schild:"Bahnschrift","DIN Alternate","Segoe UI",sans-serif;
+  --f-text:"Segoe UI",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%;margin:0}
+body{font-family:var(--f-text);color:var(--tinte);background:linear-gradient(var(--himmel-oben),#8b7a93 45%,var(--himmel-unten) 78%) fixed;
+  display:grid;grid-template-rows:auto 1fr auto;min-height:100%;overflow-x:hidden;user-select:none;-webkit-user-select:none}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:4px solid #fff;outline-offset:2px;box-shadow:0 0 0 8px var(--tinte)}
+
+header{display:flex;flex-wrap:wrap;align-items:center;gap:8px 20px;padding:12px max(16px,3vw);color:#fff}
+header h1{font-family:var(--f-schild);font-size:26px;margin:0;font-weight:700}
+#runde{font-size:17px}
+#punkte{margin-left:auto;font-family:var(--f-schild);font-size:20px;font-variant-numeric:tabular-nums}
+.kopfknopf{background:rgba(20,30,55,.55);color:#fff;border:2px solid rgba(255,255,255,.55);border-radius:6px;padding:7px 14px;font-size:16px}
+.kopfknopf:hover{background:rgba(20,30,55,.85)}
+
+main{display:flex;flex-direction:column;justify-content:flex-end;width:min(1180px,100% - 32px);margin:0 auto;min-width:0}
+.dach{height:clamp(24px,6vh,64px);margin:0 -14px;background:#3a4152;clip-path:polygon(5% 0,95% 0,100% 100%,0 100%)}
+.wand{background-color:var(--ziegel);
+  background-image:
+   linear-gradient(var(--fuge) 2px,transparent 2px),
+   linear-gradient(90deg,var(--fuge) 2px,transparent 2px),
+   linear-gradient(90deg,var(--fuge) 2px,transparent 2px);
+  background-size:100% 18px,44px 36px,44px 36px;background-position:0 0,0 0,22px 18px;background-blend-mode:normal;
+  padding:16px;position:relative}
+.wand::before{content:"";position:absolute;inset:0;background:rgba(138,61,46,.62)}
+#haus{position:relative;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+
+#haus.einzeln{grid-template-columns:minmax(0,480px);justify-content:center}
+#haus.einzeln .wer{height:clamp(130px,30vh,260px)}
+#haus.einzeln .platz.de{min-width:190px;font-size:24px}
+#haus.einzeln .frage{font-size:26px}
+#haus.einzeln .satz{font-size:26px;padding:14px;gap:12px}
+#haus.einzeln .platz{min-width:120px;min-height:48px;font-size:28px}
+.zimmer{min-width:0;display:flex;flex-direction:column;border:6px solid var(--rahmen);background:var(--glas);position:relative;transition:background .35s}
+.zimmer .wer{display:flex;align-items:flex-end;justify-content:center;position:relative;height:clamp(84px,17vh,150px)}
+.zimmer svg{height:88%;max-width:74%;filter:saturate(.55) brightness(.8);transition:filter .35s}
+.person{position:absolute;left:8px;top:6px;font-family:var(--f-schild);font-size:24px;font-weight:700;color:#fff;line-height:1}
+.person small{display:block;font-family:var(--f-text);font-size:14px;font-weight:400;margin-top:4px}
+.zimmer.an{background:var(--licht)}
+.zimmer.an svg{filter:none}
+.zimmer.an .person{color:var(--tinte)}
+.satz{background:var(--rahmen);padding:7px 8px;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px 9px;font-size:20px;min-height:52px}
+.frage{flex-basis:100%;text-align:center;font-size:18px;line-height:1.2}
+.frage b{font-weight:700}
+.platz{display:inline-flex;align-items:center;justify-content:center;min-width:84px;min-height:38px;border:2.5px dashed #8892a6;border-radius:4px;font-family:var(--f-schild);font-size:22px;font-weight:700;padding:0 8px;background:#fff}
+.platz.de{min-width:120px;font-size:18px}
+.platz.voll{border:2.5px solid var(--gruen);color:var(--gruen)}
+.zimmer.ziel{box-shadow:0 0 0 5px #fff,0 0 22px 8px var(--licht)}
+.zimmer.falsch{animation:wackeln .4s}
+.zimmer.falsch .platz:not(.voll){border-color:var(--rot);border-style:solid}
+@keyframes wackeln{20%{transform:translateX(-9px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(3px)}}
+
+footer{background:var(--gehweg);border-top:8px solid #6d7484;padding:10px max(16px,3vw) 14px;min-height:150px}
+.innen{width:min(1180px,100%);margin:0 auto}
+#tipp{color:#fff;font-size:19px;min-height:30px;margin:0 0 8px;text-align:center;line-height:1.35}
+#tipp.schlecht{color:#ffd9a8}
+#tipp.gut{color:#b9f2cf}
+#schilder{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.wort{touch-action:none;background:var(--schild);border:2px solid var(--tinte);border-bottom-width:5px;border-radius:5px;font-family:var(--f-schild);font-weight:700;font-size:26px;padding:6px 20px;min-width:86px;cursor:grab}
+.wort.de{font-size:20px;border-color:var(--rot);color:#8f1a20;padding:9px 14px}
+.wort:hover{background:#fff4d6}
+.wort.gewaehlt{background:var(--licht);transform:translateY(-4px)}
+.wort.weg{visibility:hidden}
+.wort.hilfe{animation:huepfen .7s 3}
+@keyframes huepfen{50%{transform:translateY(-10px);background:var(--licht)}}
+.geist{position:fixed;left:0;top:0;z-index:50;pointer-events:none;cursor:grabbing;box-shadow:0 12px 22px rgba(0,0,0,.4)}
+.gezogen{opacity:.25}
+
+/* Hauptmenue und einfache Tabelle: ein Schild an der Hauswand */
+#menue,#tafel,#karte,#schreiben{background:var(--rahmen);border:8px solid var(--tinte);border-radius:8px;margin:auto;width:min(760px,100%)}
+#menue{padding:22px 28px}
+#menue h2{font-family:var(--f-schild);font-size:30px;margin:0 0 4px}
+#menue p{font-size:17px;margin:0 0 16px}
+#menue{width:min(1040px,100%)}
+#spiele{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+#karte{width:min(900px,100%);padding:22px 28px}
+.aufgabe{display:grid;grid-template-columns:minmax(0,1fr);gap:18px;justify-items:center;text-align:center;border-radius:6px;min-height:200px;align-content:center;padding:8px}
+.aufgabe .auftrag{font-size:18px;color:#566079;margin:0}
+.aufgabe .satzgross{font-family:var(--f-schild);font-size:32px;line-height:1.55;margin:0;text-wrap:balance}
+.aufgabe .platz{min-height:50px;min-width:110px;font-size:28px;vertical-align:middle;margin:0 2px;text-align:center}
+.aufgabe .platz.eng{min-width:56px}
+.aufgabe .platz.lang{width:440px;max-width:100%;min-width:0;font-size:24px}
+.aufgabe svg{height:150px}
+.aufgabe .reihe{max-width:100%;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:8px;font-family:var(--f-schild);font-size:30px}
+.aufgabe .janein{display:inline-block;border-radius:5px;padding:2px 14px;font-size:22px;font-family:var(--f-schild);font-weight:700;color:#fff;background:var(--gruen)}
+.aufgabe .janein.nein{background:var(--rot)}
+.aufgabe .falschsatz{text-decoration:underline wavy var(--rot) 2px;text-underline-offset:6px}
+.aufgabe.ziel{background:#fff4d6}
+.aufgabe .platz.ziel{border-color:var(--tinte);background:var(--licht)}
+.aufgabe.falsch{animation:wackeln .4s}
+.aufgabe .platz.nein{border-color:var(--rot);border-style:solid}
+.wort.breit{font-size:21px;padding:8px 16px}
+.aufgabe .zahl{font-family:var(--f-schild);font-size:64px;font-weight:700;line-height:1;margin:0}
+.aufgabe .muster{font-family:var(--f-schild);font-size:28px;color:#566079;margin:0;min-height:1.3em}
+.aufgabe form{display:flex;flex-direction:column;gap:12px;align-items:center;width:100%}
+.aufgabe .trio{display:grid;grid-template-columns:auto minmax(0,320px);gap:10px 18px;align-items:center;font-family:var(--f-schild);font-size:34px;font-weight:700}
+.aufgabe .trio .muster{grid-column:2;font-size:20px;min-height:0}
+.aufgabe input{font-family:var(--f-schild);font-size:30px;font-weight:700;color:var(--tinte);background:#fff;border:2.5px solid #8892a6;border-radius:5px;padding:5px 12px;width:min(320px,100%);text-align:center;user-select:text;-webkit-user-select:text}
+.aufgabe input.gut{border-color:var(--gruen);color:var(--gruen);background:#fff}
+.aufgabe input.nein{border-color:var(--rot)}
+.aufgabe .pruefen{background:var(--licht);border:2px solid var(--tinte);border-bottom-width:5px;border-radius:5px;padding:7px 22px;font-size:20px;font-weight:700}
+.aufgabe .hoeren{background:#fff;border:2px solid var(--tinte);border-bottom-width:5px;border-radius:5px;padding:9px 22px;font-size:22px;font-weight:700}
+#schreiben{width:min(1000px,100%);padding:16px 22px}
+/* Vokabeln */
+.vokabel .deutsch{font-size:28px;margin:0}.vokabel .zusatz{font-size:18px;color:#566079;margin:-8px 0 0}.vokabel .merk{font-size:18px;margin:0;background:#fff4d6;border-radius:5px;padding:6px 14px}
+.deins{font-family:var(--f-schild);font-size:26px;margin:0;color:var(--tinte)}.weg1{color:var(--rot);text-decoration:line-through}.neu1{color:var(--gruen);text-decoration:underline;text-underline-offset:4px}
+.vokabel .muster{letter-spacing:2px}.vokabel .zu{visibility:hidden}
+.vokabel .linie{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:center;min-height:62px;width:min(620px,100%);border:2.5px dashed #8892a6;border-radius:6px;background:#fff;padding:6px 10px}
+.vokabel .linie.ziel{background:var(--licht);border-color:var(--tinte)}.vokabel .linie.gut{border:2.5px solid var(--gruen)}.vokabel .linie.gut .wort{color:var(--gruen)}
+.vokabel .vorrat{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;min-height:52px}.vokabel .wort.raus{opacity:.35;text-decoration:line-through}
+.kasten{grid-column:1/-1;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;width:100%}
+.fach{background:#fff;border:2px solid var(--tinte);border-radius:5px;text-align:center;padding:6px 2px;display:grid;font-size:15px}.fach b{font-family:var(--f-schild);font-size:24px}.fach small{font-size:13px;color:#566079}
+.einstellung{grid-column:1/-1;display:grid;gap:8px;font-size:18px;max-height:56vh;overflow:auto;min-width:0}.einstellung label{display:block}.einstellung small,.testliste small{color:#566079;font-size:15px}.einstellung input[type=checkbox]{width:20px;height:20px;vertical-align:-3px}.einstellung input[type=date]{font:inherit;padding:4px 8px}.einstellung summary{font-family:var(--f-schild);font-size:21px;cursor:pointer;padding:4px 0}.einstellung td button{background:none;border:0;padding:0;text-align:left;font:inherit}.einstellung td:nth-child(2){font-family:var(--f-text);font-size:17px}.einstellung .spiel{justify-self:start}
+.testliste{max-height:46vh;overflow:auto}.testliste h2{font-family:var(--f-schild);margin:0 0 4px}.testliste p{margin:0 0 8px;font-size:16px}.testliste .deins{font-size:20px}.testliste td:last-child,.testliste th:last-child{text-align:right}
+.themen{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+.themen button{background:#fff;border:2px solid var(--tinte);border-radius:5px;padding:6px 14px;font-size:17px;font-family:var(--f-schild)}
+.themen button[aria-pressed="true"]{background:var(--licht)}
+#auftrag{margin:0 0 8px;font-size:17px}
+#text{width:100%;font-family:var(--f-text);font-size:20px;line-height:1.5;border:2px solid var(--tinte);border-radius:5px;padding:10px 12px;resize:vertical;user-select:text;-webkit-user-select:text}
+#pruefliste{list-style:none;margin:10px 0 0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 20px;font-size:16px}
+#pruefliste li::before{content:"○ ";color:#8892a6}
+#pruefliste li.ok{color:var(--gruen);font-weight:600}
+#pruefliste li.ok::before{content:"✓ ";color:var(--gruen)}
+.spiel{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 14px;text-align:left;background:#fff;border:2px solid var(--tinte);border-bottom-width:5px;border-radius:6px;padding:11px 18px;font-size:17px}
+.spiel b{font-family:var(--f-schild);font-size:22px}
+.spiel .stand{margin-left:auto;color:var(--gruen);font-weight:600}
+.spiel:hover:not(:disabled){background:#fff4d6}
+.spiel:disabled{cursor:not-allowed;background:#e6e4de;border-color:#9aa1b0;color:#5d6577}
+.spiel:disabled .stand{color:#5d6577}
+#tafel{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:14px 40px;padding:16px 24px}
+#links,#rechts{display:grid;grid-template-rows:repeat(8,minmax(44px,58px));gap:7px;min-width:0}
+.zeile{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(100px,1fr) 70px;align-items:center;gap:12px;background:#fff;border:2px solid #b9c0cf;border-radius:5px;padding:0 12px;min-width:0}
+.zeile .p{font-family:var(--f-schild);font-weight:700;font-size:26px}
+.zeile .p small{font-family:var(--f-text);font-weight:400;font-size:14px;margin-left:7px;color:#566079}
+.zeile .gl{font-size:24px}
+.zeile .platz{min-height:36px;font-size:24px}
+.zeile.ziel{border-color:var(--tinte);background:#fff4d6}
+.zeile.falsch{animation:wackeln .4s}
+.zeile.falsch .platz:not(.voll){border-color:var(--rot);border-style:solid}
+.serie{display:flex;gap:6px}
+.serie i{width:18px;height:18px;border-radius:50%;border:2px solid #8892a6;background:#fff}
+.serie i.an{background:var(--gruen);border-color:var(--gruen)}
+#rechts .wort{width:100%;padding-block:0}
+body[data-modus="tabelle"] footer,body[data-modus="menue"] footer,body[data-modus="schreiben"] footer{min-height:60px}
+#ende{color:#fff;text-align:center}
+#ende h2{font-family:var(--f-schild);font-size:28px;margin:0 0 4px}
+#ende p{margin:0 0 12px;font-size:18px;line-height:1.4}
+.knoepfe{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+.haupt,.neben{border-radius:6px;padding:11px 24px;font-size:19px;border:2px solid #fff}
+.haupt{background:var(--licht);border-color:var(--licht);color:var(--tinte);font-weight:700}
+.haupt:hover{background:#ffe9b3}
+.neben{background:transparent;color:#fff}
+.neben:hover{background:rgba(255,255,255,.15)}
+.sterne{letter-spacing:4px;color:var(--licht)}
+
+dialog{border:8px solid var(--tinte);border-radius:8px;background:#fff;color:var(--tinte);padding:22px 28px;width:min(700px,calc(100% - 24px));max-height:calc(100% - 24px);overflow:auto;user-select:text}
+dialog::backdrop{background:rgba(18,26,48,.75)}
+dialog h2{font-family:var(--f-schild);font-size:30px;margin:0 0 4px}
+dialog p{font-size:17px;line-height:1.45;margin:0 0 12px}
+table{border-collapse:collapse;width:100%;font-size:18px;margin-bottom:14px}
+th{text-align:left;font-size:15px;font-weight:600;color:#566079;padding:4px 8px}
+td{padding:5px 8px;border-top:1px solid #d8dce6}
+td:first-child,td:nth-child(2){font-family:var(--f-schild);font-size:20px}
+td b{color:var(--rot)}
+dialog ul{margin:0 0 16px;padding-left:20px;font-size:17px;line-height:1.5}
+dialog .knoepfe{justify-content:flex-start}
+dialog .haupt{border:2px solid var(--tinte)}
+
+@media (max-width:760px){
+  #spiele,#pruefliste{grid-template-columns:minmax(0,1fr)}#menue,#karte,#schreiben{padding:14px}.aufgabe .satzgross{font-size:24px}.aufgabe .reihe{font-size:22px}.aufgabe .platz{font-size:22px;min-width:70px;min-height:40px}.wort.breit{font-size:17px;padding:6px 10px}
+  #tafel{gap:8px 12px;padding:10px}.zeile{grid-template-columns:minmax(0,1fr) minmax(64px,1fr);gap:2px 6px;padding:2px 6px}.zeile .gl{display:none}.zeile .platz{min-width:0;min-height:28px;font-size:18px}.zeile .p{font-size:19px}.zeile .p{line-height:1;white-space:nowrap}.zeile .p small{font-size:11px;margin-left:4px}.serie{grid-column:1/-1}.serie i{width:10px;height:10px}
+  #haus{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  footer{position:sticky;bottom:0;z-index:5}
+  .wort{font-size:20px;padding:5px 12px;min-width:64px}.wort.de{font-size:16px;padding:6px 9px}
+}
+@media (max-height:760px) and (min-width:761px){
+  #karte{padding:10px 24px}.aufgabe{gap:12px;min-height:170px}.aufgabe svg{height:120px}.aufgabe .satzgross{font-size:28px}.aufgabe .zahl{font-size:50px}.aufgabe .trio{font-size:28px;gap:6px 16px}.aufgabe input{font-size:25px;padding:3px 10px}.wort.breit{font-size:19px;padding:5px 14px}#text{font-size:18px}
+  #menue{padding:14px 24px}#menue p{margin-bottom:10px}#spiele{gap:7px}.spiel{padding:7px 16px}
+  #tafel{padding:10px 20px}#links,#rechts{grid-template-rows:repeat(8,minmax(38px,52px));gap:5px}.zeile .platz{min-height:32px}
+  dialog{padding:14px 24px}dialog h2{font-size:24px}dialog p{font-size:16px;margin-bottom:6px}table{margin-bottom:8px;font-size:16px}td{padding:2px 8px}td:first-child,td:nth-child(2){font-size:18px}dialog ul{font-size:16px;line-height:1.4;margin-bottom:10px}
+  header{padding-block:6px}.dach{height:18px}.wand{padding:10px}#haus{gap:10px}
+  .zimmer .wer{height:clamp(64px,14vh,104px)}
+  .satz{min-height:46px;padding:4px 8px}
+  footer{padding-block:8px 10px}
+  #tipp:empty{display:none}#ende h2{font-size:22px;margin:0}#ende p{font-size:16px;margin-bottom:8px;line-height:1.3}#ende .haupt,#ende .neben{padding:6px 20px;font-size:17px}
+  .wort{font-size:22px;padding:4px 16px}.wort.de{font-size:18px;padding:6px 11px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.wort.hilfe{background:var(--licht)}}

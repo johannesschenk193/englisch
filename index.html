@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#4c8f16">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Englisch">
+<title>Englisch-Trainer</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<link rel="stylesheet" href="stil.css">
+<link rel="stylesheet" href="optik.css">
+</head>
+<body>
+
+<header>
+  <h1 id="titel">Englisch-Trainer</h1>
+  <span id="runde"></span>
+  <span id="punkte"></span>
+  <button class="kopfknopf" id="bMenue" type="button">Zurück</button>
+  <button class="kopfknopf" id="bTabelle" type="button">Regeln</button>
+  <button class="kopfknopf" id="bTon" type="button" aria-label="Ton ausschalten">🔊</button>
+</header>
+
+<main>
+  <section id="menue" hidden>
+    <h2 id="menuetitel"></h2>
+    <p id="menuetext"></p>
+    <div id="spiele"></div>
+  </section>
+  <section id="tafel" hidden><div id="links"></div><div id="rechts"></div></section>
+  <section id="karte" hidden></section>
+  <section id="schreiben" hidden>
+    <div class="themen" id="themen"></div>
+    <p id="auftrag"></p>
+    <textarea id="text" rows="7" spellcheck="false" lang="en" aria-label="Dein Text"></textarea>
+    <ul id="pruefliste"></ul>
+  </section>
+  <div class="dach"></div>
+  <div class="wand"><div id="haus"></div></div>
+</main>
+
+<footer><div class="innen">
+  <p id="tipp" role="status" aria-live="polite"></p>
+  <div id="schilder"></div>
+  <div id="ende" hidden></div>
+</div></footer>
+
+<dialog id="tabelle">
+  <h2 id="regeltitel"></h2>
+  <div id="regeln"></div>
+  <template id="besitzregeln">
+    <table>
+      <thead><tr><th>Person</th><th>wem gehört's?</th><th>Deutsch</th></tr></thead>
+      <tbody id="tabellenzeilen"></tbody>
+    </table>
+    <ul>
+      <li>Das Mädchen heißt im Englischen <b>she</b>, also <b>her</b>.</li>
+      <li><b>your</b> kann dein, euer oder Ihr heißen.</li>
+      <li><b>its</b> (sein) und <b>it's</b> (it is) sind zwei verschiedene Wörter. Genauso <b>your</b> und <b>you're</b> (you are).</li>
+    </ul>
+  </template>
+  <div class="knoepfe"><button class="haupt" id="bLos" type="button">Schließen</button></div>
+</dialog>
+
+<script src="kern.js"></script>
+<script src="audio/liste.js"></script>
+<script src="spiel.js"></script>
+<script src="vokabelliste.js"></script>
+<script src="vokabeln.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
