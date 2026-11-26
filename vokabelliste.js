@@ -1,4 +1,4 @@
-// Vokabeln zum Ueben, Stand 26.11.2026 (Unit 1 bis 3, Vokabelliste S. 184 bis 211; S. 202 und 203 fehlen noch)
+// Vokabeln zum Ueben, Stand 26.11.2026 (Pick-up A bis Unit 4, Vokabelliste S. 184 bis 217; S. 202 und 203 fehlen noch)
 // Zeile: englisch | deutsch | Zusatz bei Verwechslungsgefahr | auch richtig (Komma) | Merkhilfe
 // Ein Wort = schreiben, mehrere Woerter = Satz aus Schildern bauen.
 // Eine Zeile "@190" heisst: ab hier stehen die Woerter auf Seite 190 (fuer seitenweises Lernen).
@@ -438,7 +438,7 @@ fork|Gabel
 spoon|Löffel
 to run|rennen; laufen
 `],
-["u2x","Unit 2: Seite 204 (Überschrift fehlt noch)","S. 204",`
+["u2x","Unit 2: Story, Let's play a trick","S. 204",`
 later|später|||later → late
 I hear …|Ich habe gehört, dass …
 to hear|hören
@@ -642,8 +642,184 @@ studying|Lernen; Studieren|Nomen: das Lernen
 `],
 ["u3co","Unit 3: Check-out","S. 211",`
 first|zuerst; als Erstes
+`],
+["ac1","Across cultures 1: How to be polite in English","S. 212 und 213",`
+@212
+how to …|wie man …
+to visit|besichtigen; besuchen|||to visit → a visit
+country|Land|||Mehrzahl: countries
+important|wichtig
+English-speaking|englischsprachig
+smile|Lächeln
+Here you go.|Bitte schön!; Bitte sehr!|wenn man jemandem etwas reicht
+to open|öffnen; aufmachen
+window|Fenster
+I'm cold.|Mir ist kalt.
+of course|natürlich; selbstverständlich
+No idea.|Keine Ahnung.
+may|(vielleicht) können; dürfen|||Höflich fragen: May I take your book, please?
+@213
+to need|brauchen; benötigen
+Excuse me …|Entschuldigung!; Entschuldigen Sie!
+to have (a sweet)|(ein Bonbon) nehmen; (ein Bonbon) essen
+You're welcome.|Bitte schön.; Nichts zu danken.; Gern geschehen.|als Antwort auf Danke||You're welcome heißt nicht Willkommen.
+lemonade|Limonade
+bus station|Busbahnhof
+timetable|Stundenplan; Fahrplan
+to be in the way|im Weg sein; im Weg stehen
+person|Person; Mensch|||Mehrzahl: people (one person – two people)
+train|Zug
+`],
+["ac1pre","Across cultures 1: Prepositions of place","S. 213",`
+at school|in der Schule
+at the station|am Bahnhof
+in Britain|in Großbritannien
+in the house|im Haus
+in the park|im Park
+in the shop|im Laden
+on the bus|im Bus
+on the train|im Zug
+in the car|im Auto|||Im Auto heißt in the car, nicht on.
+`],
+["ac1b","Across cultures 1: Auf der Rolltreppe","S. 213 und 214",`
+@213
+to hold|halten; festhalten
+open|offen; geöffnet; aufgeschlagen|||open → to open
+woman|Frau|||Achtung Aussprache. Mehrzahl: women
+@214
+man|Mann|||Mehrzahl: men; man ↔ woman
+to jump the queue|sich vordrängeln
+British|britisch; Brite; Britin
+escalator|Rolltreppe
+to stand|stehen
+on the right|auf der rechten Seite; rechts
+on the left|auf der linken Seite; links|||on the left ↔ on the right
+to walk|gehen; laufen
+`],
+["u4c","Unit 4: Check-in, Let's do something fun","S. 214 und 215",`
+@214
+fun|lustig; witzig; fröhlich
+museum|Museum
+to cost|kosten
+ship|Schiff
+over|hinüber; über|beginnt mit o||over ↔ under
+foot|Fuß|||Mehrzahl: feet (one foot – two feet)
+east|Osten; Ost-
+west|Westen; West-|||west ↔ east
+pier|Pier; Hafendamm
+tunnel|Tunnel
+river|Fluss
+farm|Farm; Bauernhof
+across|auf der anderen Seite von; über; hinüber; quer durch|beginnt mit a
+city|Stadt; Großstadt
+free|frei; kostenlos
+@215
+water slide|Wasserrutsche
+leisure centre|Freizeitzentrum
+activity|Aktivität
+tour|Tour; Fahrt; Rundgang
+through|durch
+`],
+["u4s1","Unit 4: Station 1, Well, what's your idea?","S. 215",`
+at the weekend|am Wochenende
+special|besonders; speziell
+What time?|Um wie viel Uhr?
+fine|gut; in Ordnung; schön
+See you!|Bis dann!
+to happen|geschehen; passieren
+to close|schließen; zumachen|||to close ↔ to open
+enough|genug; genügend
+`],
+["u4s2","Unit 4: Station 2, Does the farm look nice?","S. 215 und 216",`
+@215
+to spell|buchstabieren
+at last|endlich; schließlich
+half-sister|Halbschwester
+to get to|kommen zu; kommen nach; erreichen
+us|uns
+to answer|antworten; beantworten|||Achtung Aussprache: Das w wird nicht gesprochen. to answer ↔ to ask
+bad|schlecht; böse; schlimm|||bad ↔ good
+to keep your fingers crossed|die Daumen drücken
+spider|Spinne
+to stay|bleiben|||to come – to stay – to go
+@216
+brochure|Broschüre; Prospekt|||Achtung Aussprache und Schreibung.
+to get|holen; bringen; bekommen
+Dear …|Lieber …; Liebe …|||Briefe beginnen mit Dear und dem Namen.
+visitor|Besucher; Besucherin|||visitor → a visit → to visit
+to sell|verkaufen|||to sell ↔ to buy
+perfect|perfekt; vollkommen
+to talk to|reden mit
+difficult|schwierig|||difficult ↔ easy
+German|deutsch; Deutsch; aus Deutschland
+to say hello (to)|grüßen
+`],
+["u4tiere","Unit 4: Farm animals","S. 216",`
+pig|Schwein
+chicken|Huhn
+lamb|Lamm
+sheep|Schaf|||Mehrzahl: sheep
+cow|Kuh
+goat|Ziege
+duck|Ente
+`],
+["u4s3","Unit 4: Station 3, The Greenwich Test","S. 216",`
+to mean|bedeuten; meinen
+winner|Gewinner; Gewinnerin; Sieger|||winner → to win
+tourist|Tourist; Touristin|||Achtung Aussprache.
+line|Zeile; Linie
+to turn (into)|einbiegen; abbiegen
+left|(nach) links; linke
+right|(nach) rechts; rechte|Richtung||right ↔ left
+straight on|geradeaus
+I don't know!|Ich weiß es nicht!
+stop|Halt; Stopp|||stop → to stop
+tourist information centre|Touristeninformation|||town centre – city centre – leisure centre
+market|Markt
+`],
+["u4sk","Unit 4: Skills, How to work with maps","S. 217",`
+to go down|entlanggehen; hinuntergehen
+past|vorbei an
+opposite|gegenüber
+café|Café|||Achtung Aussprache.
+theatre|Theater
+shopping|Einkaufen; Einkäufe
+cinema|Kino
+church|Kirche
+`],
+["u4weg","Unit 4: Asking and telling the way","S. 217",`
+Let's look at the map.|Lass uns auf den Stadtplan schauen.
+Look, it's over there.|Schau, es ist dort drüben.
+Are you sure?|Bist du sicher?
+I'm not sure. Let's ask.|Ich bin nicht sicher. Lass uns fragen.
+Excuse me, please.|Entschuldigung, bitte.
+Can you tell me the way to …?|Können Sie mir sagen, wie ich zum … komme?
+How do I get to …?|Wie komme ich zum …?
+Wait a minute.|Einen Augenblick.
+Go down …|Geh … entlang.
+Turn right into …|Bieg rechts in … ab.
+Turn left into …|Bieg links in … ab.
+Go straight on.|Geh geradeaus.
+Go past …|Geh am … vorbei.
+It's on the right.|Es ist auf der rechten Seite.
+It's on the left.|Es ist auf der linken Seite.
+It's opposite the …|Es ist gegenüber vom …
+Thank you very much for your help.|Vielen Dank für deine Hilfe.
+`],
+["u4task","Unit 4: Unit task, A survey about free time","S. 217",`
+survey|Umfrage
+to think of|halten von; denken über
+help|Hilfe|||help → to help
+some|einige; ein paar; etwas|||some = not all
 `]
 ];
 // Wo die Klasse im Buch steht, solange niemand etwas anderes sagt: Klassenarbeit am 25.11.2026 ueber Unit 1.
 // Neue Kinder starten auch hier. Danach fragt das Spiel an Schultagen nach.
 window.BUCH_START="ac";
+// Schulbuchseite -> Abschnitt (aus dem Inhaltsverzeichnis, paperless:3029 und den Buchseiten 26-69). Pick-up A grob.
+// S. 45-47 (Skills, Unit task): Vokabeln S. 202-203 fehlen noch, deshalb bis dahin nur Station 2.
+window.BUCHSEITEN=[[8,9,"a1"],[10,10,"a2"],[11,12,"a3"],[13,13,"a4"],[14,15,"a5"],
+  [16,17,"u1"],[18,20,"s1"],[21,23,"s2"],[24,25,"s3"],[26,27,"st"],[28,29,"ac"],[30,31,"pb"],[32,35,"pbk"],
+  [36,37,"u2c"],[38,41,"u2s1"],[42,47,"u2s2"],[48,49,"u2adj"],[50,50,"u2ac"],[51,53,"u2co"],
+  [54,55,"u3zeit"],[56,58,"u3s1"],[59,62,"u3s2"],[63,63,"u3sk"],[64,65,"u3st"],[66,66,"u3ac"],[67,67,"u3co"],
+  [68,69,"ac1b"],[70,71,"u4c"],[72,73,"u4s1"],[74,77,"u4tiere"],[78,79,"u4s3"],[80,81,"u4weg"],[82,83,"u4task"]];

@@ -166,7 +166,7 @@ function frageBuch(){
 // Seite der Vokabelliste (ab 180): steht dort. Seite im Schulbuch: einmal fragen, welche Ueberschrift dort steht, und fuer alle Kinder merken.
 function nachSeite(s){
   if(s>=180){ const a=BUCH.ausListenseite(s); return a?weiterBis(a.id):menue(); }
-  const id=KERN.fam().seiten?.[s]; if(id&&BUCH.idx(id)>=0) return weiterBis(id);
+  const id=BUCH.ausSchulseite(s)||KERN.fam().seiten?.[s]; if(id&&BUCH.idx(id)>=0) return weiterBis(id);
   ort="@frage"; ruhe(`Seite ${s}`,"Welche Überschrift steht auf dieser Seite oder davor? Dann merke ich mir die Seite.");
   const d=blatt(""), ab=Math.max(0,BUCH.idx(BUCH.pos())-1);
   antworten(d,[...BUCH.ABSCHNITT.slice(ab,ab+10).map(a=>[kurz(a),"neben",()=>{ KERN.setzFamilie({seiten:{...(KERN.fam().seiten||{}),[s]:a.id}}); weiterBis(a.id); },esc(a.seite)]),
@@ -180,7 +180,7 @@ function weiterBis(id){
   KERN.log(`Im Buch weiter: ${BUCH.abschnitt(id).name}`,0,0,"buch");
   ort="@frage"; ruhe("Super, dann geht's weiter!",`Neu dran: ${r.neu.map(x=>BUCH.abschnitt(x).name).join(", ")}`.replace(/([^.!?])$/,"$1."));
   const d=blatt(`<section><h3>📚 Vokabeln</h3><p>${r.woerter} neue Wörter. Die lernst du jetzt zuerst, die alten wiederholst du nebenbei.</p></section>
-    ${frei.length?`<section class="neufrei"><h3>🔓 Neu freigeschaltet in Grammatik</h3><ul>${frei.map(b=>`<li>${b.icon} <b>${esc(b.name)}</b>: ${esc(b.was)}</li>`).join("")}</ul></section>`:""}`);
+    ${frei.length?`<section class="neufrei"><h3>🔓 Neu freigeschaltet in Grammatik</h3><ul>${frei.map(b=>`<li>${b.icon} <b>${esc(b.name)}</b>: ${esc(b.was)}</li>`).join("")}</ul>${frei.some(b=>b.erkl)?"<p>Vor dem ersten Spiel kommt eine Erklärung aus dem Buch.</p>":""}</section>`:""}`);
   antworten(d,[["Los geht's","haupt",menue]]);
 }
 // ---------- Geraete ----------

@@ -290,17 +290,21 @@ function uebungFertig(){
   aus++; $("karte").replaceChildren(); const o=offen();
   const k=document.createElement("div"); k.className="aufgabe"; k.innerHTML=`<p class="satzgross">Geschafft!</p>${tagesStand()}${kasten()}`; $("karte").append(k);
   $("runde").textContent=U.titel; $("punkte").textContent=""; sag("",""); piep([[523,0,.15],[659,.13,.15],[784,.26,.3]]);
-  const r=Math.max(0,ziel()-geuebt());
-  abschluss(`<p>${U.gut} gleich richtig, ${U.fast} fast richtig, ${U.falsch} noch nicht. ${o.alle?r?`Noch ${r} ${r===1?"Wort":"Wörter"} bis zum Tagesziel.`:"":"Für heute bist du fertig."}</p>`,
-    o.alle?[["Weiter üben","haupt",heuteUeben],["Zurück","neben",vokMenue]]:[["Zurück","haupt",vokMenue],...(neue().length?[["5 neue Wörter extra","neben",()=>neueUeben(5)]]:[])]);
+  const r=Math.max(0,ziel()-geuebt()), g=grammatik();
+  const gk=g.offen&&U.heute?[[`Weiter: 8 Grammatik-Aufgaben`,"haupt",()=>grammatikHeute.start()]]:[];
+  abschluss(`<p>${U.gut} gleich richtig, ${U.fast} fast richtig, ${U.falsch} noch nicht. ${o.alle?r?`Noch ${r} ${r===1?"Wort":"Wörter"} bis zum Tagesziel.`:"":g.offen?"Die Wörter sind für heute fertig.":"Für heute bist du fertig."}${gk.length?` Jetzt noch kurz Grammatik: ${sicher(g.name)}.`:""}</p>`,
+    o.alle?[...gk,["Weiter üben",gk.length?"neben":"haupt",heuteUeben],["Zurück","neben",vokMenue]]:[...gk,["Zurück",gk.length?"neben":"haupt",vokMenue],...(neue().length?[["5 neue Wörter extra","neben",()=>neueUeben(5)]]:[])]);
 }
+// Grammatik des aktuellen Themas (spiel.js): einmal am Tag nach der Vokabelrunde
+const grammatik=()=>window.grammatikHeute?grammatikHeute.info():{offen:false,fertig:false,name:""};
 // Bekanntes zuerst, neue Woerter in kleinen Portionen dazwischen; reicht beides nicht fuers Tagesziel, kommt Gelerntes zum Auffrischen
 function heuteUeben(){
   const o=offen();
   const f=faellige().slice(0,SITZUNG).map(w=>({w,s:"abfrage"}));
   const nn=Math.min(o.n,Math.max(5,SITZUNG-f.length),10), n=neue().slice(0,nn).map(w=>({w,s:"neu"}));
   const x=auffrischen().slice(0,Math.min(o.x,Math.max(0,SITZUNG-f.length-n.length))).map(w=>({w,s:"schwer"}));
-  starteUebung([...mischen([...f,...x]),...n],"Vokabeln: heute üben");
+  if(!f.length&&!n.length&&!x.length&&grammatik().offen) return grammatikHeute.start();
+  starteUebung([...mischen([...f,...x]),...n],"Vokabeln: heute üben"); if(U) U.heute=true;
 }
 const neueUeben=n=>starteUebung(neue().slice(0,n).map(w=>({w,s:"neu"})),"Vokabeln: neue Wörter");
 const schwereUeben=()=>starteUebung(schwere().slice(0,12).map(w=>({w,s:"schwer"})),"Vokabeln: schwere Wörter");
@@ -349,9 +353,10 @@ const auswahlText=v=>{ const m=v.nach||"abschnitt", sel=gewaehlt(v,m); return se
 function vokMenue(){
   aus++; ort="vok"; const o=offen(), bis=testTag()-heute(), k=kette();
   ruhe("Vokabeln",[bis>0?`Noch ${bis} ${bis===1?"Tag":"Tage"} bis zum Test.`:bis===0&&S.test?"Heute ist der Test.":"", k>1?`${k} Tage hintereinander geübt.`:"", `Jeden Tag mindestens ${ziel()} Wörter.`].filter(Boolean).join(" "));
-  const fn=fokusNeu(), fa=fokus().map(abschnitt).filter(Boolean);
+  const fn=fokusNeu(), fa=fokus().map(abschnitt).filter(Boolean), g=grammatik();
   karten([...(fn.length?[{t:"Neu im Unterricht",u:fa.map(a=>sicher(a.name)).join(", "),st:`${fn.length} neue Wörter`,f:()=>starteUebung(fn.slice(0,10).map(w=>({w,s:"neu"})),"Vokabeln: neu im Unterricht")}]:[]),
-    {t:"Heute üben",u:o.alle?[o.f&&`${o.f} wiederholen`,o.n&&`${o.n} neu`,o.x&&`${o.x} auffrischen`].filter(Boolean).join(", "):"für heute fertig",st:o.alle?`${Math.min(geuebt(),ziel())} von ${ziel()}`:"Fertig ✓",zu:!o.alle,f:heuteUeben},
+    {t:"Heute üben",u:(o.alle?[o.f&&`${o.f} wiederholen`,o.n&&`${o.n} neu`,o.x&&`${o.x} auffrischen`].filter(Boolean).join(", "):"Wörter für heute fertig")+(g.offen?`, dazu Grammatik: ${sicher(g.name)}`:g.fertig?", Grammatik fertig":""),
+      st:o.alle?`${Math.min(geuebt(),ziel())} von ${ziel()}`:g.offen?"Grammatik offen":"Fertig ✓",zu:!o.alle&&!g.offen,f:heuteUeben},
     {t:"Was lerne ich?",u:"seitenweise, abschnittsweise oder unitweise",st:auswahlText(S),f:einstellen},
     {t:"Schwere Wörter",u:"nur, was zuletzt nicht saß",st:schwere().length?`${schwere().length} offen`:"nichts offen",zu:!schwere().length,f:schwereUeben},
     {t:"Vokabeltest",u:"20 Wörter wie in der Schule",st:S.test&&bis>=0?`Test: ${S.test.split("-").reverse().join(".")}`:"",f:testMenue},
@@ -398,6 +403,8 @@ window.vokKarte=()=>{ const o=offen(); return {i:"📚",p:[ALLE.filter(w=>L(w).f
 window.vokWahl=wahlEl;
 window.BUCH={ABSCHNITT,REIHE,idx,pos:buchPos,erreicht,abschnitt,setzen:buchSetzen,naechste:()=>ABSCHNITT[idx(buchPos())+1],
   // Seite der Vokabelliste (ab 180) -> letzter Abschnitt, der auf dieser Seite steht
-  ausListenseite:n=>{ let t=null; for(const a of ABSCHNITT){ const s=(a.seite.match(/\d+/g)||[]).map(Number); if(s.length&&s[0]<=n) t=a; } return t; }};
+  ausListenseite:n=>{ let t=null; for(const a of ABSCHNITT){ const s=(a.seite.match(/\d+/g)||[]).map(Number); if(s.length&&s[0]<=n) t=a; } return t; },
+  // Seite im Schulbuch -> Abschnitt (aus dem Inhaltsverzeichnis, vokabelliste.js)
+  ausSchulseite:n=>{ const t=(window.BUCHSEITEN||[]).find(([a,b])=>n>=a&&n<=b); return t&&idx(t[2])>=0?t[2]:null; }};
 window.vokPruef={leer,kasten,GRUPPEN,ZIEL,offen,geuebt,ziel,dran,auffrischen,auswahlText,tausch:x=>{const a=S; if(x) S=x; return a;},W,ALLE,ABSCHNITT,bewerte,bewerteSatz,vergleich,faellig,ablenker,halbe,L,S:()=>S,setTag:t=>heute=()=>t,U:()=>U,faellige,neue,neuProTag}; // fuer Tests
 })();

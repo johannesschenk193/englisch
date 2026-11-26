@@ -127,3 +127,18 @@ th{color:var(--leise)}td{border-color:#e6ecdf}
   #links,#rechts{grid-template-rows:repeat(8,minmax(40px,48px))}
   .person small{font-size:12px}.zimmer svg{max-width:62%;margin-left:auto}
 }
+/* Erklaerseite nach dem Buch */
+.erkl{background:none;box-shadow:none;padding:0;display:grid;gap:12px;font-size:17px;line-height:1.5;user-select:text;-webkit-user-select:text}
+.erkl section,.erkl .maus{background:#fff;border-radius:15px;box-shadow:var(--schatten);padding:14px 16px;margin:0;min-width:0}
+.erkl h3{margin:0 0 6px;font-size:18px;color:var(--gruen)}.erkl p{margin:0}.erkl ul{margin:0;padding-left:20px}.erkl li+li{margin-top:5px}
+.erkl .leise{color:var(--leise);font-size:14px;margin-bottom:6px}
+.erkl .tabs{overflow-x:auto;display:grid;gap:10px}
+.etab{border-collapse:collapse;width:100%;font-size:15px}.etab th,.etab td{border:1px solid var(--linie);padding:6px 8px;text-align:left;vertical-align:top}
+.etab th{background:var(--hell);color:var(--gruen)}
+.erkl .bsp{list-style:none;padding:0;display:grid;gap:8px}.erkl .bsp li{display:grid;gap:2px;margin:0}
+.erkl .bsp button{font:inherit;font-weight:600;text-align:left;background:var(--hell);color:var(--tinte);border:0;border-radius:10px;padding:8px 11px;cursor:pointer}
+.erkl .bsp span{color:var(--leise);font-size:15px;padding-left:11px}
+.erkl .achtung{background:#fff3f2;border:2px solid #f0b4b0}.erkl .achtung h3{color:var(--rot)}
+.erkl s{text-decoration-color:var(--rot);text-decoration-thickness:2px}
+.erkl .maus{background:#fff6d6;border:2px solid #f0c14b;font-weight:600}
+.erkl .knoepfe{display:flex;flex-wrap:wrap;gap:10px}

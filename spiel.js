@@ -107,7 +107,7 @@ const ZMEINT={fourty:"forty",forteen:"fourteen",threeteen:"thirteen",threety:"th
 const luecken=w=>w.split("").map((c,i)=>/[- ]/.test(c)?c:i===0||i===w.length-1||(w.length>6&&i===2)?c:"_").join(" ");
 
 const BEREICHE=[
-{id:"besitz",icon:"🏠",name:"Whose room?",was:"my, your, his, her ... (Nr. 5)",regeln:"tabelle",ebenen:[
+{id:"besitz",icon:"🏠",name:"Whose room?",was:"my, your, his, her ... (Nr. 5)",thema:"s3",regeln:"tabelle",ebenen:[
   {id:"b_a",name:"Lückensätze",was:"das richtige Wort einsetzen",typ:"wahl",o:WOERTER,items:[
     ["I'm Ben. ___ brother is seven.","my"],["She's Holly. ___ guinea pigs are cute.","her"],["He's Luke. ___ dog is Sherlock.","his"],["We're brothers. ___ room is big.","our"],
     ["They're the Elliots. ___ house is in Brook Lane.","their"],["It's a nice house. ___ door is red.","its"],["You're new here. What's ___ name?","your"],["Irina is a girl. ___ bedroom is pink.","her"],
@@ -131,7 +131,7 @@ const BEREICHE=[
     ["Tony ist eine Maus. Übersetze: Sein Zimmer ist auf dem Dachboden.","his|room|is|in the loft",["its","her"]],["Mein kleiner Bruder ist nett.","my|little|brother|is|nice",["his"]],["Unsere Küche ist gelb.","our|kitchen|is|yellow",["their"]]
    ].map(([d,a,x])=>({d,a,x,z:".",t:"Überleg zuerst: Wem gehört es? Damit fängt der Satz an."}))}
  ]},
-{id:"be",icon:"🙋",name:"Yes, I am.",was:"Fragen mit to be und Kurzantworten (Nr. 3)",
+{id:"be",icon:"🙋",name:"Yes, I am.",was:"Fragen mit to be und Kurzantworten (Nr. 3)",thema:"s1",
  regeln:`<ul><li>Bei <b>Yes</b> immer die lange Form: Yes, I am. Nie Yes, I'm.</li><li>Bei <b>No</b> die Kurzform: No, he isn't. No, they aren't.</li><li>Bei I heißt es: No, <b>I'm not</b>.</li><li>Are <b>you</b> ...? Antwort mit <b>I</b>. Are <b>you and your friend</b> ...? Antwort mit <b>we</b>.</li><li>Frage bauen: Das Verb kommt nach vorn. Dave <b>is</b> here. <b>Is</b> Dave here?</li></ul>`,ebenen:[
   {id:"k_wer",name:"Wer antwortet?",was:"I, he, she, it, we oder they",typ:"wahl",o:PRON,items:[
     ["Are you eleven? Yes, ___ am.","I"],["Is Luke from Greenwich? Yes, ___ is.","he"],["Is Irina Luke's sister? Yes, ___ is.","she"],["Is the kitchen big? Yes, ___ is.","it"],["Are Luke and Jamie brothers? Yes, ___ are.","they"],
@@ -150,7 +150,7 @@ const BEREICHE=[
     ["Dave is from Greenwich.","is|Dave|from Greenwich"],["The children are in the garden.","are|the children|in the garden"],["You are crazy.","are|you|crazy"],["The dog is under the table.","is|the dog|under the table"],["Holly and Tess are friends.","are|Holly and Tess|friends"],["Your mum is at work.","is|your mum|at work"],["We are in Brook Lane.","are|we|in Brook Lane"],["The sofa is red.","is|the sofa|red"]
    ].map(([d,a])=>({d,a,x:[/^is/.test(a)?"are":"is"],z:"?",t:"In der Frage steht das Verb ganz vorn."}))}
  ]},
-{id:"there",icon:"📦",name:"There is, there are",was:"Es gibt ... (Nr. 3)",
+{id:"there",icon:"📦",name:"There is, there are",was:"Es gibt ... (Nr. 3)",thema:"s2",
  regeln:`<ul><li><b>There is</b> und <b>there are</b> heißen: es gibt, da ist, da sind.</li><li>Ein Ding, also a oder an: <b>There is</b> a ball.</li><li>Mehrere Dinge: <b>There are</b> three balls.</li><li>Frage: tauschen. <b>Is there</b> a mouse under the bed? Erst das Ding, dann der Ort.</li><li>Antwort: there kommt wieder mit. <b>Yes, there is.</b> <b>No, there aren't.</b></li><li>Steht kein there in der Frage, antwortest du mit I, he, she, it, we oder they.</li></ul>`,ebenen:[
   {id:"t_isare",name:"is oder are?",was:"ein Ding oder mehrere",typ:"wahl",o:["is","are"],items:[
     ["There ___ a dog in the garden.","is"],["There ___ two cats on the sofa.","are"],["There ___ a ball.","is"],["There ___ three balls.","are"],["There ___ a mouse under the bed.","is"],["There ___ two books on the table.","are"],["There ___ a sofa in the living room.","is"],["There ___ four chairs in the kitchen.","are"],["There ___ biscuits on the shelf.","are"],["There ___ a TV in my bedroom.","is"]
@@ -170,7 +170,7 @@ const BEREICHE=[
     ["Are you ten?",JA,"yes|I|am"],["Is there a dog in the garden?",NEIN,"no|there|isn't"],["Is your brother at school?",JA,"yes|he|is"],["Are there two cats on the sofa?",JA,"yes|there|are"],["Is the kitchen big?",NEIN,"no|it|isn't"],["Is there a TV in your bedroom?",NEIN,"no|there|isn't"],["Are your friends crazy?",JA,"yes|they|are"],["Are there books on the table?",NEIN,"no|there|aren't"],["Is your dad from Greenwich?",NEIN,"no|he|isn't"],["Is there a mouse under the bed?",JA,"yes|there|is"],["Are you and your brother in the garden?",JA,"yes|we|are"],["Are there three chairs in the kitchen?",NEIN,"no|there|aren't"],["Is the sofa red?",JA,"yes|it|is"],["Are you from London?",NEIN,"no|I|'m not"],["Is there a ball in your bag?",JA,"yes|there|is"]
    ].map(([f,j,a])=>({f,j,a}))}
  ]},
-{id:"of",icon:"🔗",name:"'s oder of?",was:"Luke's dog, the door of the house (Nr. 4)",
+{id:"of",icon:"🔗",name:"'s oder of?",was:"Luke's dog, the door of the house (Nr. 4)",thema:"s1",
  regeln:`<ul><li>Person oder Tier: <b>'s</b>. Luke<b>'s</b> dog.</li><li>Sache: <b>of</b>. the door <b>of</b> the house.</li><li>Das Wort endet schon auf -s: nur <b>'</b>. the boys<b>'</b> house, James<b>'</b> skateboard.</li><li>children, men, women: <b>'s</b>. the children<b>'s</b> room.</li><li>Zwei Namen: nur am letzten. Luke and Jamie<b>'s</b> dad.</li></ul>`,ebenen:[
   {id:"g_sort",name:"Lebewesen oder Sache?",was:"zwei Gruppen",typ:"wahl",breit:true,o:["'s oder '","of"],items:["Luke","the house","Sherlock","the road","my mum","the sofa","the girls","the kitchen","the dog","the street"
    ].map(w=>({f:w+" → ___",a:/house|road|sofa|kitchen|street/.test(w)?"of":"'s oder '",t:"Person oder Tier: 's oder '. Sache: of."}))},
@@ -186,7 +186,7 @@ const BEREICHE=[
     ["Das ist Pias Hund.","this|is|Pia's|dog",["Pias"]],["Das Zimmer der Jungen ist groß. (zwei Jungen)","the|boys'|room|is|big",["boy's"]],["Die Tür des Hauses ist grün.","the door|of the house|is|green",["the house's"]],["Die Spielsachen der Kinder sind im Garten.","the|children's|toys|are|in the garden",["childrens'"]],["Mr Elliot ist Lukes und Jamies Vater.","Mr Elliot|is|Luke and Jamie's|dad",["Luke's and Jamie's"]],["Das Auto meines Vaters ist alt.","my|dad's|car|is|old",["dads"]],["Der Name der Straße ist Brook Lane.","the name|of the street|is|Brook Lane",["the street's"]]
    ].map(([d,a,x])=>({d,a,x,z:".",t:"Wem gehört es? Lebewesen 's oder ', Sache of."}))}
  ]},
-{id:"zimmer",icon:"🛏️",name:"My room",was:"dein Zimmer beschreiben (Nr. 6)",
+{id:"zimmer",icon:"🛏️",name:"My room",was:"dein Zimmer beschreiben (Nr. 6)",thema:"s3",
  regeln:`<ul><li>Ein Ding: <b>There is</b> a bed. Mehrere: <b>There are</b> two chairs.</li><li>Wo: in, on, under, behind, <b>in front of</b>, <b>next to</b>. next braucht immer to.</li><li>Farbe und Größe: The walls <b>are</b> blue. My room <b>is</b> small.</li><li>Satzanfang groß, am Ende ein Punkt.</li><li>Abwechseln: nicht jeder Satz mit There is.</li></ul>`,ebenen:[
   {id:"w_ort",name:"Wo ist es?",was:"in, on, under, behind ...",typ:"wahl",o:["in","on","under","behind","in front of","next to"],n:12,items:[
     ...Object.keys(ORTE).map(a=>({f:`The ball is ___ the ${a==="under"?"table":"box"}.`,a,bild:a})),
@@ -204,7 +204,7 @@ const BEREICHE=[
    ].map(([d,a,x])=>({d,a,x,z:".",t:"Ein Ding: there is. Mehrere: there are. Und achte auf das Ortswort."}))},
   {id:"w_du",name:"Jetzt du!",was:"fünf eigene Sätze schreiben",typ:"schreiben"}
  ]},
-{id:"zahlen",icon:"🔢",name:"Numbers",was:"Zahlen schreiben: 3, 13, 30 (Seite 22, Nr. 14)",
+{id:"zahlen",icon:"🔢",name:"Numbers",was:"Zahlen schreiben: 3, 13, 30 (Seite 22, Nr. 14)",thema:"s2",
  regeln:`<ul><li>13 bis 19 enden auf <b>-teen</b>, die Zehner auf <b>-ty</b>: thir<b>teen</b>, thir<b>ty</b>.</li><li>Beim Sprechen: thir<b>TEEN</b> wird hinten betont, <b>THIR</b>ty vorn.</li><li>Aus three wird <b>thir</b>: thirteen, thirty.</li><li>Aus five wird <b>fif</b>: fifteen, fifty.</li><li>four und fourteen mit u, aber <b>forty</b> ohne u.</li><li>eighteen und eighty: nur ein t nach gh. nineteen und ninety: das e bleibt.</li><li>Ab 21 mit Bindestrich: twenty<b>-</b>one. Erst der Zehner, dann der Einer.</li></ul>`,ebenen:[
   {id:"n_wahl",name:"Zahl und Wort",was:"3, 13 oder 30?",typ:"wahl",n:12,items:TRIOS.flatMap(t=>t.map(n=>({f:`${n} = ___`,a:wortZahl(n),o:t.map(wortZahl),t:n<13?"Das ist die kurze Zahl ohne teen und ohne ty.":n<20?"13 bis 19 enden auf teen.":"Die Zehner enden auf ty."})))},
   {id:"n_ende",name:"-teen oder -ty?",was:"die richtige Endung",typ:"wahl",n:12,o:["teen","ty"],items:TRIOS.slice(0,7).flatMap(t=>[t[1],t[2]]).map(n=>({f:`${n} = ${wortZahl(n).replace(/(teen|ty)$/,"")}___`,a:n<20?"teen":"ty",t:n<20?"13 bis 19: teen.":"Zehner, also mit 0 am Ende: ty."}))},
@@ -218,7 +218,34 @@ const BEREICHE=[
   {id:"n_hoer",name:"Zahlen hören",was:"13 oder 30? Schreib die Ziffern",typ:"tippen",hoeren:true,n:10,items:[...TRIOS.slice(0,7).flatMap(t=>[t[1],t[2]]),12,20,33,43,58,85].map(n=>({f:`Zahl ${n}`,a:String(n),sag:wortZahl(n)}))}
  ]},
 // ---------- ab hier: geht erst auf, wenn die Klasse im Buch so weit ist (ab = Abschnitt der Vokabelliste) ----------
-{id:"havegot",icon:"🎒",name:"Have you got ...?",was:"have got, has got, Fragen und Kurzantworten",ab:"u2s1",
+{id:"can",icon:"🛹",name:"I can skate!",was:"can und can't: können und dürfen (G9)",ab:"pb",
+ regeln:`<ul><li><b>can</b> heißt kann oder darf, <b>can't</b> kann nicht oder darf nicht.</li><li>can bleibt bei allen gleich, auch bei he, she, it: She <b>can</b> swim. Nie: She cans.</li><li>Danach kommt das Verb ohne to: I can <b>skate</b>. Nie: I can to skate.</li><li>Frage: can nach vorn. <b>Can</b> you swim?</li><li>Kurzantwort: <b>Yes, I can.</b> <b>No, I can't.</b></li></ul>`,ebenen:[
+  {id:"c_wahl",name:"can oder can't?",was:"kann oder kann nicht",typ:"wahl",o:["can","can't"],items:[
+    ["Luke ___ skate. (kann nicht)","can't"],["Holly ___ skate fast now. (kann)","can"],["I ___ swim. (kann)","can"],["Sherlock ___ play in the garden. (darf)","can"],["We ___ play computer games now. (dürfen nicht)","can't"],["Dave ___ meet Luke today. (darf nicht)","can't"],
+    ["You ___ see Greenwich from the river. (könnt)","can"],["My little brother ___ read. (kann nicht)","can't"],["They ___ find the lucky charm. (können nicht)","can't"],["My sister ___ ride a bike. (kann)","can"],["You ___ use your phone in class. (darfst nicht)","can't"],["We ___ go to the park after school. (dürfen)","can"]
+   ].map(([f,a])=>({f,a,t:a==="can"?"Kann oder darf: can.":"Kann nicht oder darf nicht: can't."}))},
+  {id:"c_form",name:"Die richtige Form",was:"can bleibt gleich, Verb ohne to",typ:"wahl",items:[
+    ["She ___ swim.","can","cans"],["He ___ play the guitar.","can","cans"],["I can ___ fast.","skate","to skate","skates"],["Luke can ___ his bike.","ride","rides","to ride"],["My dog ___ run very fast.","can","cans"],
+    ["We can ___ English.","speak","to speak","speaks"],["Holly ___ sing.","can","cans"],["They can ___ the ball.","find","finds","to find"],["Jay can ___ a song.","sing","sings","to sing"],["It ___ jump very high.","can","cans"]
+   ].map(([f,a,...x])=>({f,a,o:[a,...x],t:"can bleibt immer gleich. Danach kommt das Verb ohne to und ohne s."}))},
+  {id:"c_kurz",name:"Kurzantworten",was:"Yes, I can. No, he can't.",typ:"kurz",o:["yes","no","I","you","he","she","it","we","they","can","can't"],items:[
+    ["Can you skate?",JA,"yes|I|can"],["Can Luke swim?",NEIN,"no|he|can't"],["Can Holly ride a horse?",JA,"yes|she|can"],["Can you and your friend play football?",JA,"yes|we|can"],["Can the dog play in the garden?",JA,"yes|it/he|can"],
+    ["Can Luke and Jamie meet today?",NEIN,"no|they|can't"],["Can I use your pen, please?",JA,"yes|you|can"],["Can your mum speak English?",JA,"yes|she|can"],["Can you sing?",NEIN,"no|I|can't"],["Can Dave come to the party?",NEIN,"no|he|can't"]
+   ].map(([f,j,a])=>({f,j,a}))},
+  {id:"c_frage",name:"Mach eine Frage daraus",was:"can nach vorn",typ:"bau",frage:true,items:[
+    ["You can swim.","can|you|swim"],["Luke can skate.","can|Luke|skate"],["Holly can ride a horse.","can|Holly|ride|a horse"],["We can play in the garden.","can|we|play|in the garden"],
+    ["They can come to the party.","can|they|come|to the party"],["Your sister can sing.","can|your sister|sing"],["I can use your ruler.","can|I|use|your ruler"],["Sherlock can find the ball.","can|Sherlock|find|the ball"]
+   ].map(([d,a])=>({d,a,x:["cans"],z:"?",t:"can nach vorn, dann wer, dann das Verb."}))},
+  {id:"c_de",name:"Übersetzen",was:"können und dürfen",typ:"bau",items:[
+    ["Ich kann schnell skaten.","I|can|skate|fast",["can to"]],["Luke kann nicht schwimmen.","Luke|can't|swim",["cans"]],["Darf ich dein Lineal benutzen?","can|I|use|your ruler",["cans"]],["Wir dürfen hier nicht rennen.","we|can't|run|here",["not"]],
+    ["Sie kann Gitarre spielen. (ein Mädchen)","she|can|play|the guitar",["cans"]],["Kannst du Englisch sprechen?","can|you|speak|English",["to speak"]],["Mein Hund darf im Garten spielen.","my dog|can|play|in the garden",["cans"]],["Sie können nicht kommen. (mehrere)","they|can't|come",["can to"]]
+   ].map(([d,a,x])=>({d,a,x,z:d.endsWith("?")?"?":".",t:"können und dürfen: can. Nicht: can't. Danach das Verb ohne to."}))},
+  {id:"c_fehler",name:"Finde den Fehler",was:"welcher Satz ist richtig?",typ:"wahl",breit:true,items:[
+    ["She cans swim.","She can swim.","She can swims.","She can to swim."],["I can to skate.","I can skate.","I cans skate.","I can skating."],["Luke not can swim.","Luke can't swim.","Luke can't swims.","Luke cann't swim."],
+    ["Can you to sing?","Can you sing?","Cans you sing?","Can you sings?"],["Can you skate? – No, I not can.","No, I can't.","No, I not.","No, I cans."],["My dog cans run fast.","My dog can run fast.","My dog can runs fast.","My dog can to run fast."]
+   ].map(([w,a,...x])=>({f:"Falsch: "+w+" ___",a,o:[a,...x],t:"can bleibt gleich: kein s, kein to. Nicht heißt can't."}))}
+ ]},
+{id:"havegot",icon:"🎒",name:"Have you got ...?",was:"have got, has got, Fragen und Kurzantworten (G10–G12)",ab:"u2s1",
  regeln:`<ul><li><b>I, you, we, they</b>: have got. Kurz: I<b>'ve</b> got.</li><li><b>he, she, it</b> und ein Name: <b>has</b> got. Kurz: she<b>'s</b> got.</li><li>Nein: <b>haven't</b> got, <b>hasn't</b> got.</li><li>Frage: have oder has nach vorn. <b>Has</b> Luke got a dog?</li><li>Kurzantwort ohne got: <b>Yes, I have.</b> <b>No, she hasn't.</b></li></ul>`,ebenen:[
   {id:"h_hh",name:"have oder has?",was:"wer hat was?",typ:"wahl",o:["have","has"],items:[
     ["I ___ got a dog.","have"],["Luke ___ got a dog.","has"],["We ___ got a big garden.","have"],["Holly ___ got two guinea pigs.","has"],["They ___ got a new car.","have"],["The house ___ got a loft.","has"],
@@ -242,7 +269,7 @@ const BEREICHE=[
     ["Hast du einen Bleistift?","have|you|got|a pencil",["has"]],["Hat Luke ein Haustier?","has|Luke|got|a pet",["have"]],["Sie haben keinen Garten. (mehrere)","they|haven't got|a garden",["hasn't got"]],["Das Haus hat einen Dachboden.","the house|has got|a loft",["have got"]]
    ].map(([d,a,x])=>({d,a,x,z:d.endsWith("?")?"?":".",t:"I, you, we, they: have. he, she, it: has. Frage: have oder has nach vorn."}))}
  ]},
-{id:"befehl",icon:"🚫",name:"Don't stare!",was:"Aufforderungen und Verbote: Sit down! Don't run!",ab:"u2s2",
+{id:"befehl",icon:"🚫",name:"Don't stare!",was:"Aufforderungen und Verbote: Sit down! Don't run! (G13)",ab:"u2s2",
  regeln:`<ul><li>Aufforderung: das Verb steht vorn, ohne to und ohne you. <b>Sit down!</b> <b>Look</b> at the board!</li><li>Verbot: <b>Don't</b> + Verb. <b>Don't stare!</b> <b>Don't run!</b></li><li>Nicht: Not run! No run! You sit down!</li><li>Höflich mit please: <b>Please</b> sit down.</li></ul>`,ebenen:[
   {id:"i_form",name:"Die richtige Form",was:"Verb vorn, Don't für nicht",typ:"wahl",items:[
     ["___ at the board!","Look","Looks","To look"],["___! It's rude.","Don't stare","Not stare","Stare not"],["___ your pencil case!","Don't forget","Not forget","Forget not"],["___ down, please.","Sit","Sits","Sitting"],
@@ -265,8 +292,25 @@ const BEREICHE=[
     ["Stare not! It's rude.","Don't stare! It's rude.","No stare! It's rude.","Not stare! It's rude."],["Please uses a ruler.","Please use a ruler.","Please to use a ruler.","Please using a ruler."]
    ].map(([w,a,...x])=>({f:"Falsch: "+w+" ___",a,o:[a,...x],t:"Das Verb steht vorn, ohne s, ohne to. Nicht heißt Don't."}))}
  ]},
-{id:"always",icon:"⏰",name:"I'm always busy",was:"always, usually, often, sometimes, never; in, at, on",ab:"u3s1",
- regeln:`<ul><li><b>always</b> immer, <b>usually</b> meistens, <b>often</b> oft, <b>sometimes</b> manchmal, <b>never</b> nie.</li><li>Sie stehen <b>vor dem Verb</b>: I <b>often</b> play football.</li><li>Aber <b>nach</b> am, is, are: I'm <b>always</b> busy. He is <b>never</b> late.</li><li>Zeit: <b>at</b> seven o'clock (Uhrzeit), <b>on</b> Monday (Wochentag), <b>in</b> the morning (Tageszeit).</li></ul>`,ebenen:[
+{id:"this",icon:"👉",name:"This is our table.",was:"this, that, these, those (G14)",ab:"u2s2",
+ regeln:`<ul><li><b>this</b> = dies hier (nah), <b>that</b> = das dort (weiter weg).</li><li>Mehrere: <b>these</b> (nah), <b>those</b> (weiter weg).</li><li>this book → <b>these</b> books, that book → <b>those</b> books. Und is wird are.</li><li>Zwei Dinge vergleichen: zuerst this, dann that.</li><li>Oft kurz: <b>That's</b> = that is.</li></ul>`,ebenen:[
+  {id:"t_wahl",name:"this, that, these oder those?",was:"nah oder weit, eins oder mehrere",typ:"wahl",o:["this","that","these","those"],items:[
+    ["___ is my pencil case. (hier, eins)","this"],["___ girls over there are in my class. (dort, mehrere)","those"],["___ books here are new. (hier, mehrere)","these"],["Look at ___ dog over there! (dort, eins)","that"],
+    ["___ is our table, and that's the girls' table. (hier, eins)","this"],["Are ___ your pens here? (hier, mehrere)","these"],["Who is ___ boy over there? (dort, eins)","that"],["___ burgers over there look nice. (dort, mehrere)","those"],
+    ["I like ___ T-shirt here. (hier, eins)","this"],["___ chips here are cold. (hier, mehrere)","these"],["___ house over there is old. (dort, eins)","that"],["Can I have ___ sweets over there? (dort, mehrere)","those"]
+   ].map(([f,a])=>({f,a,t:{this:"Hier und eins: this.",that:"Dort und eins: that.",these:"Hier und mehrere: these.",those:"Dort und mehrere: those."}[a]}))},
+  {id:"t_mehr",name:"Mach mehrere daraus",was:"this → these, that → those",typ:"wahl",breit:true,items:[
+    ["This book is new. → ___","These books are new.","This books are new.","Those books are new."],["That girl is nice. → ___","Those girls are nice.","That girls are nice.","These girls are nice."],
+    ["This pen is red. → ___","These pens are red.","This pens are red.","These pen are red."],["That boy is from York. → ___","Those boys are from York.","Those boys is from York.","That boys are from York."],
+    ["This is my friend. → ___","These are my friends.","This are my friends.","These is my friends."],["That is your bag. → ___","Those are your bags.","That are your bags.","Those is your bags."]
+   ].map(([f,a,...x])=>({f,a,o:[a,...x],t:"Mehrere: this wird these, that wird those. Und is wird are."}))},
+  {id:"t_de",name:"Übersetzen",was:"englische Sätze bauen",typ:"bau",items:[
+    ["Das hier ist unser Tisch.","this|is|our table",["that"]],["Das dort ist der Tisch der Mädchen.","that's|the girls' table",["this is"]],["Diese Bücher hier sind neu.","these books|are|new",["those books"]],
+    ["Die Jungen dort sind nett.","those boys|are|nice",["these boys"]],["Wer ist das Mädchen dort?","who|is|that girl",["this girl"]],["Diese Pommes hier sind lecker.","these chips|are|nice",["this chips"]],["Ist das hier dein Füller?","is|this|your pen",["these"]]
+   ].map(([d,a,x])=>({d,a,x,z:d.endsWith("?")?"?":".",t:"Nah: this, these. Weiter weg: that, those."}))}
+ ]},
+{id:"always",icon:"⏰",name:"I'm always busy",was:"always, usually, often, sometimes, never; Ort vor Zeit (G15, G16)",ab:"u3s1",
+ regeln:`<ul><li><b>always</b> immer, <b>usually</b> meistens, <b>often</b> oft, <b>sometimes</b> manchmal, <b>never</b> nie.</li><li>Sie stehen <b>vor dem Verb</b>: I <b>often</b> play football.</li><li>Aber <b>nach</b> am, is, are: I'm <b>always</b> busy. He is <b>never</b> late.</li><li>Bei have got und can in die Mitte: She has <b>never</b> got time. They can <b>usually</b> eat at school.</li><li>Im verneinten Satz steht sometimes vorn: He <b>sometimes</b> isn't nice.</li><li>Satzbau: wer, tut, was, wo, wann. <b>Ort vor Zeit</b>: I go to Art Club on Mondays.</li><li>Zeit: <b>at</b> seven o'clock (Uhrzeit), <b>on</b> Monday (Wochentag), <b>in</b> the morning (Tageszeit).</li></ul>`,ebenen:[
   {id:"a_wort",name:"Wie oft?",was:"das richtige Wort",typ:"wahl",o:["always","usually","often","sometimes","never"],items:[
     ["immer = ___","always"],["nie = ___","never"],["oft = ___","often"],["manchmal = ___","sometimes"],["meistens = ___","usually"],["normalerweise = ___","usually"],["niemals = ___","never"],["häufig = ___","often"],["100 % = ___","always"],["0 % = ___","never"]
    ].map(([f,a])=>({f,a,t:"always 100 %, usually, often, sometimes, never 0 %."}))},
@@ -274,8 +318,10 @@ const BEREICHE=[
     ["I play football. + often → ___","I often play football.","I play often football.","Often I football play."],["She is late. + never → ___","She is never late.","She never is late.","Never she is late."],
     ["We have breakfast at seven. + usually → ___","We usually have breakfast at seven.","We have usually breakfast at seven.","We have breakfast usually at seven."],["I'm tired. + always → ___","I'm always tired.","I always am tired.","Always I'm tired."],
     ["They are busy. + often → ___","They are often busy.","They often are busy.","Often they busy are."],["I go to bed at nine. + never → ___","I never go to bed at nine.","I go never to bed at nine.","I go to bed never at nine."],
-    ["You are early. + always → ___","You are always early.","You always are early.","Always you are early."],["We practise on Mondays. + sometimes → ___","We sometimes practise on Mondays.","We practise sometimes on Mondays.","We practise on sometimes Mondays."]
-   ].map(([f,a,...x])=>({f,a,o:[a,...x],t:"Vor das Verb. Nur bei am, is, are dahinter."}))},
+    ["You are early. + always → ___","You are always early.","You always are early.","Always you are early."],["We practise on Mondays. + sometimes → ___","We sometimes practise on Mondays.","We practise sometimes on Mondays.","We practise on sometimes Mondays."],
+    ["Olivia has got time. + never → ___","Olivia has never got time.","Olivia never has got time.","Olivia has got never time."],["They can eat lunch at school. + usually → ___","They can usually eat lunch at school.","They usually can eat lunch at school.","They can eat usually lunch at school."],
+    ["Sherlock isn't nice to cats. + sometimes → ___","Sherlock sometimes isn't nice to cats.","Sherlock isn't sometimes nice to cats.","Sherlock isn't nice sometimes to cats."]
+   ].map(([f,a,...x])=>({f,a,o:[a,...x],t:/ has | can /.test(a)?"Bei have got und can kommt es in die Mitte.":/ sometimes isn't/.test(a)?"Im verneinten Satz steht sometimes vorn.":"Vor das Verb. Nur bei am, is, are dahinter."}))},
   {id:"a_de",name:"Übersetzen",was:"Sätze mit always, never ...",typ:"bau",items:[
     ["Ich bin immer beschäftigt.","I'm|always|busy",["never"]],["Wir frühstücken normalerweise um sieben.","we|usually|have breakfast|at seven",["often"]],["Ich spiele oft Fußball.","I|often|play|football",["always"]],
     ["Sie sind nie müde. (mehrere)","they|are|never|tired",["is"]],["Ich gehe nie früh ins Bett.","I|never|go to bed|early",["always"]],["Wir fangen montags oft früh an.","we|often|start|early|on Mondays",["sometimes"]],["Ich übe manchmal Saxofon.","I|sometimes|practise|the saxophone",["often"]]
@@ -283,9 +329,14 @@ const BEREICHE=[
   {id:"a_zeit",name:"in, at oder on?",was:"Uhrzeit, Wochentag, Tageszeit",typ:"wahl",o:["in","at","on"],items:[
     ["___ Monday","on"],["___ seven o'clock","at"],["___ the morning","in"],["___ the evening","in"],["___ Fridays","on"],["___ half past six","at"],["___ the afternoon","in"],
     ["I get up ___ seven a.m.","at"],["We have English ___ Tuesdays.","on"],["I practise ___ the afternoon.","in"],["The test is ___ Wednesday.","on"],["Lunch is ___ quarter past twelve.","at"]
-   ].map(([f,a])=>({f,a,t:{at:"Uhrzeit: at.",on:"Wochentag: on.","in":"Tageszeit: in the morning, in the afternoon, in the evening."}[a]}))}
+   ].map(([f,a])=>({f,a,t:{at:"Uhrzeit: at.",on:"Wochentag: on.","in":"Tageszeit: in the morning, in the afternoon, in the evening."}[a]}))},
+  {id:"a_ort",name:"Ort vor Zeit",was:"wer, tut, was, wo, wann",typ:"bau",items:[
+    ["Ich gehe montags zum Art Club.","I|go|to Art Club|on Mondays"],["Ich höre morgens im Bus Musik.","I|listen to|music|on the bus|in the mornings"],["Ich spiele nach der Schule Computerspiele.","I|play|computer games|after school"],
+    ["Ich spiele dienstags immer Korbball.","I|always|play|netball|on Tuesdays"],["Wir frühstücken um sieben in der Küche.","we|have breakfast|in the kitchen|at seven"],["Wir spielen samstags im Park Fußball.","we|play|football|in the park|on Saturdays"],
+    ["Ich mache abends meine Hausaufgaben.","I|do|my homework|in the evenings"],["Wir treffen uns nach der Schule im Park.","we|meet|in the park|after school"]
+   ].map(([d,a])=>({d,a,z:".",t:"Wer, tut, was, wo, wann. Der Ort kommt vor der Zeit."}))}
  ]},
-{id:"she_s",icon:"🗣️",name:"She gets on my nerves",was:"he, she, it: das s muss mit",ab:"u3s2",
+{id:"she_s",icon:"🗣️",name:"She gets on my nerves",was:"he, she, it: das s muss mit (G17)",ab:"u3s2",
  regeln:`<ul><li>I, you, we, they: <b>play</b>. he, she, it und ein Name: <b>plays</b>.</li><li>Merksatz: he, she, it, das s muss mit.</li><li>Nach s, sh, ch, x und o: <b>-es</b>. watch<b>es</b>, go<b>es</b>, do<b>es</b>.</li><li>Mitlaut + y wird <b>-ies</b>: tidy → tid<b>ies</b>. Aber play → play<b>s</b>.</li><li>have wird <b>has</b>.</li></ul>`,ebenen:[
   {id:"s_mit",name:"Mit oder ohne s?",was:"wer macht es?",typ:"wahl",items:[
     ["I ___ football. (play)","play","plays"],["Luke ___ football. (play)","plays","play"],["She ___ on my nerves. (get)","gets","get"],["We ___ breakfast at seven. (have)","have","has"],
@@ -308,6 +359,58 @@ const BEREICHE=[
    ].map(([w,a,...x])=>({f:"Falsch: "+w+" ___",a,o:[a,...x],t:"he, she, it: das s muss mit. I, you, we, they: ohne s."}))}
  ]}
 ];
+// ---------- Erklaerseiten nach dem Grammatikteil im Buch (Green Line 1, S. 160-169) ----------
+// g = Nummer im Grammatikteil, s = Seite dort, l = Seiten im Lektionsteil. Kommt vor dem ersten Oeffnen eines neu freien Felds.
+const TAB=(kopf,zeilen)=>`<table class="etab"><thead><tr>${kopf.map(k=>`<th>${k}</th>`).join("")}</tr></thead><tbody>${zeilen.map(z=>`<tr>${z.map(t=>`<td>${t}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+const ERKL={
+ can:{g:"G9",s:"160–161",l:"32–34",
+  wozu:"Mit <b>can</b> sagst du, was jemand kann oder darf. Mit <b>can't</b> sagst du, was jemand nicht kann oder nicht darf.",
+  teile:[["So geht's",["can und can't bleiben bei allen gleich. Auch bei he, she, it kommt kein s dran: She <b>can</b> swim.","Nach can steht das Verb in der Grundform, ohne to: I can <b>skate</b>.","Im Deutschen sagst du können oder dürfen. Im Englischen heißt beides <b>can</b>.","Frage: can kommt nach vorn. <b>Can</b> you skate?","Antwort kurz mit can oder can't: Yes, I can. No, I can't."]]],
+  tab:TAB(["wer","","was"],[["I","can / can't","help you."],["You","can / can't","show me the photo."],["He, she, it","can / can't","go fast."],["We","can / can't","play computer games now."],["They","can / can't","find the lucky charm."]]),
+  bsp:[["I can skate fast now.","Ich kann jetzt schnell skaten."],["Luke can't skate.","Luke kann nicht skaten."],["Sherlock can play in the garden.","Sherlock darf im Garten spielen."],["Can you skate? – No, I can't.","Kannst du skaten? – Nein."]],
+  achtung:["Nie <s>She cans</s> und nie <s>I can to skate</s>.","Nur Yes oder No allein klingt unhöflich. Sag lieber: Yes, I can."],
+  maus:"can heißt können und dürfen."},
+ havegot:{g:"G10–G12",s:"162–164",l:"39–41",
+  wozu:"Mit <b>have got</b> sagst du, dass jemand etwas hat.",
+  teile:[["So geht's",["I, you, we, they: <b>have got</b>. he, she, it und ein Name: <b>has got</b>.","Beim Sprechen nimmst du die Kurzform: I<b>'ve</b> got, she<b>'s</b> got. Die Langform schreibst du, wenn es ordentlich sein soll."]],
+   ["Nicht haben (G11)",["Das not kommt zwischen have und got: I <b>haven't</b> got a pen.","he, she, it: <b>hasn't</b> got. Holly hasn't got her lucky charm."]],
+   ["Fragen und Kurzantworten (G12)",["Frage: have oder has nach vorn, got bleibt hinten. <b>Has</b> she got a uniform?","Kurzantwort ohne got: Yes, I have. No, she hasn't."]]],
+  tab:TAB(["Langform","Kurzform","nicht"],[["I have got","I've got","I haven't got"],["you have got","you've got","you haven't got"],["he, she, it has got","he's, she's, it's got","he, she, it hasn't got"],["we, they have got","we've, they've got","we, they haven't got"]])
+   +TAB(["Frage","ja","nein"],[["Have you got a pen?","Yes, I have.","No, I haven't."],["Has he got a brother?","Yes, he has.","No, he hasn't."],["Have they got a big house?","Yes, they have.","No, they haven't."]]),
+  bsp:[["I've got a dog.","Ich habe einen Hund."],["She's got two guinea pigs.","Sie hat zwei Meerschweinchen."],["Holly hasn't got her lucky charm.","Holly hat ihren Glücksbringer nicht."],["Have you got a uniform? – No, I haven't.","Hast du eine Uniform? – Nein."]],
+  achtung:["Vorsicht bei den Kurzformen: Nie <s>We'ven't got</s>. Richtig: We haven't got a pet.","In der Kurzantwort fehlt got: Yes, I have. Nicht: <s>Yes, I have got.</s>"],
+  maus:"he, she, it: has. Alle anderen: have."},
+ befehl:{g:"G13",s:"164–165",l:"43",
+  wozu:"Mit dem <b>Imperativ</b> sagst du jemandem, dass er etwas tun oder lassen soll.",
+  teile:[["So geht's",["Der Imperativ ist einfach die Grundform des Verbs: <b>Look</b> at this! <b>Come</b> here. <b>Be</b> polite.","Er sieht immer gleich aus, egal ob du einen oder mehrere ansprichst.","Verbot: <b>Don't</b> + Grundform. Don't forget your planner.","Mit please wird es höflich: Don't bring your phone to school, please.","Ein Ausrufezeichen brauchst du nur, wenn du aufgeregt bist oder etwas betonen willst: Give me my pen!"]]],
+  tab:TAB(["Mach das!","Lass das!"],[["Sit down.","Don't sit there."],["Look at the board.","Don't look at your phone."],["Be polite.","Don't be silly!"]]),
+  bsp:[["Come here.","Komm her."],["Be polite.","Sei höflich."],["Don't stare!","Starr nicht so!"],["Don't forget your planner.","Vergiss deinen Planer nicht."]],
+  achtung:["Kein you und kein to davor: nicht <s>You sit down</s>, sondern Sit down.","Nicht <s>Not run!</s> oder <s>No run!</s>, sondern Don't run!"],
+  maus:"Bei Verboten setzt du einfach don't davor."},
+ this:{g:"G14",s:"165",l:"44",
+  wozu:"Mit <b>this, that, these</b> und <b>those</b> zeigst du auf Menschen, Tiere oder Sachen.",
+  teile:[["So geht's",["<b>this</b>: eins, nah bei dir (here). <b>that</b>: eins, weiter weg (over there).","Mehrere: this wird <b>these</b>, that wird <b>those</b>.","Vergleichst du zwei, sagst du zuerst this, dann that: This is Luke's tray, and that's Steve's tray.","that is wird oft kurz: <b>That's</b> the girls' table.","Die Wörter stehen allein (This is Pia.) oder vor einem Nomen (This girl is nice.)."]]],
+  tab:TAB(["","eins","mehrere"],[["nah (here)","this","these"],["weiter weg (over there)","that","those"]]),
+  bsp:[["This is our table.","Das ist unser Tisch."],["That's the girls' table over there.","Das dort drüben ist der Tisch der Mädchen."],["These books are new, but those books are old.","Diese Bücher sind neu, aber die dort sind alt."],["This girl is nice.","Dieses Mädchen ist nett."]],
+  achtung:["Bei mehreren ändert sich auch das Verb: This <b>is</b> … wird These <b>are</b> …"],
+  maus:"here: this, these. over there: that, those."},
+ always:{g:"G15, G16",s:"166–168",l:"57–58",
+  wozu:"Mit <b>always, usually, often, sometimes</b> und <b>never</b> sagst du, wie oft etwas passiert. Dazu lernst du, in welcher Reihenfolge ein englischer Satz gebaut ist.",
+  teile:[["Wie oft? (G15)",["always (immer), usually (meistens), often (oft), sometimes (manchmal), never (nie).","Sie stehen vor dem Verb: I <b>always</b> go to school by bike.","Bei am, is, are dahinter: Olivia and Holly are <b>never</b> late.","Bei have got zwischen have und got: Olivia has <b>never</b> got time.","Bei can zwischen can und dem Verb: They can <b>usually</b> eat lunch at school.","Im verneinten Satz steht sometimes vorn: Sherlock <b>sometimes</b> isn't nice to cats."]],
+   ["Satzbau (G16)",["Ein englischer Satz geht so: wer, tut, was. Danach kommen wo und wann.","<b>Ort vor Zeit</b>, wie im Alphabet O vor Z: I go to Art Club on Mondays.","Die Zeit darf auch ganz vorn stehen: On Mondays I go to Art Club. Aber nie in der Mitte."]]],
+  tab:TAB(["wer","tut","was","wo","wann"],[["I","play","computer games","","after school."],["I","go","","to Art Club","on Mondays."],["I","listen to","music","on the bus","in the mornings."]]),
+  bsp:[["I always have breakfast with my family.","Ich frühstücke immer mit meiner Familie."],["After breakfast we sometimes go to Greenwich Park.","Nach dem Frühstück gehen wir manchmal in den Greenwich Park."],["Olivia has never got time.","Olivia hat nie Zeit."],["I always play netball on Tuesdays.","Ich spiele dienstags immer Korbball."]],
+  achtung:["Im Deutschen steht die Zeit oft in der Mitte: Ich spiele dienstags Korbball. Im Englischen nie: I play netball on Tuesdays."],
+  maus:"S, V, O, das steht fast immer so: Subjekt, Verb, Objekt."},
+ she_s:{g:"G17",s:"168–169",l:"60–61",
+  wozu:"Das <b>simple present</b> ist die einfache Gegenwart. Du nimmst es für Dinge, die jemand regelmäßig, oft, manchmal oder nie macht, für Dinge, die immer stimmen (Cats like mice.), und wenn du eine Geschichte der Reihe nach erzählst.",
+  teile:[["So geht's",["I, you, we, they: das Verb bleibt, wie es ist. I <b>play</b>.","he, she, it und ein Name: ein s kommt dran. She <b>plays</b>.","Bei go, do und Verben auf s, sh, ch, x kommt -es dran: he <b>goes</b>, she <b>watches</b>.","Mitlaut + y: y wird ie, dann s. tidy → she <b>tidies</b>. Aber play → he <b>plays</b>, weil vor dem y ein Selbstlaut steht.","have wird <b>has</b>. be hat eigene Formen: am, is, are."]]],
+  tab:TAB(["wer","Verb"],[["I, you","play"],["he, she, it","plays"],["we, you, they","play"]]),
+  bsp:[["My parents often work on Saturdays.","Meine Eltern arbeiten samstags oft."],["Cats like mice.","Katzen mögen Mäuse."],["Granny Rose usually comes and looks after me.","Oma Rose kommt meistens und passt auf mich auf."],["She gets on my nerves.","Sie geht mir auf die Nerven."]],
+  achtung:["Das s vergisst man leicht: nicht <s>He play</s>, sondern He plays.","Nur bei he, she, it: nicht <s>We plays</s>."],
+  maus:"He, she, it, das s muss mit."}
+};
+BEREICHE.forEach(b=>{ if(ERKL[b.id]) b.erkl=ERKL[b.id]; });
 // offen, wenn die Klasse im Buch dort angekommen ist (vokabeln.js setzt BUCH)
 const bOffen=b=>!b.ab||!window.BUCH||BUCH.erreicht(b.ab);
 // Register aller Aufgaben; der Schluessel bleibt beim Umsortieren gleich
@@ -412,10 +515,10 @@ function zeige(m){
   $("ende").hidden=true; $("schilder").hidden=m!=="haus"&&m!=="karte";
   $("bMenue").hidden = (m==="menue" && !ort) || (m==="tabelle" && !stand.frei);
   $("bMenue").textContent = m==="menue" && ort!=="vok" && ort?.[0]!=="@" ? "Menü" : "Zurück";
-  $("bTabelle").hidden = m==="tabelle" || !ort || ort==="probe" || ort==="fehler" || ort==="vok" || ort?.[0]==="@";
+  $("bTabelle").hidden = m==="tabelle" || !ort || ort==="probe" || ort==="fehler" || ort==="vok" || ort==="heute" || ort?.[0]==="@";
   $("bMenue").textContent="← "+$("bMenue").textContent;
 }
-function zurueck(){ if(ort?.[0]==="@") return appZurueck(); if(ort==="vok"&&(modus!=="menue"||$("menuetitel").textContent!=="Vokabeln")) return vokMenue(); if(modus==="menue"||!ort||ort==="probe"||ort==="fehler") menue(); else bereich(ort); }
+function zurueck(){ if(ort?.startsWith("@erkl:")) return bereich(ort.slice(6)); if(ort==="heute") return vokMenue(); if(ort?.[0]==="@") return appZurueck(); if(ort==="vok"&&(modus!=="menue"||$("menuetitel").textContent!=="Vokabeln")) return vokMenue(); if(modus==="menue"||!ort||ort==="probe"||ort==="fehler") menue(); else bereich(ort); }
 function ruhe(titel,text){
   lauf++; laeuft=false; abspieler.pause(); try{ speechSynthesis.cancel(); }catch(e){}
   zeige("menue"); sag("",""); $("runde").textContent=""; $("punkte").textContent="";
@@ -452,14 +555,56 @@ function ebeneZu(b,i){ if(b.ebenen[i].hoeren&&!hatStimme()) return true; return 
 function bereich(id){
   const b=BEREICHE.find(b=>b.id===id); ort=id;
   if(stand.neuFrei?.includes(id)){ stand.neuFrei=stand.neuFrei.filter(x=>x!==id); merke(); }
+  if(erklFaellig(b)){ erklGezeigt.add(id); return erklaerung(b,true); }
   const schon=b.id==="besitz"&&!stand.frei;
   ruhe(b.name, schon?"Fang mit der Tabelle an. Sitzt jedes Wort dreimal hintereinander, gehen die anderen Spiele auf.":b.id==="besitz"?"Such dir ein Spiel aus.":"Die nächste Ebene geht auf, wenn du drei Viertel auf Anhieb richtig hast.");
   const liste=[fehlerKarte(id)];
   if(b.id==="besitz") liste.unshift({t:"Die Tabelle",u:"I = my, you = your ...",st:stand.frei?"Geschafft":sitzt()?`${sitzt()} von 8 sitzen`:"",f:starteTabelle}),
     liste.push(...RUNDEN.map((x,n)=>({t:"Das "+x.kurz,u:x.was,f:()=>starte(n),zu:!stand.frei,st:stand.frei?standText(n):"noch gesperrt"})));
   liste.push(...b.ebenen.map((e,i)=>{ const zu=ebeneZu(b,i); return {t:(b.id==="besitz"?"":`${i+1}. `)+e.name,u:e.was,zu,st:e.hoeren&&!hatStimme()?"keine englische Stimme":zu?"noch gesperrt":standX(e),f:()=>starteEbene(e)}; }));
+  if(b.erkl) liste.unshift({t:"📖 Erklärung",u:`aus dem Buch, ${b.erkl.g}, Seite ${b.erkl.s}`,st:stand.erklaert?.[id]?"gelesen ✓":"noch nicht gelesen",f:()=>erklaerung(b,false)});
   karten(liste);
 }
+// ---------- Erklaerung aus dem Buch ----------
+// Kommt einmal vor dem ersten Oeffnen. "Später" schiebt sie auf morgen, "Zurück" nur bis zum naechsten Laden der Seite.
+const erklGezeigt=new Set();
+const erklFaellig=b=>!!b.erkl&&!stand.erklaert?.[b.id]&&stand.spaeter?.[b.id]!==KERN.heute()&&!erklGezeigt.has(b.id);
+function erklaerung(b,auto,weiter){
+  weiter=weiter||(()=>bereich(b.id)); const e=b.erkl;
+  ruhe(b.name,`Erklärung aus dem Buch: ${e.g}, Grammatik Seite ${e.s}, geübt auf Seite ${e.l}.`); ort="@erkl:"+b.id; zeige("menue");
+  const d=document.createElement("div"); d.className="einstellung erkl";
+  d.innerHTML=`<section><h3>Wofür?</h3><p>${e.wozu}</p></section>`
+    +e.teile.map(([h,l])=>`<section><h3>${h}</h3><ul>${l.map(x=>`<li>${x}</li>`).join("")}</ul></section>`).join("")
+    +(e.tab?`<section class="tabs">${e.tab}</section>`:"")
+    +`<section><h3>Beispiele</h3><p class="leise">Tipp auf einen Satz, dann hörst du ihn.</p><ul class="bsp">${e.bsp.map(([en,de])=>`<li><button type="button" data-sag="${sicher(en).replace(/"/g,"&quot;")}">🔊 ${sicher(en)}</button><span>${sicher(de)}</span></li>`).join("")}</ul></section>`
+    +(e.achtung?.length?`<section class="achtung"><h3>Achtung!</h3><ul>${e.achtung.map(x=>`<li>${x}</li>`).join("")}</ul></section>`:"")
+    +(e.maus?`<p class="maus">🐭 ${e.maus}</p>`:"")
+    +`<div class="knoepfe"></div>`;
+  d.addEventListener("click",ev=>{ const t=ev.target.closest("[data-sag]"); if(t) sprich(t.dataset.sag); });
+  const k=d.querySelector(".knoepfe");
+  const knopf=(t,c,f)=>{ const x=document.createElement("button"); x.type="button"; x.className=c; x.textContent=t; x.onclick=f; k.append(x); };
+  const gelesen=()=>{ stand.erklaert={...(stand.erklaert||{}),[b.id]:Date.now()}; merke(); KERN.log("Erklärung: "+b.name,0,0,"erklaerung"); weiter(); };
+  knopf(auto?"Verstanden, los geht's":"Verstanden","haupt",gelesen);
+  if(auto) knopf("Später","neben",()=>{ stand.spaeter={...(stand.spaeter||{}),[b.id]:KERN.heute()}; merke(); weiter(); });
+  $("spiele").className=""; $("spiele").replaceChildren(d); scrollTo(0,0);
+}
+// ---------- Grammatik von heute: kurze Runde zum aktuellen Thema, haengt an "Heute üben" ----------
+// Thema = die freien Felder der Unit, in der der neueste schon erreichte Anker liegt (ab oder thema).
+const HEUTE={id:"heute8",name:"Grammatik von heute"};
+function themaFelder(){
+  if(!window.BUCH) return [];
+  const pos=BUCH.idx(BUCH.pos()), unit=id=>BUCH.abschnitt(id)?.name.split(":")[0];
+  const mit=BEREICHE.filter(bOffen).map(b=>({b,i:BUCH.idx(b.ab||b.thema)})).filter(x=>x.i>=0&&x.i<=pos);
+  if(!mit.length) return [];
+  const neu=mit.reduce((a,x)=>x.i>a.i?x:a), u=unit(neu.b.ab||neu.b.thema);
+  return mit.filter(x=>unit(x.b.ab||x.b.thema)===u).map(x=>x.b);
+}
+const themaKeys=()=>themaFelder().flatMap(b=>b.ebenen.filter((e,i)=>!e.hoeren&&e.typ!=="schreiben"&&e.keys.length&&!ebeneZu(b,i)).flatMap(e=>e.keys));
+function starteHeute(){ const keys=themaKeys(); if(!keys.length) return vokMenue(); ort="heute"; starteX(HEUTE,()=>ziehe(keys,Math.min(8,keys.length))); }
+window.grammatikHeute={
+  info:()=>{ const f=themaFelder(); return {offen:stand.gTag!==KERN.heute()&&themaKeys().length>0,fertig:stand.gTag===KERN.heute(),name:f.map(b=>b.name).join(", ")}; },
+  start:()=>{ const b=themaFelder().find(erklFaellig); if(b){ erklGezeigt.add(b.id); return erklaerung(b,true,starteHeute); } starteHeute(); }
+};
 function standX(e){
   if(e.typ==="schreiben") return stand.geschafft[e.id]?"Geschafft":Object.values(stand.texte).some(t=>t)?"angefangen":"";
   const w=stand.weiter[e.id], g=stand.gespielt[e.id];
@@ -741,7 +886,8 @@ function geloestX(r){
 }
 function tippKurz(it,n){
   if(n===0) return "Schau auf ja oder nein.";
-  if(n===1) return /^(Is|Are) there/.test(it.f)?"In der Frage steht there, also auch in der Antwort.":/ you and /.test(it.f)?"Du und noch jemand, das sind wir.":/^(Are|Have) you/.test(it.f)?"Du wirst gefragt, also antwortest du mit ich.":/^(Has|Have) /.test(it.f)?"Wer ist gemeint: he, she, it oder they?":"Kein there in der Frage. Wer oder was ist gemeint: he, she, it oder they?";
+  if(n===1) return /^(Is|Are) there/.test(it.f)?"In der Frage steht there, also auch in der Antwort.":/ you and /.test(it.f)?"Du und noch jemand, das sind wir.":/^(Are|Have|Can) you/.test(it.f)?"Du wirst gefragt, also antwortest du mit ich.":/^Can I /.test(it.f)?"Jemand fragt dich, ob er darf. Du antwortest mit you.":/^(Has|Have|Can) /.test(it.f)?"Wer ist gemeint: he, she, it oder they?":"Kein there in der Frage. Wer oder was ist gemeint: he, she, it oder they?";
+  if(/^Can /.test(it.f)) return it.j?"Die Antwort nimmt can wieder auf.":"Bei No: can't.";
   return it.j?"Bei Yes die lange Form. Welche Form passt zur Person?":"Bei No die Kurzform. Welche Form passt zur Person?";
 }
 function bucheX(){
@@ -749,7 +895,8 @@ function bucheX(){
   stand.gespielt[id]=(stand.gespielt[id]||0)+1; if(xr.e!==PROBE) stand.runden[id]=(stand.runden[id]||0)+1;
   stand.best[id]=Math.max(xr.alt,xr.gut);
   if(xr.e!==PROBE && xr.gut/xr.keys.length>=.75) stand.geschafft[id]=true;
-  delete stand.weiter[id]; merke(); KERN.log((xr.e.bereich?xr.e.bereich.name+": ":"")+xr.e.name,xr.gut,xr.keys.length,xr.e.bereich?.id||"probe");
+  if(xr.e===HEUTE) stand.gTag=KERN.heute();
+  delete stand.weiter[id]; merke(); KERN.log((xr.e.bereich?xr.e.bereich.name+": ":"")+xr.e.name,xr.gut,xr.keys.length,xr.e.bereich?.id||(xr.e===HEUTE?"heute":"probe"));
 }
 function abschlussX(){
   const g=xr.keys.length, a=xr.gut, st=sterne(a,g), e=xr.e, b=e.bereich, i=b?b.ebenen.indexOf(e):-1, next=b?.ebenen[i+1];
@@ -761,6 +908,8 @@ function abschlussX(){
   if(xr.schlecht.length) text+=`<br>Schau dir noch einmal an: ${xr.schlecht.slice(0,4).map(k=>sicher(loesung(ITEM[k]))).join(" · ")}`;
   if(e===PROBE && xr.schlecht.length){ const z={}; xr.schlecht.forEach(k=>{const n=ITEM[k].e.bereich.name; z[n]=(z[n]||0)+1;}); text+=`<br>Fehler nach Bereich: ${Object.entries(z).map(([n,c])=>`${n} ${c}`).join(", ")}`; }
   $("schilder").hidden=true; sag("","");
+  if(e===HEUTE) return abschluss(`<h2>Grammatik für heute geschafft. <span class="sterne" aria-label="${st} von 3 Sternen">${"★".repeat(st)}${"☆".repeat(3-st)}</span></h2><p>${text}</p>`,
+    [["Zurück zu den Vokabeln","haupt",()=>vokMenue()],["Zum Menü","neben",menue]]);
   const wieder=["Noch einmal","neben",()=>e===PROBE?starteProbe():starteEbene(e)], fb=b?b.id:null;
   abschluss(`<h2>${a===g?"Alles auf Anhieb richtig!":"Runde geschafft."} <span class="sterne" aria-label="${st} von 3 Sternen">${"★".repeat(st)}${"☆".repeat(3-st)}</span></h2><p>${text}</p>`,
     [...(offen?[[`Weiter: ${next.name}`,"haupt",()=>starteEbene(next)]]:[["Noch einmal","haupt",wieder[2]]]),
