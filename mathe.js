@@ -646,7 +646,7 @@ const BEREICHE=[
      return {f:`${fz(p.x)} ${p.mal?"·":":"} ${fz(p.F)} = {0}`,a:[y],hilfe:`${fz(p.F)} hat ${NULLEN[n-1]}: das Komma rückt ${stellen(n)} nach ${p.mal?"rechts":"links"}. Fehlende Stellen füllst du mit 0.`,weg:kommaWeg(p),
        tipp:(i,v)=>gleich(v,p.mal?p.x/p.F:p.x*p.F)?(p.mal?"Mal heißt: Die Zahl wird größer, das Komma rückt nach rechts.":"Geteilt heißt: Die Zahl wird kleiner, das Komma rückt nach links.")
          :gleich(v,y*10)||gleich(v,y/10)?`${fz(p.F)} hat ${NULLEN[n-1]}: Das Komma rückt genau ${stellen(n)}.`:null}; }),
-  ZIEHEN.rk_zerlegen,
+  Object.assign(ZIEHEN.rk_zerlegen,{kette:true}), // gleich offen, laeuft neben dem Komma-Verschieben
   E("rk_zerltipp","Malnehmen mit Komma","40 · 2,8 = ?",zerlZieh,
    p=>{ const {a,g,d}=p, x=zerl(p);
      return {f:`${a} · ${fz(x.b)} = {0}`,a:[x.s],hilfe:`Zerleg ${fz(x.b)} in ${g} + ${x.z}: ${x.zer}. ${x.klein}`,weg:x.weg,
@@ -724,7 +724,9 @@ const halte=()=>KERN.speichere("mathe",M());
 // (Johannes, 26.11.2026). Der alte Einzelwert (Text) liest sich als Liste; "m_laenge" war der alte Vorschlag und wird zum neuen.
 const FOKUS1=["m_rkomma","m_laenge","m_runden"];
 const fokusVon=(m,n)=>{ const f=m.fokus; if(Array.isArray(f)) return f.filter(id=>BEREICHE.some(b=>b.id===id)); if(n===1&&(f===undefined||f==="m_laenge")) return FOKUS1; return f?[f]:[]; };
-const ezu=(b,i,m)=>i>0&&!m.geschafft?.[b.ebenen[i-1].id]&&!m.gespielt?.[b.ebenen[i].id];
+// Eine Ebene mit kette:true beginnt eine eigene Kette und ist von Anfang an offen (Zerlegen, Johannes 26.11.2026: "gleich offen").
+const ezu=(b,i,m)=>i>0&&!b.ebenen[i].kette&&!m.geschafft?.[b.ebenen[i-1].id]&&!m.gespielt?.[b.ebenen[i].id];
+const ketten=b=>b.ebenen.reduce((k,e,i)=>(i&&!e.kette?k[k.length-1].push(e):k.push([e]),k),[]);
 const offeneEbenen=(b,m)=>b.ebenen.filter((e,i)=>!ezu(b,i,m));
 const fertigB=(b,m)=>b.ebenen.every(e=>m.geschafft?.[e.id]);
 const zahlB=(b,m)=>[b.ebenen.filter(e=>m.geschafft?.[e.id]).length,b.ebenen.length];
@@ -845,11 +847,15 @@ function starteEbene(e){ ort="@mr:"+e.b.id; runde({art:"ebene",key:e.id,titel:e.
 // Heute: offene Fehler zuerst, dann die Schwerpunkte (6 Punkte, bei mehreren 9), Rest aus dem aktuellen Thema, mindestens 3 Punkte.
 // Gezaehlt wird nach Luecken: eine Zieh-Aufgabe mit vier Luecken zaehlt vier. Die Schwerpunkte kommen reihum dran: die naechste
 // Aufgabe bekommt immer der mit den wenigsten Punkten, jeder aus seiner aktuellen Ebene, jede dritte aus einer schon offenen.
+// Hat ein Bereich zwei Ketten (Rechnen mit Komma: Verschieben und Zerlegen), laeuft jede unfertige Kette wie ein eigener Schwerpunkt,
+// und jede kommt mindestens einmal dran. Fertige Ketten bleiben als Wiederholung (jede dritte Aufgabe) im Spiel.
 function heuteListe(){
   const m=M(), {fo,th}=heuteTeile(m), l=[], wx=x=>gewicht(mach(x)), w=()=>l.reduce((s,x)=>s+wx(x),0), schon=()=>l.map(x=>x.e+JSON.stringify(x.p));
   offeneFehler(m).slice(0,2).forEach(x=>l.push({e:x.e,p:x.p}));
-  if(fo.length){ const st=fo.map(b=>{ const off=offeneEbenen(b,m), jetzt=off.find(e=>!m.geschafft?.[e.id])||off[off.length-1]; return {jetzt,alt:off.filter(e=>e!==jetzt),p:0,i:0}; }), ziel=w()+(fo.length>1?9:6);
-    for(let n=0;w()<ziel&&n<24;n++){ const s=st.reduce((a,b)=>b.p<a.p?b:a), x=plane(s.i++%3===2&&s.alt.length?R.pick(s.alt):s.jetzt,1,schon()); s.p+=x.reduce((q,y)=>q+wx(y),0); l.push(...x); } }
+  if(fo.length){ const st=fo.flatMap(b=>{ const ks=ketten(b), ganz=k=>k.every(e=>m.geschafft?.[e.id]), rest=ks.filter(ganz).flat();
+      return ks.filter(k=>!ganz(k)).map(k=>{ const off=k.filter(e=>!ezu(b,b.ebenen.indexOf(e),m)), jetzt=off.find(e=>!m.geschafft?.[e.id])||off[off.length-1];
+        return {jetzt,alt:[...off.filter(e=>e!==jetzt),...rest],p:0,i:0}; }); }), ziel=w()+(st.length>1?9:6);
+    for(let n=0;(w()<ziel||st.some(s=>!s.p))&&n<24;n++){ const s=st.reduce((a,b)=>b.p<a.p?b:a), x=plane(s.i++%3===2&&s.alt.length?R.pick(s.alt):s.jetzt,1,schon()); s.p+=x.reduce((q,y)=>q+wx(y),0); l.push(...x); } }
   const pool=th.flatMap(b=>offeneEbenen(b,m)), bis=Math.max(10,w()+3); for(let i=0;w()<bis&&pool.length&&i<20;i++) l.push(...plane(R.pick(pool),1,schon()));
   return mischen(l);
 }
@@ -1035,6 +1041,6 @@ function eltern(n){
 const altRegeln=$("bTabelle").onclick; $("bTabelle").onclick=e=>{ if(ort?.startsWith("@m")) return merkzettel(); altRegeln?.(e); };
 
 return {start:mStart,menue:mMenue,zurueck:mZurueck,karte,eltern,BEREICHE,EB,ABS,START,mach,loesung,lies,fz,zahlwort,roemisch,vonRoemisch,ausSeite,setzen,
-  posVon:()=>posVon(M()),fokusVon:n=>fokusVon(M(),n??KERN.nr),plane,heuteListe,starteEbene,starteHeute,starteProbe,starteFehler,erklaerung,bereich:mBereich,frageBuch,weiterBis,
+  posVon:()=>posVon(M()),fokusVon:n=>fokusVon(M(),n??KERN.nr),gesperrt:id=>{ const b=BEREICHE.find(x=>x.id===id); return b.ebenen.filter((e,i)=>ezu(b,i,M())).map(e=>e.id); },plane,heuteListe,starteEbene,starteHeute,starteProbe,starteFehler,erklaerung,bereich:mBereich,frageBuch,weiterBis,
   get X(){return X;}, get A(){return A;}, pruefeEingabe};
 })();
