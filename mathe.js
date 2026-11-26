@@ -93,8 +93,10 @@ const LG={km:1e6,m:1000,dm:100,cm:10,mm:1}, GW={t:1e9,kg:1e6,g:1000,mg:1}, ZT={d
 function um(q,von,nach,U,extra){
   const fak=U[von]/U[nach], klein=fak>1, F=rund(klein?fak:1/fak), a=rund(q*fak), gr=klein?von:nach, kl=klein?nach:von;
   return {f:`${fz(q)} ${von} = {0} ${nach}`,a:[a],
-    hilfe:`1 ${gr} = ${fz(F)} ${kl}. ${klein?`Von ${von} nach ${nach} wird die Zahl größer: mal ${fz(F)}.`:`Von ${von} nach ${nach} wird die Zahl kleiner: geteilt durch ${fz(F)}.`}`,
-    weg:`${fz(q)} ${von} = ${fz(q)} ${klein?"·":":"} ${fz(F)} ${nach} = ${fz(a)} ${nach}`,
+    hilfe:klein?`1 ${gr} sind ${fz(F)} ${kl}. ${fz(q)} ${gr} sind also ${fz(q)} mal ${fz(F)} ${kl}.`:U===ZT?`1 ${gr} = ${fz(F)} ${kl}. Teile durch ${fz(F)}.`:`1 ${gr} sind ${fz(F)} ${kl}. Wie oft stecken ${fz(F)} ${kl} in ${fz(q)} ${kl}? So viele ${gr} sind es.`,
+    weg:klein?`${fz(q)} ${von} = ${fz(q)} · ${fz(F)} ${nach} = ${fz(a)} ${nach}`:U===ZT?`${fz(q)} ${von} = ${fz(q)} : ${fz(F)} ${nach} = ${fz(a)} ${nach}`
+      :Number.isInteger(a)?`${fz(q)} ${von} = ${fz(a)} · ${fz(F)} ${von} = ${fz(a)} ${nach}`
+      :`${fz(q)} ${von} = ${Math.floor(a)} · ${fz(F)} ${von} + ${fz(rund(q-Math.floor(a)*F))} ${von} = ${Math.floor(a)} ${nach} ${fz(rund(q-Math.floor(a)*F))} ${von} = ${fz(a)} ${nach}`,
     tipp:(i,v)=>extra?.(v,a,F,klein)||(gleich(v,rund(q/fak))?(klein?`${nach} ist die kleinere Einheit. Da wird die Zahl größer, nicht kleiner.`:`${nach} ist die größere Einheit. Da wird die Zahl kleiner, nicht größer.`):null)};
 }
 // m und cm: die Stelle, an der Jonathan haengt (Johannes, 26.11.2026)
@@ -140,7 +142,9 @@ const RREGEL="Höchstens dreimal dasselbe Zeichen. V, L und D nur einmal. Abzieh
 const DTHEMA=[["Lieblingstier",["Hund","Katze","Pferd","Hamster","Fische"]],["Schulweg",["zu Fuß","Fahrrad","Bus","Auto"]],["Lieblingsfach",["Mathe","Deutsch","Englisch","Sport","Kunst"]],["Geschwister",["keine","eins","zwei","drei"]]];
 const FARBEN=["Rot","Blau","Gelb","Grün","Lila"];
 const ZIMMER=["Das Kinderzimmer","Die Küche","Das Wohnzimmer","Der Flur","Das Bad"], PLATZ=["Der Schulhof","Das Fußballfeld","Der Parkplatz"];
-const ctxVon=(m,c)=>m>=500?PLATZ[c%PLATZ.length]:m>=50?ZIMMER[c%ZIMMER.length]:"Das Modell";
+// was zu der echten Laenge r (in m) passt: kein 22 m langes Kinderzimmer
+const HAUS=["Das Haus","Der Garten","Das Handballfeld","Das Schwimmbecken"], WEGE=["Der Schulweg","Die Straße","Der Weg zum Park"];
+const ctxVon=(m,c,r)=>m<50?"Das Modell":r<=7?ZIMMER[c%ZIMMER.length]:r<=50?HAUS[c%HAUS.length]:r<=300?PLATZ[c%PLATZ.length]:WEGE[c%WEGE.length];
 const LPAARE=[["km","m"],["m","dm"],["dm","cm"],["cm","mm"],["m","cm"],["m","mm"]];
 const KPAARE=[["km","m",LG],["m","cm",LG],["m","mm",LG],["cm","mm",LG],["dm","cm",LG],["m","dm",LG],["t","kg",GW],["kg","g",GW],["g","mg",GW]];
 const KOMMA_AN=F=>Math.round(Math.log10(F));
@@ -257,6 +261,35 @@ const ZIEHEN={
     return {typ:"ziehen",frage:"1 cm auf dem Plan sind in Wirklichkeit …",zeilen:z.map(([m,l])=>zz(`1 : ${fz(m)}`,"",l,"Die Zahl rechts sind Zentimeter. 100 cm = 1 m.")),tiles:[...z.map(([m,l])=>l),d],bleibt:false,
       hilfe:"1 : 100 heißt: 1 cm sind 100 cm, also 1 m. 100 000 cm sind 1 km.",weg:z.map(([m,l])=>`1 : ${fz(m)}: 1 cm sind ${fz(m)} cm = ${l}`).join(" · ")}; })
 };
+
+// Zahlkarten: Antworten plus Fallen (Faktor 10), keine doppelten, der Groesse nach
+const zahlKarten=(ans,extra)=>{ const t=new Map(); ans.forEach(x=>t.set(x,fz(x))); extra.forEach(x=>{ if(t.size<7&&Number.isInteger(x)&&x>0) t.set(x,fz(x)); }); return [...t.entries()].sort((a,b)=>a[0]-b[0]).map(e=>e[1]); };
+const WEG_GROSS=[["cm","m",100],["cm","m",100],["cm","m",100],["mm","cm",10],["m","km",1000],["dm","m",10]];
+const WEG_KLEIN=[["m","cm",100],["m","cm",100],["km","m",1000],["cm","mm",10],["m","dm",10]];
+Object.assign(ZIEHEN,{
+ l_weg:Z("l_weg","Der Weg aus dem Buch","400 cm = 4 · 100 cm = 4 m",()=>({g:R.int(0,WEG_GROSS.length-1),q:R.int(2,60)*(R.ja(.3)?10:1),k:R.int(0,WEG_KLEIN.length-1),p:R.int(2,25)}),
+  ({g,q,k,p})=>{ const [a1,b1,F1]=WEG_GROSS[g], [a2,b2,F2]=WEG_KLEIN[k];
+    return {typ:"ziehen",schema:true,frage:"Rechne wie im Buch: Wie oft steckt die Umrechnungszahl drin?",
+      zeilen:[{s:`${fz(q*F1)} ${a1} = {0} · ${fz(F1)} ${a1} = {1} ${b1}`,as:[fz(q),fz(q)],t:`Wie oft stecken ${fz(F1)} ${a1} in ${fz(q*F1)} ${a1}? So viele ${b1} sind es.`},
+              {s:`${p} ${a2} = ${p} · {0} ${b2} = {1} ${b2}`,as:[fz(F2),fz(p*F2)],t:`1 ${a2} sind ${fz(F2)} ${b2}. ${p} ${a2} sind also ${p} mal ${fz(F2)} ${b2}.`}],
+      tiles:zahlKarten([q,F2,p*F2],[q*10,p*F2*10,p*F2/10,F2===10?100:10]),bleibt:true,
+      hilfe:"So steht es im Buch: 4000 mg = 4 · 1000 mg = 4 g (S. 24) und 40 000 cm = 400 · 100 cm = 400 m (S. 30).",
+      weg:`${fz(q*F1)} ${a1} = ${fz(q)} · ${fz(F1)} ${a1} = ${fz(q)} ${b1}. ${p} ${a2} = ${p} · ${fz(F2)} ${b2} = ${fz(p*F2)} ${b2}.`}; }),
+ ma_weg:Z("ma_weg","Der Rechenweg aus dem Buch","wie Beispiel 1 und 2 auf S. 30 und 31",()=>{ const k=R.int(0,1), c=R.int(0,4);
+    if(!k) return {k,m:R.pick([100,200,500,1000,2000,5000,10000]),b:R.int(2,9),c};
+    const m=R.pick([50,100,200,500]); let b; do b=R.int(2,12); while(b*m%100); return {k,m,b,c}; },
+  ({k,m,b,c})=>{ const ctx=ctxVon(m,c,b*m/100);
+    if(!k){ const w=b*m, mm=w/100;
+      return {typ:"ziehen",schema:true,frage:`${ctx} ist auf dem Plan <b>${b} cm</b> lang. Wie lang ist es in Wirklichkeit?`,
+        zeilen:[{s:`Maßstab: 1 : ${fz(m)}`,as:[]},{s:`Länge im Bild: ${b} cm`,as:[]},{s:`Länge in Wirklichkeit: ${b} cm · {0} = {1} cm = {2} · 100 cm = {3} m`,as:[fz(m),fz(w),fz(mm),fz(mm)],t:"Erst mal die Maßstabszahl. Dann: Wie oft stecken 100 cm drin?"}],
+        tiles:zahlKarten([m,w,mm],[w/10,w*10,mm*10]),bleibt:true,hilfe:`1 cm im Bild entsprechen ${fz(m)} cm in der Wirklichkeit. Die Länge in der Wirklichkeit ist also ${fz(m)}-mal so groß. Multipliziere daher mit ${fz(m)}.`,
+        weg:`Länge in Wirklichkeit: ${b} cm · ${fz(m)} = ${fz(w)} cm = ${fz(mm)} · 100 cm = ${fz(mm)} m`}; }
+    const r=b*m/100;
+    return {typ:"ziehen",schema:true,frage:`${ctx} ist in Wirklichkeit <b>${fz(r)} m</b> lang. Es wird im Maßstab 1 : ${fz(m)} gezeichnet. Wie lang wird es im Bild?`,
+      zeilen:[{s:`Maßstab: 1 : ${fz(m)}`,as:[]},{s:`Länge in Wirklichkeit: ${fz(r)} m = {0} cm`,as:[fz(r*100)],t:"Erst in cm umwandeln: 1 m = 100 cm."},{s:`Länge im Bild: {0} cm : {1} = {2} cm`,as:[fz(r*100),fz(m),fz(b)],t:"Im Bild ist es kleiner: dividiere durch die Maßstabszahl."}],
+      tiles:zahlKarten([r*100,m,b],[r*10,r*1000,b*10]),bleibt:true,hilfe:`1 cm im Bild entsprechen ${fz(m)} cm in der Wirklichkeit. Die Länge im Bild ist also ${fz(m)}-mal so klein. Dividiere daher durch ${fz(m)}. Vorher in cm umwandeln.`,
+      weg:`Länge in Wirklichkeit: ${fz(r)} m = ${fz(r*100)} cm. Länge im Bild: ${fz(r*100)} cm : ${fz(m)} = ${b} cm`}; })
+});
 
 // ---------- Erklaerseiten und Aufgaben, Reihenfolge wie im Buch ----------
 const BEREICHE=[
@@ -401,14 +434,15 @@ const BEREICHE=[
 {id:"m_laenge",kap:"1.6",icon:"📐",name:"Längen umrechnen",was:"km, m, dm, cm, mm. Vor allem m und cm",
  erkl:{s:"24–27",wozu:"Zum Vergleichen und Rechnen müssen Längen in derselben Einheit stehen. Dafür brauchst du die Umrechnungszahlen.",
   teile:[["Die Umrechnungszahlen",["1 km = 1000 m","1 m = 10 dm","1 dm = 10 cm","1 cm = 10 mm","Daraus folgt: 1 m = 10 · 10 cm = 100 cm und 1 m = 1000 mm."]],
-   ["Von m nach cm",["Zentimeter sind kleiner, also wird die Zahl größer: mal 100.","3 m = 3 · 100 cm = 300 cm. Du hängst zwei Nullen an."]],
-   ["Von cm nach m",["Meter sind größer, also wird die Zahl kleiner: geteilt durch 100.","400 cm = 400 : 100 m = 4 m. Zwei Nullen fallen weg.","Bleibt etwas übrig, schreibst du m und cm: 345 cm = 3 m 45 cm. Mit Komma: 3,45 m."]]],
-  tab:TAB(["von","nach","Rechnung"],[["m","cm","mal 100"],["cm","m","geteilt durch 100"],["km","m","mal 1000"],["m","km","geteilt durch 1000"],["cm","mm","mal 10"],["mm","cm","geteilt durch 10"]]),
-  bsp:[["3 m in cm","3 · 100 = 300, also 300 cm"],["400 cm in m","400 : 100 = 4, also 4 m"],["2 m 5 cm in cm","200 cm + 5 cm = 205 cm"],["3,45 m in cm","3 m 45 cm = 300 cm + 45 cm = 345 cm"]],
+   ["Von m nach cm (wie im Buch, S. 24)",["1 m sind 100 cm. 3 m sind also 3 mal 100 cm.","3 m = 3 · 100 cm = 300 cm."]],
+   ["Von cm nach m (wie im Buch, S. 24 und 30)",["Frag dich: Wie oft stecken 100 cm drin? So viele Meter sind es.","400 cm = 4 · 100 cm = 4 m.","40 000 cm = 400 · 100 cm = 400 m.","Bleibt etwas übrig: 345 cm = 3 · 100 cm + 45 cm = 3 m 45 cm = 3,45 m."]]],
+  tab:`<p class="mtreppe"><span>km</span><i>1000</i><span>m</span><i>10</i><span>dm</span><i>10</i><span>cm</span><i>10</i><span>mm</span></p>`+TAB(["von","nach","Rechnung"],[["m","cm","mal 100"],["cm","m","geteilt durch 100"],["km","m","mal 1000"],["m","km","geteilt durch 1000"],["cm","mm","mal 10"],["mm","cm","geteilt durch 10"]]),
+  bsp:[["3 m in cm","3 m = 3 · 100 cm = 300 cm"],["400 cm in m","400 cm = 4 · 100 cm = 4 m"],["40 000 cm in m (S. 30)","40 000 cm = 400 · 100 cm = 400 m"],["2 m 5 cm in cm","200 cm + 5 cm = 205 cm"],["3,45 m in cm","3 m 45 cm = 300 cm + 45 cm = 345 cm"]],
   achtung:["1 m sind 100 cm, nicht 10. Zwischen m und cm liegt noch der dm.","Sabrina rechnet 24 km = 2400 m. Richtig ist 24 · 1000 = 24 000 m (Stolperstelle S. 26).","Kleinere Einheit, größere Zahl. Größere Einheit, kleinere Zahl."],
   maus:"Meter in Zentimeter: zwei Nullen dran. Zentimeter in Meter: zwei Nullen weg."},
  ebenen:[
   ZIEHEN.l_treppe,
+  ZIEHEN.l_weg,
   E("l_zahl","Die Umrechnungszahlen","1 m = ? cm",...liste([["1 m = {0} cm",100,"Zwischen m und cm liegt noch der dm: 1 m = 10 dm, 1 dm = 10 cm. Also 10 · 10 = 100."],["1 km = {0} m",1000,"Kilo heißt tausend."],["1 m = {0} dm",10,"Dezi heißt ein Zehntel."],["1 dm = {0} cm",10,"Ein Dezimeter ist so lang wie zehn Zentimeter."],["1 cm = {0} mm",10,"Auf dem Lineal: zehn kleine Striche pro Zentimeter."],["1 m = {0} mm",1000,"1 m = 100 cm und 1 cm = 10 mm: 100 · 10 = 1000."],["100 cm = {0} m",1,"100 cm sind genau ein Meter."],["10 mm = {0} cm",1,"10 mm sind genau ein Zentimeter."],["1000 m = {0} km",1,"1000 m sind genau ein Kilometer."],["10 dm = {0} m",1,"10 dm sind genau ein Meter."]].map(([f,a,t])=>({f,a:[a],hilfe:t,tipp:()=>t,weg:f.replace("{0}",fz(a))})),10)),
   E("l_mcm","Meter in Zentimeter","mal 100",()=>({q:R.ja(.7)?R.int(1,20):R.pick([25,30,40,50,75,120,250])}),({q})=>um(q,"m","cm",LG,mcmTipp)),
   E("l_cmm","Zentimeter in Meter","geteilt durch 100",()=>({q:R.ja(.7)?R.int(1,20):R.pick([25,30,40,50,75,120,250])}),({q})=>um(q*100,"cm","m",LG,mcmTipp)),
@@ -421,7 +455,7 @@ const BEREICHE=[
   E("l_alle","Alle Längen","mm, cm, dm, m, km",()=>{ const [g,k]=R.pick(LPAARE), F=LG[g]/LG[k], rauf=R.ja(); return {g,k,q:rauf?R.int(2,60)*F:R.int(2,60)*(F===1000&&R.ja(.3)?10:1),rauf}; },
    ({g,k,q,rauf})=>rauf?um(q,k,g,LG,mcmTipp):um(q,g,k,LG,mcmTipp)),
   E("l_komma","Meter mit Komma","3,45 m = 345 cm",()=>{ const r=R.ja(); if(r) return {r,c:R.ja(.2)?R.int(1,9):R.ja(.3)?R.int(10,99):R.int(101,999)}; const k=R.int(0,2); return {r,q:k===0?R.int(101,999)/100:k===1?R.int(11,99)/10:R.int(1,99)/100}; },
-   ({r,c,q})=>{ if(r){ const a=c/100; return {f:`${fz(c)} cm = {0} m`,a:[a],hilfe:"1 m = 100 cm. Das Komma rückt zwei Stellen nach links.",weg:`${fz(c)} cm = ${Math.floor(c/100)} m ${c%100} cm = ${fz(a)} m`,
+   ({r,c,q})=>{ if(r){ const a=c/100; return {f:`${fz(c)} cm = {0} m`,a:[a],hilfe:"Wie oft stecken 100 cm drin? Das sind die ganzen Meter, der Rest kommt hinter das Komma.",weg:`${fz(c)} cm = ${Math.floor(c/100)} · 100 cm + ${c%100} cm = ${Math.floor(c/100)} m ${c%100} cm = ${fz(a)} m`,
        tipp:(i,v)=>gleich(v,c/10)?"Zwei Stellen nach links, nicht nur eine: 1 m = 100 cm.":gleich(v,c/1000)?"Eine Stelle zu weit: 1 m sind 100 cm, nicht 1000.":gleich(v,c)?"Meter sind größer, die Zahl wird kleiner: geteilt durch 100.":null}; }
      const a=rund(q*100), g=Math.floor(q), rest=rund(a-g*100);
      return {f:`${fz(q)} m = {0} cm`,a:[a],hilfe:`${fz(q)} m = ${g} m ${rest} cm. Ein Meter sind 100 cm.`,weg:`${fz(q)} m = ${g} m ${rest} cm = ${g*100} cm + ${rest} cm = ${fz(a)} cm`,
@@ -443,9 +477,9 @@ const BEREICHE=[
 {id:"m_gewicht",kap:"1.6",icon:"🏋️",name:"Gewichte umrechnen",was:"t, kg, g, mg",
  erkl:{s:"24–26",wozu:"Auch Gewichte rechnest du mit Umrechnungszahlen um. Hier ist es immer die 1000.",
   teile:[["Die Umrechnungszahlen",["1 t = 1000 kg","1 kg = 1000 g","1 g = 1000 mg"]],
-   ["So rechnest du",["In die kleinere Einheit: mal 1000. 18 kg = 18 000 g.","In die größere Einheit: geteilt durch 1000. 4000 mg = 4 g.","Vergleichen: erst in dieselbe Einheit umrechnen. 8 kg = 8000 g, das ist mehr als 7389 g."]]],
-  tab:TAB(["von","nach","Rechnung"],[["t","kg","mal 1000"],["kg","g","mal 1000"],["g","mg","mal 1000"],["mg → g → kg → t","","geteilt durch 1000"]]),
-  bsp:[["5 t in kg","5 · 1000 = 5000 kg"],["24 000 mg in g","24 000 : 1000 = 24 g"],["2 kg 70 g in g","2000 g + 70 g = 2070 g"]],
+   ["So rechnest du",["In die kleinere Einheit: mal 1000. 18 kg = 18 000 g.","In die größere Einheit (Beispiel 1, S. 24): 1 g sind 1000 mg. 4 mal 1000 mg sind also 4 g: 4000 mg = 4 · 1000 mg = 4 g.","Vergleichen: erst in dieselbe Einheit umrechnen. 8 kg = 8000 g, das ist mehr als 7389 g."]]],
+  tab:`<p class="mtreppe"><span>t</span><i>1000</i><span>kg</span><i>1000</i><span>g</span><i>1000</i><span>mg</span></p>`+TAB(["von","nach","Rechnung"],[["t","kg","mal 1000"],["kg","g","mal 1000"],["g","mg","mal 1000"],["mg → g → kg → t","","geteilt durch 1000"]]),
+  bsp:[["5 t in kg","5 · 1000 = 5000 kg"],["24 000 mg in g","24 000 mg = 24 · 1000 mg = 24 g"],["2 kg 70 g in g","2000 g + 70 g = 2070 g"]],
   achtung:["Sabrina schreibt 3000 kg = 3 g. Richtig ist 3000 kg = 3 t (Stolperstelle S. 26)."],maus:"Bei Gewichten ist es immer die 1000."},
  ebenen:[
   ZIEHEN.w_treppe,
@@ -530,13 +564,16 @@ const BEREICHE=[
 {id:"m_mass",kap:"1.8",icon:"🗺️",name:"Maßstab",was:"1 : 50 auf Plänen und Karten",
  erkl:{s:"30–33",wozu:"Auf Karten und Plänen ist alles kleiner gezeichnet. Der Maßstab sagt, wievielmal.",
   teile:[["Was heißt 1 : 50?",["Links steht die Länge im Bild, rechts die Länge in Wirklichkeit, beide in cm.","1 : 50 heißt: 1 cm auf dem Plan sind 50 cm in Wirklichkeit.","1 : 500 ist eine 500-fache Verkleinerung. 2 : 1 ist eine Vergrößerung auf das Doppelte."]],
-   ["Vom Plan zur Wirklichkeit",["Länge auf dem Plan mal Maßstabszahl.","Dann in eine passende Einheit umrechnen: 400 cm = 4 m."]],
-   ["Von der Wirklichkeit zum Plan",["Erst die echte Länge in cm umrechnen.","Dann geteilt durch die Maßstabszahl."]]],
+   ["Längen in der Wirklichkeit berechnen (Beispiel 1, S. 30)",["1 cm im Stadtplan entsprechen 10 000 cm in der Wirklichkeit. Die Länge in der Wirklichkeit ist also 10 000-mal so groß. Multipliziere daher mit 10 000.","Dann in Meter: Wie oft stecken 100 cm drin? 40 000 cm = 400 · 100 cm = 400 m."]],
+   ["Längen im Bild berechnen (Beispiel 2, S. 31)",["1 cm im Bild entsprechen 200 cm in der Wirklichkeit. Die Länge im Bild ist also 200-mal so klein. Dividiere daher durch 200.","Wandle die wirklichen Längen vor dem Dividieren in cm um: 40 m = 4000 cm."]]],
   tab:TAB(["Maßstab","1 cm auf dem Plan sind"],[["1 : 50","50 cm"],["1 : 100","100 cm = 1 m"],["1 : 1000","1000 cm = 10 m"],["1 : 10 000","10 000 cm = 100 m"],["1 : 100 000","100 000 cm = 1 km"]]),
-  bsp:[["Stadtplan 1 : 10 000, 4 cm (Beispiel 1, S. 30)","4 cm · 10 000 = 40 000 cm = 400 m"],["Handballfeld 40 m lang, Plan 1 : 200 (Beispiel 2, S. 31)","40 m = 4000 cm. 4000 cm : 200 = 20 cm"],["Zimmer im Plan 1 : 50 ist 8 cm lang","8 cm · 50 = 400 cm = 4 m"]],
-  achtung:["Tim rechnet beim Modellauto 1 : 5 so: 40 cm : 5 = 8 cm. Falsch! In Wirklichkeit ist das Auto größer, also mal 5: 200 cm = 2 m (Stolperstelle S. 33).","Vor dem Teilen erst in cm umrechnen."],maus:"Plan nach echt: mal. Echt nach Plan: geteilt."},
+  bsp:[["Beispiel 1 (S. 30): Vom Rathaus zum Staatstheater sind es auf der Karte 4 cm.","Maßstab: 1 : 10 000<br>Länge im Bild: 4 cm<br>Länge in Wirklichkeit: 4 cm · 10 000 = 40 000 cm = 400 · 100 cm = 400 m"],
+   ["Beispiel 2 (S. 31): Ein Handballfeld ist 40 m lang, gezeichnet im Maßstab 1 : 200.","Maßstab: 1 : 200<br>Länge in Wirklichkeit: 40 m = 4000 cm<br>Länge im Bild: 4000 cm : 200 = 20 cm"],
+   ["Ein Zimmer ist im Plan 1 : 50 genau 8 cm lang.","Länge in Wirklichkeit: 8 cm · 50 = 400 cm = 4 · 100 cm = 4 m"]],
+  achtung:["Tim rechnet beim Modellauto 1 : 5 so: 40 cm : 5 = 8 cm. Falsch! In Wirklichkeit ist das Auto größer, also mal 5: 200 cm = 2 m (Stolperstelle S. 33).","Vor dem Dividieren erst in cm umwandeln (Beispiel 2)."],maus:"Bild nach Wirklichkeit: mal. Wirklichkeit nach Bild: erst in cm, dann geteilt."},
  ebenen:[
   ZIEHEN.ma_tabelle,
+  ZIEHEN.ma_weg,
   E("ma_worte","Maßstab verstehen","1 cm auf dem Plan sind …",()=>{ const k=R.int(0,3); return k===0?{k,m:R.pick([20,50,100,200,500,1000])}:k===1?{k,m:R.pick([100,200,500,1000,2000,5000,10000,25000,50000])}:k===2?{k,m:R.pick([100000,200000,250000,500000,1000000])}:{k,i:R.int(0,7)}; },
    ({k,m,i})=>{ if(k===3){ const [a,b]=[[1,50],[1,3],[2,1],[1,500],[500,1],[10,1],[1,25000],[3,1]][i], v=a<b;
        return wahl(`Ist der Maßstab <b>${a} : ${fz(b)}</b> eine Vergrößerung oder eine Verkleinerung?`,v?"Verkleinerung":"Vergrößerung",["Vergrößerung","Verkleinerung"],{t:"Links steht das Bild, rechts die Wirklichkeit.",weg:v?`1 cm im Bild sind ${fz(b)} cm in Wirklichkeit. Das Bild ist kleiner.`:`${a} cm im Bild sind 1 cm in Wirklichkeit. Das Bild ist größer.`}); }
@@ -545,15 +582,16 @@ const BEREICHE=[
      if(k===1) return {frage:fr,f:"{0} m",a:[m/100],hilfe:`1 cm auf dem Plan sind ${fz(m)} cm. 100 cm = 1 m.`,weg:`${fz(m)} cm = ${fz(m/100)} m`,tipp:(j,v)=>v===m?"Das sind Zentimeter. In Meter: geteilt durch 100.":gleich(v,m/10)||gleich(v,m/1000)?"1 m sind 100 cm: geteilt durch 100.":null};
      return {frage:fr,f:"{0} km",a:[m/100000],hilfe:`${fz(m)} cm = ${fz(m/100)} m. 1000 m = 1 km.`,weg:`${fz(m)} cm = ${fz(m/100)} m = ${fz(m/100000)} km`,tipp:(j,v)=>v===m/100?"Das sind Meter. In Kilometer: geteilt durch 1000.":v===m?"Das sind Zentimeter. 100 000 cm sind 1 km.":null}; }),
   E("ma_echt","Plan nach Wirklichkeit","mal die Maßstabszahl",()=>({m:R.pick([5,10,20,25,50,100,200,500,1000]),b:R.int(2,15),c:R.int(0,4)}),
-   ({m,b,c})=>({frage:`Maßstab <b>1 : ${fz(m)}</b>. ${ctxVon(m,c)} ist ${m<50?"als Modell":"auf dem Plan"} ${b} cm lang. Wie lang ist es in Wirklichkeit?`,f:"{0} cm",a:[b*m],weg:`${b} cm · ${fz(m)} = ${fz(b*m)} cm`,
+   ({m,b,c})=>({frage:`Maßstab <b>1 : ${fz(m)}</b>. ${ctxVon(m,c,b*m/100)} ist ${m<50?"als Modell":"auf dem Plan"} ${b} cm lang. Wie lang ist es in Wirklichkeit?`,f:"{0} cm",a:[b*m],weg:`Länge in Wirklichkeit: ${b} cm · ${fz(m)} = ${fz(b*m)} cm`,
      tipp:(i,v)=>gleich(v,b/m)||v===Math.round(b/m)?`In Wirklichkeit ist alles größer: mal ${fz(m)}, nicht geteilt.`:v===b+m?"Nicht plus, sondern mal.":null})),
-  E("ma_echtm","Plan nach Wirklichkeit in m","mal, dann in Meter",()=>{ const m=R.pick([50,50,100,200,500,1000]); return {m,b:m===1000?R.int(2,12):R.int(2,20),c:R.int(0,4)}; },
-   ({m,b,c})=>({frage:`Maßstab <b>1 : ${fz(m)}</b>. ${ctxVon(m,c)} ist auf dem Plan ${b} cm lang. Wie viele Meter sind das in Wirklichkeit?`,f:"{0} m",a:[b*m/100],
-     hilfe:`Erst in cm: ${b} cm · ${fz(m)} = ${fz(b*m)} cm. Dann in Meter: geteilt durch 100.`,weg:`${b} cm · ${fz(m)} = ${fz(b*m)} cm = ${fz(b*m/100)} m`,
-     tipp:(i,v)=>v===b*m?"Das sind Zentimeter. Jetzt noch in Meter umrechnen: geteilt durch 100.":gleich(v,b*m/10)||gleich(v,b*m/1000)?"1 m sind 100 cm: geteilt durch 100.":gleich(v,b/m)?"In Wirklichkeit ist es größer: mal, nicht geteilt.":null})),
+  E("ma_echtm","Plan nach Wirklichkeit in m","Rechenweg wie Beispiel 1",()=>{ const m=R.pick([50,50,100,200,500,1000]); let b=m===1000?R.int(2,12):R.int(2,20); if(m===50&&b%2) b++; return {m,b,c:R.int(0,4)}; },
+   ({m,b,c})=>{ const w=b*m, mm=rund(w/100);
+     return {frage:`Maßstab <b>1 : ${fz(m)}</b>. ${ctxVon(m,c,b*m/100)} ist auf dem Plan ${b} cm lang. Wie lang ist es in Wirklichkeit?`,f:`${b} cm · ${fz(m)} = {0} cm = {1} · 100 cm = {2} m`,a:[w,mm,mm],
+       hilfe:`1 cm im Bild sind ${fz(m)} cm in Wirklichkeit: multipliziere mit ${fz(m)}. Dann: Wie oft stecken 100 cm drin?`,weg:`Länge in Wirklichkeit: ${b} cm · ${fz(m)} = ${fz(w)} cm = ${fz(mm)} · 100 cm = ${fz(mm)} m`,
+       tipp:(i,v)=>i===0&&gleich(v,b/m)?"In Wirklichkeit ist es größer: mal, nicht geteilt.":i>0&&gleich(v,w)?"Wie oft stecken 100 cm drin? Die Zahl wird kleiner.":i>0&&(gleich(v,w/10)||gleich(v,w/1000))?"1 m sind 100 cm, nicht 10 und nicht 1000.":null}; }),
   E("ma_plan","Wirklichkeit nach Plan","erst in cm, dann geteilt",()=>{ const m=R.pick([50,100,200,500,1000]); return {m,b:m===1000?R.int(2,12):R.int(2,20),c:R.int(0,4)}; },
    ({m,b,c})=>{ const r=b*m/100;
-     return {frage:`${ctxVon(m,c)} ist in Wirklichkeit ${fz(r)} m lang. Maßstab <b>1 : ${fz(m)}</b>. Wie lang wird es auf dem Plan?`,f:"{0} cm",a:[b],hilfe:`Erst in cm umrechnen: ${fz(r)} m = ${fz(r*100)} cm.`,weg:`${fz(r)} m = ${fz(r*100)} cm. ${fz(r*100)} cm : ${fz(m)} = ${b} cm.`,
+     return {frage:`${ctxVon(m,c,r)} ist in Wirklichkeit ${fz(r)} m lang. Maßstab <b>1 : ${fz(m)}</b>. Wie lang wird es auf dem Plan?`,f:"{0} cm",a:[b],hilfe:`Erst in cm umrechnen: ${fz(r)} m = ${fz(r*100)} cm.`,weg:`Länge in Wirklichkeit: ${fz(r)} m = ${fz(r*100)} cm. Länge im Bild: ${fz(r*100)} cm : ${fz(m)} = ${b} cm.`,
        tipp:(i,v)=>gleich(v,r*m)||gleich(v,r*100*m)?"Auf dem Plan wird alles kleiner: geteilt, nicht mal.":gleich(v,r/m)?"Erst die Meter in Zentimeter umrechnen, dann teilen.":null}; }),
   E("ma_bestimmen","Maßstab bestimmen","wievielmal kleiner oder größer?",()=>R.ja(.65)?{k:R.pick([10,20,25,40,45,50,87,100,160]),m:R.int(5,30),v:0}:{k:R.pick([2,3,4,5,10,20]),m:R.int(2,12),v:1},
    ({k,m,v})=>{ if(v){ const b=m*k; return {frage:`Ein Käfer ist ${m} mm lang. Im Bild ist er ${fz(b/10)} cm lang. Welcher Maßstab ist das?`,f:"{0} : 1",a:[k],l:`${k} : 1`,hilfe:`${fz(b/10)} cm = ${b} mm. Wie oft passen ${m} mm hinein?`,weg:`${b} mm : ${m} mm = ${k}, also ${k} : 1 (Vergrößerung).`}; }
@@ -561,7 +599,7 @@ const BEREICHE=[
        tipp:(i,v)=>gleich(v,r/100/m)?"Erst die Meter in Zentimeter umrechnen.":null}; }),
   E("ma_karte","Auf der Landkarte","km und Wegweiser",()=>R.ja(.6)?{m:R.pick([10000,20000,25000,50000,100000,200000,250000,500000]),b:R.int(2,15),r:0}:{m:R.pick([10000,20000,25000,50000]),b:R.int(2,12),r:1},
    ({m,b,r})=>{ if(r){ const e=b*m/100; return {frage:`Ein Wegweiser zeigt: „Museum ${fz(e)} m“. Wie viele cm sind das auf dem Stadtplan im Maßstab <b>1 : ${fz(m)}</b>?`,f:"{0} cm",a:[b],hilfe:`${fz(e)} m = ${fz(e*100)} cm. Dann geteilt durch ${fz(m)}.`,weg:`${fz(e*100)} cm : ${fz(m)} = ${b} cm`,tipp:(i,v)=>gleich(v,e/m)?"Erst die Meter in Zentimeter umrechnen.":null}; }
-     const a=b*m/100000; return {frage:`Landkarte im Maßstab <b>1 : ${fz(m)}</b>. Zwei Orte liegen auf der Karte ${b} cm auseinander. Wie weit ist das in Wirklichkeit?`,f:"{0} km",a:[a],hilfe:`${b} cm · ${fz(m)} = ${fz(b*m)} cm. 100 000 cm sind 1 km.`,weg:`${b} cm · ${fz(m)} = ${fz(b*m)} cm = ${fz(b*m/100)} m = ${fz(a)} km`,
+     const a=b*m/100000; return {frage:`Landkarte im Maßstab <b>1 : ${fz(m)}</b>. Zwei Orte liegen auf der Karte ${b} cm auseinander. Wie weit ist das in Wirklichkeit?`,f:"{0} km",a:[a],hilfe:`${b} cm · ${fz(m)} = ${fz(b*m)} cm. 100 000 cm sind 1 km.`,weg:`${b} cm · ${fz(m)} = ${fz(b*m)} cm = ${fz(b*m/100)} · 100 cm = ${fz(b*m/100)} m = ${fz(a)} km`,
        tipp:(i,v)=>gleich(v,b*m/100)?"Das sind Meter. In Kilometer: geteilt durch 1000.":v===b*m?"Das sind Zentimeter. 100 000 cm sind 1 km.":null}; })]}
 ];
 const EB={}; BEREICHE.forEach(b=>b.ebenen.forEach(e=>{ e.b=b; EB[e.id]=e; }));
@@ -599,13 +637,16 @@ const zahlB=(b,m)=>[b.ebenen.filter(e=>m.geschafft?.[e.id]).length,b.ebenen.leng
 const offenB=m=>BEREICHE.filter(b=>erreichtVon(m,b.kap));
 const fKey=x=>x.e+"|"+JSON.stringify(x.p);
 const offeneFehler=(m,bid)=>Object.values(m.fehler||{}).filter(x=>x.rest>0&&EB[x.e]&&(!bid||EB[x.e].b.id===bid)&&erreichtVon(m,EB[x.e].b.kap)).sort((a,b)=>b.t-a.t);
-const gewicht=it=>it.typ==="ziehen"?it.zeilen.length:1;
-function mach(x){ const e=EB[x.e], it={typ:"eingabe",art:"zahl",...e.mach(x.p)}; it.e=e; return it; }
+const gewicht=it=>it.typ==="ziehen"?it.zeilen.reduce((n,z)=>n+z.as.length,0):1;
+function mach(x){ const e=EB[x.e], it={typ:"eingabe",art:"zahl",...e.mach(x.p)}; it.e=e;
+  // Zieh-Zeilen vereinheitlichen: s = HTML mit {0}, {1} ... fuer die Luecken, as = Antworten in dieser Reihenfolge
+  if(it.typ==="ziehen") it.zeilen=it.zeilen.map(z=>z.as?z:{...z,as:[z.a],s:`${z.vorHtml||h(z.vor)} {0}${z.nach?(/^[.,!?]/.test(z.nach)?"":" ")+h(z.nach):""}`});
+  return it; }
 function loesung(it){
   if(it.l) return it.l;
   if(it.typ==="wahl") return it.f?it.f.replace("___",it.a):ohneTags(it.a);
   if(it.typ==="ordnen") return [...it.o].sort((a,b)=>a.w-b.w).map(o=>o.t).join(" < ");
-  if(it.typ==="ziehen") return it.zeilen.map(z=>`${ohneTags(z.vor)} ${z.a}${z.nach?(/^[.,!?]/.test(z.nach)?"":" ")+z.nach:""}`).join(" · ");
+  if(it.typ==="ziehen") return it.zeilen.map(z=>{ let k=0; return ohneTags(z.s.replace(/\{\d\}/g,()=>z.as[k++])); }).join(" · ");
   return it.f.replace(/\{(\d)\}/g,(_,k)=>it.art==="text"?it.a[k]:fz(it.a[k]));
 }
 
@@ -742,9 +783,11 @@ function baueKarte(it){
   let x=(it.bild||"")+(it.frage?`<p class="mfrage">${it.frage}</p>`:"");
   if(it.typ==="wahl") x+=(it.f?`<p class="satzgross">${h(it.f).replace("___",'<span class="platz mluecke"></span>')}</p>`:"")+`<div class="mwahl">${it.o.map((o,i)=>`<button type="button" data-i="${i}">${h(o)}</button>`).join("")}</div>`;
   else if(it.typ==="ordnen"){ A.ord=mischen(it.o); A.k=0; x+=`<p class="mreihe" aria-live="polite"></p><div class="mwahl">${A.ord.map((o,i)=>`<button type="button" data-i="${i}">${h(o.t)}</button>`).join("")}</div>`; }
-  else if(it.typ==="ziehen"){ A.gaps=it.zeilen.map(()=>({f:0,ok:false})); const P=i=>`<span class="platz" data-i="${i}" tabindex="0" role="button" aria-label="Lücke ${i+1}"></span>`, N=z=>z.nach?(/^[.,!?]/.test(z.nach)?"":" ")+h(z.nach):"";
-    x+=it.satz?`<div class="msaetze">${it.zeilen.map((z,i)=>`<p class="msatz">${z.vorHtml||h(z.vor)} ${P(i)}${N(z)}</p>`).join("")}</div>`
-      :`<div class="mtab">${it.zeilen.map((z,i)=>`<div class="mzeile"><span class="mvor">${z.vorHtml||h(z.vor)}</span>${P(i)}<span class="mnach">${h(z.nach||"")}</span></div>`).join("")}</div>`; }
+  else if(it.typ==="ziehen"){ A.gaps=it.zeilen.flatMap((z,r)=>z.as.map(a=>({a,r,f:0,ok:false}))); let gi=0;
+    const P=()=>{ const i=gi++; return `<span class="platz" data-i="${i}" tabindex="0" role="button" aria-label="Lücke ${i+1}"></span>`; };
+    const einfach=!it.satz&&it.zeilen.every(z=>z.vor!==undefined&&z.as.length===1);
+    x+=einfach?`<div class="mtab">${it.zeilen.map(z=>`<div class="mzeile"><span class="mvor">${z.vorHtml||h(z.vor)}</span>${P()}<span class="mnach">${h(z.nach||"")}</span></div>`).join("")}</div>`
+      :`<div class="msaetze${it.schema?" mschema":""}">${it.zeilen.map(z=>`<p class="msatz${z.as.length?"":" mfest"}">${z.s.replace(/\{\d\}/g,()=>P())}</p>`).join("")}</div>`; }
   else x+=`<form><p class="satzgross">${h(it.f).replace(/\{(\d)\}/g,(_,k)=>feld(it,+k))}</p><button class="pruefen" type="submit">Prüfen</button></form>`;
   x+=`<p class="mweg" hidden></p><div class="knoepfe mweiter" hidden><button type="button" class="haupt">Weiter</button></div>`;
   el.innerHTML=x; $("karte").replaceChildren(el); A.el=el;
@@ -778,14 +821,14 @@ function platzBei(x,y){ const el=document.elementFromPoint(x,y); if(!el||!A?.el?
 function waehleK(t){ if(A.sel){ A.sel.el.classList.remove("gewaehlt"); A.sel.el.setAttribute("aria-pressed","false"); } A.sel=t; if(t){ t.el.classList.add("gewaehlt"); t.el.setAttribute("aria-pressed","true"); sag(`${t.text}: Tipp jetzt auf die passende Lücke.`,""); } }
 function lege(t,p){
   if(A.fertig||p.classList.contains("voll")) return; waehleK(null);
-  const i=+p.dataset.i, z=A.it.zeilen[i], g=A.gaps[i];
-  if(t.text===z.a){ p.textContent=t.text; p.classList.add("voll"); p.classList.remove("nein"); g.ok=true; if(!A.it.bleibt) t.el.classList.add("weg");
+  const g=A.gaps[+p.dataset.i], z=A.it.zeilen[g.r];
+  if(t.text===g.a){ p.textContent=t.text; p.classList.add("voll"); p.classList.remove("nein"); g.ok=true; if(!A.it.bleibt) t.el.classList.add("weg");
     if(A.gaps.every(x=>x.ok)) return geloest(); piep([[523,0,.12]]); sag("Passt. Weiter mit der nächsten Lücke.","gut"); return; }
   g.f++; p.classList.add("nein"); setTimeout(()=>p.classList.remove("nein"),1100);
   if(falsch()) return;
   if(A.f===2&&A.it.hilfe) zeigeWeg("💡 "+h(A.it.hilfe));
   sag("Noch nicht. "+(z.t||A.it.t||""),"schlecht");
-  if(g.f>=2) huepfe(A.tiles.find(x=>x.text===z.a&&!x.el.classList.contains("weg"))?.el);
+  if(g.f>=2) huepfe(A.tiles.find(x=>x.text===g.a&&!x.el.classList.contains("weg"))?.el);
 }
 function zeigeWeg(t){ const p=A.el.querySelector(".mweg"); p.innerHTML=t; p.hidden=!t; }
 function wackel(){ A.el.classList.remove("falsch"); void A.el.offsetWidth; A.el.classList.add("falsch"); setTimeout(()=>A.el?.classList.remove("falsch"),500); piep([[220,0,.2],[175,.14,.25]]); }

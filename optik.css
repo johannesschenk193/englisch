@@ -185,3 +185,6 @@ dialog h3{margin:12px 0 4px;font-size:17px}
 .mathe .platz{min-width:76px;min-height:42px;font-size:21px;padding:0 8px;cursor:pointer;border-radius:8px}
 .mathe .platz.voll{border-style:solid;cursor:default}
 .mathe svg.mstrich{height:34px;width:auto;vertical-align:middle}
+.mathe .mschema{justify-items:start;text-align:left;width:100%}.mathe .mschema .msatz{text-wrap:wrap;line-height:2.1}.mathe .msatz.mfest{line-height:1.4;font-weight:600}
+.mtreppe{display:flex;align-items:flex-end;justify-content:center;flex-wrap:wrap;gap:0 2px;font-weight:700;font-size:20px;margin:4px 0 12px}
+.mtreppe i{font-style:normal;font-size:14px;color:#1a6fb0;border-top:2px solid #1a6fb0;border-radius:50% 50% 0 0;padding:2px 8px 0;margin-bottom:16px}
