@@ -305,6 +305,7 @@ to|zu; nach|Richtung, zum Beispiel nach London
 `],
 ["pb","Pick-up B: This is fun!","S. 196 bis 198",`
 @196
+#30
 day|Tag
 skates|Inlineskates; Rollschuhe; Schlittschuhe
 can't|kann nicht; können nicht; darf nicht; dürfen nicht
@@ -318,6 +319,7 @@ I'm sorry!|Tut mir leid!
 I'm fine.|Mir geht's gut.
 cute|niedlich; süß|I like Lou. She's ___!
 lucky charm|Glücksbringer; Talisman
+#32
 text message|SMS; Kurznachricht||text
 shirt|Hemd; Shirt
 wrong|falsch
@@ -325,6 +327,7 @@ to do|machen; tun|It's a nice day. What can we ___? – We can go cycling!
 to swim|schwimmen|Verb, mit to
 to read|lesen|This text is in English. Can you ___ it?
 to skate|Inlineskates fahren; Schlittschuh laufen|||to skate → skates → skating
+#33
 to cross|überqueren; kreuzen
 traffic light|Ampel
 loud|laut
@@ -344,12 +347,15 @@ to take photos|fotografieren; Fotos machen
 to watch TV|fernsehen|Let's ___.
 to watch|beobachten; (sich) ansehen; zuschauen|beginnt mit w
 card|Karte; Spielkarte
+#34
 reading|Lesen|Nomen: das Lesen||reading → to read
 plan|Plan; Entwurf
+#35
 to be lucky|Glück haben
 to find|finden; herausfinden
 `],
 ["pbk","Pick-up B: Clothes","S. 197",`
+#32
 belt|Gürtel
 boots|Stiefel
 cardigan|Strickjacke
@@ -364,6 +370,7 @@ trousers|Hose
 T-shirt|T-Shirt
 `],
 ["u2c","Unit 2: Check-in","S. 199",`
+#36
 planner|Handbuch; Kalender
 rule|Regel
 lunch|Mittagessen
@@ -388,6 +395,7 @@ classroom|Klassenzimmer|||classroom → class
 `],
 ["u2s1","Unit 2: Station 1, Have you got questions for Jay?","S. 199 und 200",`
 @199
+#38
 to have got|besitzen; haben
 question|Frage
 an|ein/-e
@@ -408,9 +416,12 @@ project|Projekt
 well|tja; nun|Are you happy with a school uniform? – ___, not always!
 something|etwas
 Wait and see!|Warte ab!
+#39
 to look at|anschauen; ansehen|___ that picture in your book.
+#40
 silly|dumm; doof; albern
 teacher|Lehrer/-in
+#41
 office|Büro
 job|Arbeit; Aufgabe; Job|What's your ___? – I'm a teacher.
 grandparents|Großeltern
@@ -424,6 +435,7 @@ to help|helfen
 pocket money|Taschengeld
 `],
 ["u2s2","Unit 2: Station 2, Don't stare! It's rude.","S. 201",`
+#42
 to stare|starren; anstarren
 rude|unhöflich; unverschämt
 funny|lustig; witzig
@@ -433,12 +445,14 @@ lunch break|Mittagspause
 them|sie (Pl.); ihnen|Where are your friends? – I can see ___, they're in the school shop.
 more|mehr; weitere|beginnt mit m
 to forget|vergessen
+#43
 knife|Messer|||Mehrzahl: knives
 fork|Gabel
 spoon|Löffel
 to run|rennen; laufen
 `],
 ["u2x","Unit 2: Story, Let's play a trick","S. 204",`
+#48
 later|später|||later → late
 I hear …|Ich habe gehört, dass …
 to hear|hören
@@ -466,6 +480,7 @@ to make trouble|Ärger machen; in Schwierigkeiten bringen
 to make|machen; tun; bilden|Can we ___ pizza for lunch?
 `],
 ["u2adj","Unit 2: Adjectives","S. 205",`
+#49
 cool|cool; super|beginnt mit c
 crazy|verrückt
 fair|gerecht; fair
@@ -475,6 +490,7 @@ polite|höflich
 popular|beliebt; populär
 `],
 ["u2ac","Unit 2: Action UK! Making friends","S. 205",`
+#50
 to make friends|Freundschaft schließen
 club|Klub; Verein; AG
 to be good at|gut sein in
@@ -484,6 +500,7 @@ mine|mein/-er/-e/-es
 different|anders; unterschiedlich; verschieden|Dogs and cats are ___.
 `],
 ["u2co","Unit 2: Check-out","S. 205",`
+#51
 to write|schreiben
 sweet|süß|beginnt mit s||sweet → sweets
 to put|(hinein)setzen; (hinein)stellen; (hinein)legen
@@ -491,6 +508,7 @@ box|Box; Kasten; Schachtel; Kiste
 `],
 ["u3c","Unit 3: Check-in, I like my busy days","S. 206 und 207",`
 @206
+#54
 a.m.|vormittags (Uhrzeit)|||9 a.m. = 9 Uhr
 p.m.|nachmittags (Uhrzeit)|||9 p.m. = 21 Uhr
 still|noch; immer noch
@@ -511,9 +529,11 @@ to practise|üben; trainieren
 saxophone|Saxofon|||Achtung Aussprache und Schreibung.
 sometimes|manchmal
 story|Story; Geschichte; Erzählung|||Mehrzahl: stories
+#55
 What's the time?|Wie spät ist es?; Wie viel Uhr ist es?
 `],
 ["u3tag","Unit 3: Days of the week","S. 207",`
+#55
 Monday|Montag
 Tuesday|Dienstag
 Wednesday|Mittwoch
@@ -523,6 +543,7 @@ Saturday|Samstag; Sonnabend
 Sunday|Sonntag
 `],
 ["u3zeit","Unit 3: The time","S. 207",`
+#54
 It's ten o'clock.|Es ist zehn Uhr.
 It's five past ten.|Es ist fünf nach zehn.
 It's ten oh six.|Es ist sechs nach zehn.
@@ -533,6 +554,7 @@ It's nine minutes to eleven.|Es ist neun (Minuten) vor elf.
 `],
 ["u3s1","Unit 3: Station 1, I'm always busy","S. 208 und 209",`
 @208
+#56
 subject|Betreff (in E-Mails etc.); Thema
 never|nie; niemals
 every|jede/-r/-s
@@ -558,8 +580,10 @@ bye|tschüss|||bye – hello
 abbreviation|Abkürzung
 information|Information; Informationen
 emoji|Emoji
+#57
 weekday|Wochentag
 swimming|Schwimmen|Nomen: das Schwimmen
+#58
 singing|Gesang; Singen|Nomen: das Singen||singing → to sing
 dancing|Tanz|||dancing → to dance
 to organise|organisieren
@@ -575,6 +599,7 @@ last|letzte/-r/-s|||last – first
 `],
 ["u3s2","Unit 3: Station 2, She gets on my nerves","S. 209 und 210",`
 @209
+#59
 She gets on my nerves.|Sie geht mir auf die Nerven.
 granny|Oma; Omi|beginnt mit g||Granny wird nur als Name groß geschrieben: Hi, Granny! ABER: Where's Dave's granny?
 to look after|aufpassen auf; hüten; sich kümmern um
@@ -595,8 +620,10 @@ to take|nehmen; mitnehmen; wegnehmen; bringen; mitbringen
 surgery|Arztpraxis; Praxis; Praxisräume
 why|warum
 surprise|Überraschung
+#60
 to sleep|schlafen
 cooking|Kochen
+#61
 routine|Routine|||Achtung Aussprache.
 speaker|Redner/-in; Sprecher/-in|||speaker → to speak
 to be about|sich handeln um; handeln von
@@ -604,11 +631,13 @@ clever|schlau; klug
 owner|Besitzer/-in
 `],
 ["u3sk","Unit 3: Skills, How to do a role play","S. 210",`
+#63
 clear|klar; deutlich
 No way!|Auf keinen Fall!; keineswegs
 `],
 ["u3st","Unit 3: Story, Luke is my pet","S. 210 und 211",`
 @210
+#64
 to wash|waschen; sich waschen
 face|Gesicht
 goodbye|auf Wiedersehen|||goodbye – hello
@@ -633,6 +662,7 @@ to throw|werfen (nach)
 to fall asleep|einschlafen
 `],
 ["u3ac","Unit 3: Action UK! Who's the fastest?","S. 211",`
+#66
 heading|Überschrift; Titel
 surprising|überraschend|||surprising → surprise
 weather|Wetter|||Achtung Aussprache.
@@ -641,10 +671,12 @@ map|Stadtplan; Landkarte
 studying|Lernen; Studieren|Nomen: das Lernen
 `],
 ["u3co","Unit 3: Check-out","S. 211",`
+#67
 first|zuerst; als Erstes
 `],
 ["ac1","Across cultures 1: How to be polite in English","S. 212 und 213",`
 @212
+#68
 how to …|wie man …
 to visit|besichtigen; besuchen|||to visit → a visit
 country|Land|||Mehrzahl: countries
@@ -663,6 +695,7 @@ to need|brauchen; benötigen
 Excuse me …|Entschuldigung!; Entschuldigen Sie!
 to have (a sweet)|(ein Bonbon) nehmen; (ein Bonbon) essen
 You're welcome.|Bitte schön.; Nichts zu danken.; Gern geschehen.|als Antwort auf Danke||You're welcome heißt nicht Willkommen.
+#69
 lemonade|Limonade
 bus station|Busbahnhof
 timetable|Stundenplan; Fahrplan
@@ -671,6 +704,7 @@ person|Person; Mensch|||Mehrzahl: people (one person – two people)
 train|Zug
 `],
 ["ac1pre","Across cultures 1: Prepositions of place","S. 213",`
+#69
 at school|in der Schule
 at the station|am Bahnhof
 in Britain|in Großbritannien
@@ -683,6 +717,7 @@ in the car|im Auto|||Im Auto heißt in the car, nicht on.
 `],
 ["ac1b","Across cultures 1: Auf der Rolltreppe","S. 213 und 214",`
 @213
+#69
 to hold|halten; festhalten
 open|offen; geöffnet; aufgeschlagen|||open → to open
 woman|Frau|||Achtung Aussprache. Mehrzahl: women
@@ -823,3 +858,46 @@ window.BUCHSEITEN=[[8,9,"a1"],[10,10,"a2"],[11,12,"a3"],[13,13,"a4"],[14,15,"a5"
   [36,37,"u2c"],[38,41,"u2s1"],[42,47,"u2s2"],[48,49,"u2adj"],[50,50,"u2ac"],[51,53,"u2co"],
   [54,55,"u3zeit"],[56,58,"u3s1"],[59,62,"u3s2"],[63,63,"u3sk"],[64,65,"u3st"],[66,66,"u3ac"],[67,67,"u3co"],
   [68,69,"ac1b"],[70,71,"u4c"],[72,73,"u4s1"],[74,77,"u4tiere"],[78,79,"u4s3"],[80,81,"u4weg"],[82,83,"u4task"]];
+// Setup je Schulbuchseite (E-230): Abschnitt der Vokabelliste, Ueberschrift, Uebungen im Buch, was zu ueben ist, Trainer-Ebenen.
+// Grundlage: Fotos S. 26-69 (paperless:3025, 3026), Grammatikteil (paperless:3032), Uebungsnummern und G-Verweise je Seite
+// (40_Familie/lernspiele/green-line-1/seiten.md). Die Woerter je Seite stehen als "#Seite" in den Abschnitten oben.
+// Seiten ohne Eintrag (vor 26, ab 70) gelten grob ueber BUCHSEITEN.
+window.BUCHSEITE={
+26:["st","Unit 1 Story: Where's Mr Fluff?!","",[],""],27:["st","Unit 1 Story","",[],""],
+28:["ac","Unit 1 Action UK!: Around the house","",[],""],29:["ac","Unit 1 Check-out","Nr. 1–3",[],""],
+30:["pb","Pick-up B: This is fun! (Fotostory)","",[],"Wörter aus der Fotostory"],31:["pb","Pick-up B: Fotostory","",[],"Wörter aus der Fotostory"],
+32:["pbk","Pick-up B: Hobbies, clothes, can and can't","Nr. 1–3",["c_wahl","c_form"],"Hobbys, Kleidung; can und can't (G9)"],
+33:["pbk","Pick-up B: can and can't","Nr. 4–5",["c_de"],"Sätze mit can und can't (G9)"],
+34:["pbk","Pick-up B: Interviews","Nr. 6–8",["c_kurz","c_frage","c_fehler"],"Fragen und Kurzantworten mit can (G9)"],
+35:["pbk","Pick-up B: Being polite, text messages","Nr. 9–10",[],"höflich bitten, Kurznachrichten"],
+36:["u2c","Unit 2: I'm new at TTS","Nr. 1–2",[],"Schule und Klassenzimmer"],37:["u2c","Unit 2: Check-in","Nr. 3",[],"Schulsachen, Schuluniform"],
+38:["u2s1","Station 1: Have you got questions for Jay?","Nr. 1–2",["r_the"],"the: [ðə] oder [ði] (Find the rule)"],
+39:["u2s1","Station 1","Nr. 3–5",["r_aan","r_de","h_hh"],"a oder an (Find the rule); have got, has got (G10)"],
+40:["u2s1","Station 1","Nr. 6–8",["h_nicht","h_kurz"],"haven't got, hasn't got (G11); Kurzantworten (G12)"],
+41:["u2s1","Station 1","Nr. 9–11",["h_frage","h_de"],"Fragen mit have got (G12)"],
+42:["u2s2","Station 2: Don't stare! It's rude. (Fotostory)","",[],"Wörter aus der Fotostory"],
+43:["u2s2","Station 2: School rules","Nr. 12–15",["i_form","i_lage","i_de","i_fehler"],"Aufforderungen und Verbote (G13)"],
+44:["u2s2","Station 2","Nr. 16–18",["d_wahl","d_mehr","d_de"],"this, that, these, those (G14)"],
+45:["u2s2","Skills: Practising correct spelling","Nr. 1–5",[],"Rechtschreibung üben"],
+46:["u2s2","Unit task: A brochure about your school","Step 1",[],""],47:["u2s2","Unit task","Step 2–5",[],""],
+48:["u2x","Story: Let's play a trick","Nr. 1",[],"Wörter aus der Geschichte"],
+49:["u2adj","Story","Nr. 2–4",[],"Personen beschreiben"],
+50:["u2ac","Action UK!: Making friends","Nr. 1–3",[],""],
+51:["u2co","Unit 2 Check-out","Nr. 1–3",["h_kurz","d_mehr"],"Wiederholung: have got, this und these"],
+52:["u2co","Revision A","Nr. 1–2",[],""],
+53:["u2co","Revision A","Nr. 3–6",["t_kurz","g_of"],"Wiederholung: Is there ...?, 's und of"],
+54:["u3c","Unit 3: I like my busy days","Nr. 1–2",[],"Uhrzeit"],
+55:["u3zeit","Unit 3: Check-in","Nr. 3",["a_zeit"],"Uhrzeit, Wochentage: at, on, in"],
+56:["u3s1","Station 1: I'm always busy","Nr. 1–3",[],"Tagesablauf, Wortpaare"],
+57:["u3s1","Station 1","Nr. 4–7",["a_wort","a_platz"],"always, usually, often, sometimes, never (G15)"],
+58:["u3s1","Station 1","Nr. 8–10",["a_de","a_ort"],"Satzbau: Ort vor Zeit (G16)"],
+59:["u3s2","Station 2: She gets on my nerves","Nr. 11–12",[],"Wörter aus der Geschichte"],
+60:["u3s2","Station 2","Nr. 13–15",["s_mit","s_ende"],"he, she, it: das s muss mit (G17)"],
+61:["u3s2","Station 2","Nr. 16–18",["s_de"],"Sätze im simple present (G17)"],
+62:["u3s2","Station 2","Nr. 19–21",["s_fehler"],"Fehler finden im simple present"],
+63:["u3sk","Skills: Practising role plays","Nr. 1–3",[],""],
+64:["u3st","Story: Luke is my pet","Nr. 1",[],"Wörter aus der Geschichte"],65:["u3st","Story","Nr. 2–4",[],""],
+66:["u3ac","Action UK!: Who's the fastest?","Nr. 1–3",[],""],
+67:["u3co","Unit 3 Check-out","Nr. 1–3",["s_fehler","a_ort"],"Wiederholung: simple present, Satzbau"],
+68:["ac1","Across cultures 1: How to be polite in English","Nr. 1–2",[],"höflich fragen und antworten"],
+69:["ac1b","Across cultures 1","Nr. 3–5",[],"Präpositionen, höflich sein"]};

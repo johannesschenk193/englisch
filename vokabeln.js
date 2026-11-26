@@ -18,13 +18,14 @@ for(const [id,name,seite,text] of window.VOKABELN){
   const a={id,name,seite,woerter:[]}; ABSCHNITT.push(a);
   const unit=name.split(":")[0].trim(), seiten=(seite.match(/\d+/g)||[]).map(Number);
   const ga=gruppe("abschnitt",id,name,seite), gu=gruppe("unit","unit:"+unit,unit,"");
-  let s=seiten.length>1&&!/^@/m.test(text)?seiten.join("–"):String(seiten[0]||"?");
+  let s=seiten.length>1&&!/^@/m.test(text)?seiten.join("–"):String(seiten[0]||"?"), bs=0;
   for(const z of text.trim().split("\n")){
     if(/^@\d+/.test(z)){ s=z.slice(1).trim(); continue; }
+    if(/^#\d+/.test(z)){ bs=parseInt(z.slice(1)); continue; }   // ab hier: Seite im Schulbuch (aus der Randnummer der Vokabelliste)
     const [en,de,hint="",alt="",merk=""]=z.split("|"), k=glatt(en);
     const schon=Object.values(W).find(w=>w.k===k&&w.de===de); if(schon) throw Error("doppelt: "+z);
     const verb=/^to ./.test(en), teile=en.split(" ").filter(t=>/[a-z]/i.test(t)), eins=verb?teile.length===2:teile.length===1;
-    const w={id:id+":"+k+(hint?"#"+hint.slice(0,8):""),en,de,hint,merk,k,sec:a,verb,teile,eins,
+    const w={id:id+":"+k+(hint?"#"+hint.slice(0,8):""),en,de,hint,merk,k,sec:a,verb,teile,eins,bs,
       formen:[verb?k.slice(3):k,...alt.split(",").map(glatt).filter(Boolean)].filter((x,i,l)=>l.indexOf(x)===i),
       gross:/^(I|I'm|English|Mr|Mrs|TV|OK)\b/.test(en)&&eins,
       ton:en.replace(/\s*…\s*/g," ").trim()};
@@ -50,30 +51,53 @@ let heute=()=>tagVon(new Date());
 const testTag=()=>S.test?Math.round(Date.parse(S.test+"T00:00:00Z")/864e5):0;
 const L=w=>S.w[w.id]||{f:0,d:0,s:0,r:0,h:0,x:0};   // f Fach, d faellig am, s Schwierigkeit, r richtig, h fast, x falsch
 // ---------- Stand im Buch ----------
-// stand.buch = {pos: Abschnitt-Id, i: Reihenfolge, frage: Tag der letzten Startfrage}. Steht im Grammatik-Stand (spiel.js),
-// damit mitKind() im Elternbereich ihn mittauscht. Ohne Angabe: BUCH_START aus vokabelliste.js.
+// stand.buch = {seite: Schulbuchseite, pos: Abschnitt-Id, i: Reihenfolge, frage: Tag der letzten Startfrage}. Steht im
+// Grammatik-Stand (spiel.js), damit mitKind() im Elternbereich ihn mittauscht. Ohne Angabe: BUCH_START aus vokabelliste.js.
+// Seitengenau (E-230): Woerter mit Seitenmarke (#39) gehen genau mit ihrer Schulbuchseite auf, die anderen mit dem Abschnitt.
 const REIHE=ABSCHNITT.map(a=>a.id), idx=id=>REIHE.indexOf(id);
+const BS=window.BUCHSEITE||{}, GROB=window.BUCHSEITEN||[];
+const seiteAbschnitt=n=>BS[n]?.[0]||(GROB.find(([a,b])=>n>=a&&n<=b)||[])[2]||null;
+const seiteVon=id=>{ let m=0; for(const k in BS) if(BS[k][0]===id) m=Math.max(m,+k); for(const [a,b,i] of GROB) if(i===id) m=Math.max(m,b); return m||null; };
 const buchPos=()=>{ const p=(typeof stand!=="undefined"?stand:null)?.buch?.pos; return idx(p)>=0?p:(idx(window.BUCH_START)>=0?window.BUCH_START:REIHE[REIHE.length-1]); };
+const buchSeite=()=>{ const s=(typeof stand!=="undefined"?stand:null)?.buch?.seite; return s>0?s:(seiteVon(buchPos())||0); };
 const erreicht=id=>!id||idx(id)<0||idx(id)<=idx(buchPos());
+const wErreicht=w=>w.bs?w.bs<=buchSeite():erreicht(w.sec.id);
 const abschnitt=id=>ABSCHNITT[idx(id)];
-// neu erreichte Abschnitte: kommen in jede Auswahl und stehen beim Lernen vorn
+// Seite setzen: neue Woerter genau dieser Seiten zuerst lernen, Grammatik-Ebenen der Seiten als To-do (stand.todo)
+function seiteSetzen(s){
+  if(!(s>0)) return {neu:[],seiten:[],woerter:[],ebenen:[]};
+  const alt=buchSeite(), altPos=buchPos(), pos=seiteAbschnitt(s)||altPos;
+  stand.buch={...(stand.buch||{}),seite:s,pos,i:idx(pos),frage:heute(),seit:Date.now()};
+  if(s<=alt){ merke(); return {neu:[],seiten:[],woerter:[],ebenen:[]}; }
+  const seiten=[]; for(let p=alt+1;p<=s;p++) seiten.push(p);
+  const von=idx(altPos), bis=idx(pos);
+  const neuW=ALLE.filter(w=>w.bs?w.bs>alt&&w.bs<=s:idx(w.sec.id)>von&&idx(w.sec.id)<=bis), ids=new Set(neuW.map(w=>w.id));
+  S.fokusW=[...new Set([...(S.fokusW||[]).filter(id=>W[id]&&!L(W[id]).f),...ids])]; delete S.fokus;
+  if(S.wahl) for(const m of Object.keys(S.wahl)){ const dazu=GRUPPEN[m].filter(g=>g.woerter.some(w=>ids.has(w.id))).map(g=>g.key); S.wahl[m]=[...new Set([...S.wahl[m],...dazu])]; }
+  const eb=[...new Set(seiten.flatMap(p=>BS[p]?.[3]||[]))], offen=Object.fromEntries(Object.entries(stand.todo?.e||{}).filter(([,v])=>!v));
+  stand.todo={seit:Date.now(),von:alt+1,bis:s,e:{...offen,...Object.fromEntries(eb.map(id=>[id,0]))}};
+  merke(); halte(); return {neu:REIHE.slice(von+1,bis+1),seiten,woerter:neuW,ebenen:eb};
+}
+// Abschnitt statt Seite (Vokabellisten-Seite, Elternbereich): auf die letzte Schulbuchseite des Abschnitts umrechnen
 function buchSetzen(id){
-  const alt=buchPos(), von=idx(alt), bis=idx(id); if(bis<0) return {neu:[]};
-  stand.buch={...(stand.buch||{}),pos:id,i:bis,frage:heute(),seit:Date.now()};
-  if(bis<=von){ merke(); return {neu:[]}; }
-  const neu=REIHE.slice(von+1,bis+1); S.fokus=neu;
-  if(S.wahl) for(const m of Object.keys(S.wahl)){ const dazu=GRUPPEN[m].filter(g=>g.woerter.some(w=>neu.includes(w.sec.id))).map(g=>g.key); S.wahl[m]=[...new Set([...S.wahl[m],...dazu])]; }
-  merke(); halte(); return {neu,woerter:ALLE.filter(w=>neu.includes(w.sec.id)).length};
+  const s=seiteVon(id); if(s) return seiteSetzen(s);
+  const alt=buchPos(), von=idx(alt), bis=idx(id); if(bis<0) return {neu:[],seiten:[],woerter:[],ebenen:[]};
+  stand.buch={...(stand.buch||{}),pos:id,i:bis,frage:heute(),seit:Date.now()}; delete stand.buch.seite;
+  if(bis<=von){ merke(); return {neu:[],seiten:[],woerter:[],ebenen:[]}; }
+  const neu=REIHE.slice(von+1,bis+1), neuW=ALLE.filter(w=>neu.includes(w.sec.id));
+  S.fokusW=[...new Set([...(S.fokusW||[]),...neuW.map(w=>w.id)])];
+  merke(); halte(); return {neu,seiten:[],woerter:neuW,ebenen:[]};
 }
 // Auswahl: v.nach = seite | abschnitt | unit, v.wahl[nach] = gewaehlte Gruppen. Ohne Auswahl gilt die alte Liste "aus".
 // Was im Buch noch nicht dran war, kommt nie vor, auch wenn es angehakt ist.
 const gewaehlt=(v,m)=>v.wahl?.[m]||(m==="abschnitt"?ABSCHNITT.filter(a=>!(v.aus||[]).includes(a.id)).map(a=>a.id):GRUPPEN[m].map(g=>g.key));
-const dranVon=v=>{ const m=v.nach||"abschnitt", sel=new Set(gewaehlt(v,m)); return ALLE.filter(w=>sel.has(w.g[m])&&erreicht(w.sec.id)); };
+const dranVon=v=>{ const m=v.nach||"abschnitt", sel=new Set(gewaehlt(v,m)); return ALLE.filter(w=>sel.has(w.g[m])&&wErreicht(w)); };
 const dran=()=>dranVon(S);
-const fokus=()=>(S.fokus||[]).filter(erreicht);
+// neu im Unterricht: Woerter der zuletzt erreichten Seiten (fokusW); fokus = alter Stand nach Abschnitten
+const imFokus=w=>(S.fokusW||[]).includes(w.id)||(S.fokus||[]).includes(w.sec.id)&&erreicht(w.sec.id);
 const faellige=()=>dran().filter(w=>L(w).f>0&&L(w).d<=heute()).sort((a,b)=>L(a).d-L(b).d||L(a).f-L(b).f);
-const neue=()=>{ const f=new Set(fokus()); return dran().filter(w=>!L(w).f).sort((a,b)=>(f.has(b.sec.id)-f.has(a.sec.id))); };
-const fokusNeu=()=>{ const f=new Set(fokus()); return neue().filter(w=>f.has(w.sec.id)); };
+const neue=()=>dran().filter(w=>!L(w).f).sort((a,b)=>imFokus(b)-imFokus(a));
+const fokusNeu=()=>neue().filter(imFokus);
 const schwere=()=>ALLE.filter(w=>L(w).s>0).sort((a,b)=>L(b).s-L(a).s);
 const neuHeute=()=>S.neu.tag===heute()?S.neu.n:0;
 const ziel=()=>S.ziel||ZIEL;
@@ -353,8 +377,8 @@ const auswahlText=v=>{ const m=v.nach||"abschnitt", sel=gewaehlt(v,m); return se
 function vokMenue(){
   aus++; ort="vok"; const o=offen(), bis=testTag()-heute(), k=kette();
   ruhe("Vokabeln",[bis>0?`Noch ${bis} ${bis===1?"Tag":"Tage"} bis zum Test.`:bis===0&&S.test?"Heute ist der Test.":"", k>1?`${k} Tage hintereinander geübt.`:"", `Jeden Tag mindestens ${ziel()} Wörter.`].filter(Boolean).join(" "));
-  const fn=fokusNeu(), fa=fokus().map(abschnitt).filter(Boolean), g=grammatik();
-  karten([...(fn.length?[{t:"Neu im Unterricht",u:fa.map(a=>sicher(a.name)).join(", "),st:`${fn.length} neue Wörter`,f:()=>starteUebung(fn.slice(0,10).map(w=>({w,s:"neu"})),"Vokabeln: neu im Unterricht")}]:[]),
+  const fn=fokusNeu(), fs=[...new Set(fn.map(w=>w.bs?`S. ${w.bs}`:w.sec.name))], g=grammatik();
+  karten([...(fn.length?[{t:"Neu im Unterricht",u:sicher(fs.slice(0,4).join(", ")+(fs.length>4?" …":"")),st:`${fn.length} neue Wörter`,f:()=>starteUebung(fn.slice(0,10).map(w=>({w,s:"neu"})),"Vokabeln: neu im Unterricht")}]:[]),
     {t:"Heute üben",u:(o.alle?[o.f&&`${o.f} wiederholen`,o.n&&`${o.n} neu`,o.x&&`${o.x} auffrischen`].filter(Boolean).join(", "):"Wörter für heute fertig")+(g.offen?`, dazu Grammatik: ${sicher(g.name)}`:g.fertig?", Grammatik fertig":""),
       st:o.alle?`${Math.min(geuebt(),ziel())} von ${ziel()}`:g.offen?"Grammatik offen":"Fertig ✓",zu:!o.alle&&!g.offen,f:heuteUeben},
     {t:"Was lerne ich?",u:"seitenweise, abschnittsweise oder unitweise",st:auswahlText(S),f:einstellen},
@@ -371,7 +395,7 @@ function wahlEl(v,speichern){
     d.innerHTML=`<div class="modi" role="group" aria-label="Lernen nach">${MODI.map(([k,t])=>`<button type="button" data-m="${k}" aria-pressed="${k===m}">${t}</button>`).join("")}</div>
       <p><small>${n} ${n===1?"Wort":"Wörter"} ausgewählt. Gelernte Wörter bleiben gespeichert, auch wenn sie gerade nicht dran sind.</small></p>
       <div class="reihe2"><button type="button" class="neben" data-alle="1">Alle</button><button type="button" class="neben" data-alle="0">Keine</button></div>`
-      +GRUPPEN[m].map(g=>{ const spaeter=!g.woerter.some(w=>erreicht(w.sec.id));
+      +GRUPPEN[m].map(g=>{ const spaeter=!g.woerter.some(wErreicht);
         return `<label${spaeter?' class="spaeter"':""}><input type="checkbox" value="${sicher(g.key)}" ${sel.has(g.key)?"checked":""}> ${sicher(g.name)} <small>${spaeter?"kommt im Buch noch":`${g.sub?sicher(g.sub)+", ":""}${g.woerter.length} Wörter, ${g.woerter.filter(w=>v.w?.[w.id]?.f).length} gelernt`}</small></label>`; }).join(""); };
   const setze=(m,keys)=>{ v.wahl={...(v.wahl||{}),[m]:keys}; speichern(v); zeichne(); };
   d.addEventListener("click",e=>{ const b=e.target.closest("button"); if(!b) return; const m=v.nach||"abschnitt";
@@ -401,7 +425,9 @@ function wortliste(){
 window.vokMenue=vokMenue;
 window.vokKarte=()=>{ const o=offen(); return {i:"📚",p:[ALLE.filter(w=>L(w).f).length,ALLE.length],t:"Vokabeln",u:"Karteikasten und Vokabeltest",st:o.alle?`heute ${Math.min(geuebt(),ziel())} von ${ziel()}`:"heute fertig ✓",f:vokMenue}; };
 window.vokWahl=wahlEl;
-window.BUCH={ABSCHNITT,REIHE,idx,pos:buchPos,erreicht,abschnitt,setzen:buchSetzen,naechste:()=>ABSCHNITT[idx(buchPos())+1],
+// fuer "Heute dran" (spiel.js): neue Woerter der zuletzt erreichten Seiten
+window.vokNeu={zahl:()=>fokusNeu().length,woerter:()=>fokusNeu(),start:()=>{ const fn=fokusNeu(); starteUebung(fn.slice(0,10).map(w=>({w,s:"neu"})),"Vokabeln: neu im Unterricht"); }};
+window.BUCH={ABSCHNITT,REIHE,idx,pos:buchPos,seite:buchSeite,erreicht,abschnitt,setzen:buchSetzen,seiteSetzen,seiteVon,seiteAbschnitt,SEITE:BS,naechste:()=>ABSCHNITT[idx(buchPos())+1],
   // Seite der Vokabelliste (ab 180) -> letzter Abschnitt, der auf dieser Seite steht
   ausListenseite:n=>{ let t=null; for(const a of ABSCHNITT){ const s=(a.seite.match(/\d+/g)||[]).map(Number); if(s.length&&s[0]<=n) t=a; } return t; },
   // Seite im Schulbuch -> Abschnitt (aus dem Inhaltsverzeichnis, vokabelliste.js)

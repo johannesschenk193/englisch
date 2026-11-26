@@ -228,6 +228,10 @@ const BEREICHE=[
     ["She ___ swim.","can","cans"],["He ___ play the guitar.","can","cans"],["I can ___ fast.","skate","to skate","skates"],["Luke can ___ his bike.","ride","rides","to ride"],["My dog ___ run very fast.","can","cans"],
     ["We can ___ English.","speak","to speak","speaks"],["Holly ___ sing.","can","cans"],["They can ___ the ball.","find","finds","to find"],["Jay can ___ a song.","sing","sings","to sing"],["It ___ jump very high.","can","cans"]
    ].map(([f,a,...x])=>({f,a,o:[a,...x],t:"can bleibt immer gleich. Danach kommt das Verb ohne to und ohne s."}))},
+  {id:"c_de",name:"Übersetzen",was:"können und dürfen",typ:"bau",items:[
+    ["Ich kann schnell skaten.","I|can|skate|fast",["can to"]],["Luke kann nicht schwimmen.","Luke|can't|swim",["cans"]],["Darf ich dein Lineal benutzen?","can|I|use|your ruler",["cans"]],["Wir dürfen hier nicht rennen.","we|can't|run|here",["not"]],
+    ["Sie kann Gitarre spielen. (ein Mädchen)","she|can|play|the guitar",["cans"]],["Kannst du Englisch sprechen?","can|you|speak|English",["to speak"]],["Mein Hund darf im Garten spielen.","my dog|can|play|in the garden",["cans"]],["Sie können nicht kommen. (mehrere)","they|can't|come",["can to"]]
+   ].map(([d,a,x])=>({d,a,x,z:d.endsWith("?")?"?":".",t:"können und dürfen: can. Nicht: can't. Danach das Verb ohne to."}))},
   {id:"c_kurz",name:"Kurzantworten",was:"Yes, I can. No, he can't.",typ:"kurz",o:["yes","no","I","you","he","she","it","we","they","can","can't"],items:[
     ["Can you skate?",JA,"yes|I|can"],["Can Luke swim?",NEIN,"no|he|can't"],["Can Holly ride a horse?",JA,"yes|she|can"],["Can you and your friend play football?",JA,"yes|we|can"],["Can the dog play in the garden?",JA,"yes|it/he|can"],
     ["Can Luke and Jamie meet today?",NEIN,"no|they|can't"],["Can I use your pen, please?",JA,"yes|you|can"],["Can your mum speak English?",JA,"yes|she|can"],["Can you sing?",NEIN,"no|I|can't"],["Can Dave come to the party?",NEIN,"no|he|can't"]
@@ -236,14 +240,25 @@ const BEREICHE=[
     ["You can swim.","can|you|swim"],["Luke can skate.","can|Luke|skate"],["Holly can ride a horse.","can|Holly|ride|a horse"],["We can play in the garden.","can|we|play|in the garden"],
     ["They can come to the party.","can|they|come|to the party"],["Your sister can sing.","can|your sister|sing"],["I can use your ruler.","can|I|use|your ruler"],["Sherlock can find the ball.","can|Sherlock|find|the ball"]
    ].map(([d,a])=>({d,a,x:["cans"],z:"?",t:"can nach vorn, dann wer, dann das Verb."}))},
-  {id:"c_de",name:"Übersetzen",was:"können und dürfen",typ:"bau",items:[
-    ["Ich kann schnell skaten.","I|can|skate|fast",["can to"]],["Luke kann nicht schwimmen.","Luke|can't|swim",["cans"]],["Darf ich dein Lineal benutzen?","can|I|use|your ruler",["cans"]],["Wir dürfen hier nicht rennen.","we|can't|run|here",["not"]],
-    ["Sie kann Gitarre spielen. (ein Mädchen)","she|can|play|the guitar",["cans"]],["Kannst du Englisch sprechen?","can|you|speak|English",["to speak"]],["Mein Hund darf im Garten spielen.","my dog|can|play|in the garden",["cans"]],["Sie können nicht kommen. (mehrere)","they|can't|come",["can to"]]
-   ].map(([d,a,x])=>({d,a,x,z:d.endsWith("?")?"?":".",t:"können und dürfen: can. Nicht: can't. Danach das Verb ohne to."}))},
   {id:"c_fehler",name:"Finde den Fehler",was:"welcher Satz ist richtig?",typ:"wahl",breit:true,items:[
     ["She cans swim.","She can swim.","She can swims.","She can to swim."],["I can to skate.","I can skate.","I cans skate.","I can skating."],["Luke not can swim.","Luke can't swim.","Luke can't swims.","Luke cann't swim."],
     ["Can you to sing?","Can you sing?","Cans you sing?","Can you sings?"],["Can you skate? – No, I not can.","No, I can't.","No, I not.","No, I cans."],["My dog cans run fast.","My dog can run fast.","My dog can runs fast.","My dog can to run fast."]
    ].map(([w,a,...x])=>({f:"Falsch: "+w+" ___",a,o:[a,...x],t:"can bleibt gleich: kein s, kein to. Nicht heißt can't."}))}
+ ]},
+{id:"artikel",icon:"🍎",name:"An apple, a dog",was:"the, a und an (S. 38–39, Find the rule)",ab:"u2s1",
+ regeln:`<ul><li><b>the</b> sprichst du meist [ðə]: the dog. Vor einem Selbstlaut-Laut [ði]: the apple.</li><li><b>a</b> vor einem Mitlaut-Laut: a dog, a pen.</li><li><b>an</b> vor einem Selbstlaut-Laut: an apple, an orange, an old house.</li><li>Es zählt der Klang: a uniform, weil uniform mit ju anfängt.</li></ul>`,ebenen:[
+  {id:"r_the",name:"the: [ðə] oder [ði]?",was:"wie spricht man the?",typ:"wahl",items:[
+    ["___ apple","the [ði]"],["___ dog","the [ðə]"],["___ orange","the [ði]"],["___ uniform","the [ðə]"],["___ English teacher","the [ði]"],["___ house","the [ðə]"],
+    ["___ old car","the [ði]"],["___ elephant","the [ði]"],["___ guinea pig","the [ðə]"],["___ ice cream","the [ði]"],["___ school","the [ðə]"],["___ umbrella","the [ði]"]
+   ].map(([f,a])=>({f,a,o:["the [ðə]","the [ði]"],sag:"the "+f.slice(4),t:a.includes("ði")?/uniform/.test(f)?"":"Das Wort fängt mit einem Selbstlaut-Laut an: [ði].":/uniform/.test(f)?"uniform klingt vorn wie ju, also ein Mitlaut-Laut: [ðə].":"Das Wort fängt mit einem Mitlaut-Laut an: [ðə]."}))},
+  {id:"r_aan",name:"a oder an?",was:"vor Selbstlaut-Laut an",typ:"wahl",o:["a","an"],items:[
+    ["___ apple","an"],["___ dog","a"],["___ orange","an"],["___ uniform","a"],["___ elephant","an"],["___ English book","an"],["___ pencil case","a"],["___ old house","an"],
+    ["___ ice cream","an"],["___ new pen","a"],["I've got ___ idea.","an"],["She's got ___ hamster.","a"],["It's ___ easy test.","an"],["He's got ___ uncle in York.","an"]
+   ].map(([f,a])=>({f,a,t:/uniform/.test(f)?"uniform klingt vorn wie ju. Es zählt der Klang: a uniform.":a==="an"?"Das nächste Wort fängt mit einem Selbstlaut-Laut an: an.":"Das nächste Wort fängt mit einem Mitlaut-Laut an: a."}))},
+  {id:"r_de",name:"Übersetzen",was:"a oder an im Satz",typ:"bau",items:[
+    ["Ich habe einen Apfel.","I|have got|an apple",["a apple"]],["Das ist eine Uniform.","this is|a uniform",["an uniform"]],["Er hat eine Idee.","he|has got|an idea",["a idea"]],
+    ["Wir haben einen Hund.","we|have got|a dog",["an dog"]],["Das ist ein altes Haus.","this is|an old house",["a old house"]],["Sie hat ein Eis.","she|has got|an ice cream",["a ice cream"]]
+   ].map(([d,a,x])=>({d,a,x,z:".",t:"Vor einem Selbstlaut-Laut: an. Sonst: a."}))}
  ]},
 {id:"havegot",icon:"🎒",name:"Have you got ...?",was:"have got, has got, Fragen und Kurzantworten (G10–G12)",ab:"u2s1",
  regeln:`<ul><li><b>I, you, we, they</b>: have got. Kurz: I<b>'ve</b> got.</li><li><b>he, she, it</b> und ein Name: <b>has</b> got. Kurz: she<b>'s</b> got.</li><li>Nein: <b>haven't</b> got, <b>hasn't</b> got.</li><li>Frage: have oder has nach vorn. <b>Has</b> Luke got a dog?</li><li>Kurzantwort ohne got: <b>Yes, I have.</b> <b>No, she hasn't.</b></li></ul>`,ebenen:[
@@ -294,23 +309,27 @@ const BEREICHE=[
  ]},
 {id:"this",icon:"👉",name:"This is our table.",was:"this, that, these, those (G14)",ab:"u2s2",
  regeln:`<ul><li><b>this</b> = dies hier (nah), <b>that</b> = das dort (weiter weg).</li><li>Mehrere: <b>these</b> (nah), <b>those</b> (weiter weg).</li><li>this book → <b>these</b> books, that book → <b>those</b> books. Und is wird are.</li><li>Zwei Dinge vergleichen: zuerst this, dann that.</li><li>Oft kurz: <b>That's</b> = that is.</li></ul>`,ebenen:[
-  {id:"t_wahl",name:"this, that, these oder those?",was:"nah oder weit, eins oder mehrere",typ:"wahl",o:["this","that","these","those"],items:[
+  {id:"d_wahl",name:"this, that, these oder those?",was:"nah oder weit, eins oder mehrere",typ:"wahl",o:["this","that","these","those"],items:[
     ["___ is my pencil case. (hier, eins)","this"],["___ girls over there are in my class. (dort, mehrere)","those"],["___ books here are new. (hier, mehrere)","these"],["Look at ___ dog over there! (dort, eins)","that"],
     ["___ is our table, and that's the girls' table. (hier, eins)","this"],["Are ___ your pens here? (hier, mehrere)","these"],["Who is ___ boy over there? (dort, eins)","that"],["___ burgers over there look nice. (dort, mehrere)","those"],
     ["I like ___ T-shirt here. (hier, eins)","this"],["___ chips here are cold. (hier, mehrere)","these"],["___ house over there is old. (dort, eins)","that"],["Can I have ___ sweets over there? (dort, mehrere)","those"]
    ].map(([f,a])=>({f,a,t:{this:"Hier und eins: this.",that:"Dort und eins: that.",these:"Hier und mehrere: these.",those:"Dort und mehrere: those."}[a]}))},
-  {id:"t_mehr",name:"Mach mehrere daraus",was:"this → these, that → those",typ:"wahl",breit:true,items:[
+  {id:"d_mehr",name:"Mach mehrere daraus",was:"this → these, that → those",typ:"wahl",breit:true,items:[
     ["This book is new. → ___","These books are new.","This books are new.","Those books are new."],["That girl is nice. → ___","Those girls are nice.","That girls are nice.","These girls are nice."],
     ["This pen is red. → ___","These pens are red.","This pens are red.","These pen are red."],["That boy is from York. → ___","Those boys are from York.","Those boys is from York.","That boys are from York."],
     ["This is my friend. → ___","These are my friends.","This are my friends.","These is my friends."],["That is your bag. → ___","Those are your bags.","That are your bags.","Those is your bags."]
    ].map(([f,a,...x])=>({f,a,o:[a,...x],t:"Mehrere: this wird these, that wird those. Und is wird are."}))},
-  {id:"t_de",name:"Übersetzen",was:"englische Sätze bauen",typ:"bau",items:[
+  {id:"d_de",name:"Übersetzen",was:"englische Sätze bauen",typ:"bau",items:[
     ["Das hier ist unser Tisch.","this|is|our table",["that"]],["Das dort ist der Tisch der Mädchen.","that's|the girls' table",["this is"]],["Diese Bücher hier sind neu.","these books|are|new",["those books"]],
     ["Die Jungen dort sind nett.","those boys|are|nice",["these boys"]],["Wer ist das Mädchen dort?","who|is|that girl",["this girl"]],["Diese Pommes hier sind lecker.","these chips|are|nice",["this chips"]],["Ist das hier dein Füller?","is|this|your pen",["these"]]
    ].map(([d,a,x])=>({d,a,x,z:d.endsWith("?")?"?":".",t:"Nah: this, these. Weiter weg: that, those."}))}
  ]},
 {id:"always",icon:"⏰",name:"I'm always busy",was:"always, usually, often, sometimes, never; Ort vor Zeit (G15, G16)",ab:"u3s1",
  regeln:`<ul><li><b>always</b> immer, <b>usually</b> meistens, <b>often</b> oft, <b>sometimes</b> manchmal, <b>never</b> nie.</li><li>Sie stehen <b>vor dem Verb</b>: I <b>often</b> play football.</li><li>Aber <b>nach</b> am, is, are: I'm <b>always</b> busy. He is <b>never</b> late.</li><li>Bei have got und can in die Mitte: She has <b>never</b> got time. They can <b>usually</b> eat at school.</li><li>Im verneinten Satz steht sometimes vorn: He <b>sometimes</b> isn't nice.</li><li>Satzbau: wer, tut, was, wo, wann. <b>Ort vor Zeit</b>: I go to Art Club on Mondays.</li><li>Zeit: <b>at</b> seven o'clock (Uhrzeit), <b>on</b> Monday (Wochentag), <b>in</b> the morning (Tageszeit).</li></ul>`,ebenen:[
+  {id:"a_zeit",name:"in, at oder on?",was:"Uhrzeit, Wochentag, Tageszeit",typ:"wahl",o:["in","at","on"],items:[
+    ["___ Monday","on"],["___ seven o'clock","at"],["___ the morning","in"],["___ the evening","in"],["___ Fridays","on"],["___ half past six","at"],["___ the afternoon","in"],
+    ["I get up ___ seven a.m.","at"],["We have English ___ Tuesdays.","on"],["I practise ___ the afternoon.","in"],["The test is ___ Wednesday.","on"],["Lunch is ___ quarter past twelve.","at"]
+   ].map(([f,a])=>({f,a,t:{at:"Uhrzeit: at.",on:"Wochentag: on.","in":"Tageszeit: in the morning, in the afternoon, in the evening."}[a]}))},
   {id:"a_wort",name:"Wie oft?",was:"das richtige Wort",typ:"wahl",o:["always","usually","often","sometimes","never"],items:[
     ["immer = ___","always"],["nie = ___","never"],["oft = ___","often"],["manchmal = ___","sometimes"],["meistens = ___","usually"],["normalerweise = ___","usually"],["niemals = ___","never"],["häufig = ___","often"],["100 % = ___","always"],["0 % = ___","never"]
    ].map(([f,a])=>({f,a,t:"always 100 %, usually, often, sometimes, never 0 %."}))},
@@ -326,10 +345,6 @@ const BEREICHE=[
     ["Ich bin immer beschäftigt.","I'm|always|busy",["never"]],["Wir frühstücken normalerweise um sieben.","we|usually|have breakfast|at seven",["often"]],["Ich spiele oft Fußball.","I|often|play|football",["always"]],
     ["Sie sind nie müde. (mehrere)","they|are|never|tired",["is"]],["Ich gehe nie früh ins Bett.","I|never|go to bed|early",["always"]],["Wir fangen montags oft früh an.","we|often|start|early|on Mondays",["sometimes"]],["Ich übe manchmal Saxofon.","I|sometimes|practise|the saxophone",["often"]]
    ].map(([d,a,x])=>({d,a,x,z:".",t:"Wie oft steht vor dem Verb, aber hinter am, is, are."}))},
-  {id:"a_zeit",name:"in, at oder on?",was:"Uhrzeit, Wochentag, Tageszeit",typ:"wahl",o:["in","at","on"],items:[
-    ["___ Monday","on"],["___ seven o'clock","at"],["___ the morning","in"],["___ the evening","in"],["___ Fridays","on"],["___ half past six","at"],["___ the afternoon","in"],
-    ["I get up ___ seven a.m.","at"],["We have English ___ Tuesdays.","on"],["I practise ___ the afternoon.","in"],["The test is ___ Wednesday.","on"],["Lunch is ___ quarter past twelve.","at"]
-   ].map(([f,a])=>({f,a,t:{at:"Uhrzeit: at.",on:"Wochentag: on.","in":"Tageszeit: in the morning, in the afternoon, in the evening."}[a]}))},
   {id:"a_ort",name:"Ort vor Zeit",was:"wer, tut, was, wo, wann",typ:"bau",items:[
     ["Ich gehe montags zum Art Club.","I|go|to Art Club|on Mondays"],["Ich höre morgens im Bus Musik.","I|listen to|music|on the bus|in the mornings"],["Ich spiele nach der Schule Computerspiele.","I|play|computer games|after school"],
     ["Ich spiele dienstags immer Korbball.","I|always|play|netball|on Tuesdays"],["Wir frühstücken um sieben in der Küche.","we|have breakfast|in the kitchen|at seven"],["Wir spielen samstags im Park Fußball.","we|play|football|in the park|on Saturdays"],
@@ -370,6 +385,14 @@ const ERKL={
   bsp:[["I can skate fast now.","Ich kann jetzt schnell skaten."],["Luke can't skate.","Luke kann nicht skaten."],["Sherlock can play in the garden.","Sherlock darf im Garten spielen."],["Can you skate? – No, I can't.","Kannst du skaten? – Nein."]],
   achtung:["Nie <s>She cans</s> und nie <s>I can to skate</s>.","Nur Yes oder No allein klingt unhöflich. Sag lieber: Yes, I can."],
   maus:"can heißt können und dürfen."},
+ artikel:{g:"Find the rule",s:"38–39",l:"38–39",kopf:"Aus dem Buch: Find the rule auf Seite 38 und 39. Einen eigenen Grammatikteil gibt es dazu nicht.",
+  wozu:"<b>the</b> heißt der, die, das. <b>a</b> und <b>an</b> heißen ein oder eine.",
+  teile:[["the",["Meist sprichst du the wie [ðə]: the dog.","Fängt das nächste Wort mit einem Selbstlaut-Laut an, sprichst du [ði]: the apple, the English book."]],
+   ["a oder an?",["Vor einem Mitlaut-Laut steht <b>a</b>: a dog, a pen.","Vor einem Selbstlaut-Laut steht <b>an</b>: an apple, an orange, an old house.","Es zählt, wie das Wort klingt, nicht wie es geschrieben wird: a uniform, weil uniform mit ju anfängt."]]],
+  tab:TAB(["","vor Mitlaut-Laut","vor Selbstlaut-Laut"],[["the","[ðə] dog","[ði] apple"],["ein, eine","a dog","an apple"]]),
+  bsp:[["I've got an apple.","Ich habe einen Apfel."],["She's got a dog.","Sie hat einen Hund."],["The English teacher is nice.","Die Englischlehrerin ist nett."],["It's a uniform.","Das ist eine Uniform."]],
+  achtung:["Nie <s>a apple</s>, sondern an apple.","a uniform mit a, weil uniform mit ju anfängt."],
+  maus:"Selbstlaut-Laut vorn: an, und the klingt wie [ði]."},
  havegot:{g:"G10–G12",s:"162–164",l:"39–41",
   wozu:"Mit <b>have got</b> sagst du, dass jemand etwas hat.",
   teile:[["So geht's",["I, you, we, they: <b>have got</b>. he, she, it und ein Name: <b>has got</b>.","Beim Sprechen nimmst du die Kurzform: I<b>'ve</b> got, she<b>'s</b> got. Die Langform schreibst du, wenn es ordentlich sein soll."]],
@@ -412,7 +435,12 @@ const ERKL={
 };
 BEREICHE.forEach(b=>{ if(ERKL[b.id]) b.erkl=ERKL[b.id]; });
 // offen, wenn die Klasse im Buch dort angekommen ist (vokabeln.js setzt BUCH)
-const bOffen=b=>!b.ab||!window.BUCH||BUCH.erreicht(b.ab);
+// Seite, ab der eine Ebene der neuen Felder dran ist (aus window.BUCHSEITE, E-230). Unit-1-Felder ohne ab: immer offen.
+const ebeneSeite=id=>{ if(!ebeneSeite.m){ ebeneSeite.m={}; for(const [k,v] of Object.entries(window.BUCHSEITE||{})) for(const e of v[3]) if(EBENE[e]?.bereich.ab&&!(ebeneSeite.m[e]<=+k)) ebeneSeite.m[e]=+k; } return ebeneSeite.m[id]||0; };
+const feldSeite=b=>Math.min(...b.ebenen.map(e=>ebeneSeite(e.id)||1e9));
+const seiteJetzt=()=>window.BUCH?BUCH.seite():0;
+const bOffen=b=>{ if(!b.ab||!window.BUCH) return true; const fs=feldSeite(b); return fs<1e9?fs<=seiteJetzt():BUCH.erreicht(b.ab); };
+const ebeneSpaeter=e=>{ const s=e.bereich.ab?ebeneSeite(e.id):0; return s&&s>seiteJetzt()?s:0; };
 // Register aller Aufgaben; der Schluessel bleibt beim Umsortieren gleich
 const ITEM={}, EBENE={};
 BEREICHE.forEach(b=>b.ebenen.forEach(e=>{ e.bereich=b; EBENE[e.id]=e; e.keys=(e.items||[]).map(it=>{
@@ -429,7 +457,8 @@ function loesung(it){
 }
 // vorlesen nur Englisch: deutsche Vorsaetze und Pfeile weglassen
 function englisch(it){
-  if(it.e.bereich.ab){ if(it.e.breit||/^Falsch: /.test(it.f||"")) return it.a; return loesung(it).replace(/^.*(→|=) /,"").replace(/ \([a-z]+\)$/,""); } // neue Felder: nur der englische Satz
+  if(it.sag) return it.sag;
+  if(it.e.bereich.ab){ if(it.e.breit||/^Falsch: /.test(it.f||"")) return it.a; return loesung(it).replace(/^.*(→|=) /,"").replace(/\s*\([^)]*\)$/,""); } // neue Felder: nur der englische Satz
   if(it.e.typ==="tippen") return it.sag||it.a.split("|").map(t=>t.split("/")[0]).join(", "); if(it.e.bereich.id==="zahlen") return wortZahl(parseInt(it.f)); if(it.e.id==="g_sort") return ""; if(it.e.id==="g_of"||it.e.id==="w_fehler") return it.a; return loesung(it).replace(/^(Die|Das|Der) [^.]*\. /,"").replace(/(Tom|Lisa): /g,""); }
 
 // ---------- Zustand ----------
@@ -518,7 +547,7 @@ function zeige(m){
   $("bTabelle").hidden = m==="tabelle" || !ort || ort==="probe" || ort==="fehler" || ort==="vok" || ort==="heute" || ort?.[0]==="@";
   $("bMenue").textContent="← "+$("bMenue").textContent;
 }
-function zurueck(){ if(ort?.startsWith("@erkl:")) return bereich(ort.slice(6)); if(ort==="heute") return vokMenue(); if(ort?.[0]==="@") return appZurueck(); if(ort==="vok"&&(modus!=="menue"||$("menuetitel").textContent!=="Vokabeln")) return vokMenue(); if(modus==="menue"||!ort||ort==="probe"||ort==="fehler") menue(); else bereich(ort); }
+function zurueck(){ if(ort?.startsWith("@erkl:")) return bereich(ort.slice(6)); if(ort==="@dran") return menue(); if(ort==="heute") return vokMenue(); if(ort?.[0]==="@") return appZurueck(); if(ort==="vok"&&(modus!=="menue"||$("menuetitel").textContent!=="Vokabeln")) return vokMenue(); if(modus==="menue"||!ort||ort==="probe"||ort==="fehler") menue(); else bereich(ort); }
 function ruhe(titel,text){
   lauf++; laeuft=false; abspieler.pause(); try{ speechSynthesis.cancel(); }catch(e){}
   zeige("menue"); sag("",""); $("runde").textContent=""; $("punkte").textContent="";
@@ -542,8 +571,10 @@ function menue(){
   ort=null; ruhe(`Hallo ${KERN.nr?sicher(kname(KERN.nr)):""}!`,""); kopf();
   const offen=BEREICHE.filter(bOffen), zu=BEREICHE.filter(b=>!bOffen(b)), neu=new Set(stand.neuFrei||[]);
   const z=offen.map(fortschrittZahl), g=z.reduce((a,x)=>a+x[0],0), v=z.reduce((a,x)=>a+x[1],0), p=stand.weiter.probe24;
-  karten([...(window.vokKarte?[vokKarte()]:[]),...offen.map((b,n)=>({i:b.icon,t:b.name+(neu.has(b.id)?'<span class="neu">NEU</span>':""),u:b.was,p:z[n],st:`${z[n][0]} von ${z[n][1]}`,f:()=>bereich(b.id)})),
-    ...zu.map(b=>({i:"🔒",t:b.name,u:`geht auf mit ${sicher(BUCH.abschnitt(b.ab)?.name||"")}`,zu:true,st:"noch nicht dran"})),
+  const td=todoStand();
+  karten([...(td?[{i:"📌",t:`Heute dran: ${td.titel}`,u:td.text,st:td.fertig?"Fertig ✓":`${td.erledigt} von ${td.gesamt}`,f:heuteDran}]:[]),
+    ...(window.vokKarte?[vokKarte()]:[]),...offen.map((b,n)=>({i:b.icon,t:b.name+(neu.has(b.id)?'<span class="neu">NEU</span>':"")+(todoFeld(b)?'<span class="neu">📌</span>':""),u:b.was,p:z[n],st:`${z[n][0]} von ${z[n][1]}`,f:()=>bereich(b.id)})),
+    ...zu.map(b=>({i:"🔒",t:b.name,u:feldSeite(b)<1e9?`geht auf mit Seite ${feldSeite(b)} im Buch`:`geht auf mit ${sicher(BUCH.abschnitt(b.ab)?.name||"")}`,zu:true,st:"noch nicht dran"})),
     {i:"🎯",...fehlerKarte(null)},
     {i:"🏆",t:"Probearbeit",u:"24 Aufgaben aus allen Bereichen, ohne Tipps",st:p?`weiter: ${p.nr} von ${p.keys.length}`:stand.gespielt.probe24?`Bestes: ${stand.best.probe24} von 24`:"",f:starteProbe}]);
   $("spiele").insertAdjacentHTML("afterbegin",`<div class="gesamt"><span>Du hast <b>${g} von ${v}</b> Grammatik-Ebenen geschafft.</span>${balken(g,v)}</div>`);
@@ -551,7 +582,7 @@ function menue(){
 }
 // Ebene n ist offen, wenn die davor zu drei Vierteln auf Anhieb saß
 const hatStimme=()=>{ if(window.TON) return true; try{ return speechSynthesis.getVoices().some(v=>/^en/i.test(v.lang)); }catch(e){ return false; } };
-function ebeneZu(b,i){ if(b.ebenen[i].hoeren&&!hatStimme()) return true; return b.id==="besitz" ? !stand.frei : i>0 && !stand.geschafft[b.ebenen[i-1].id]; }
+function ebeneZu(b,i){ if(b.ebenen[i].hoeren&&!hatStimme()) return true; if(ebeneSpaeter(b.ebenen[i])) return true; return b.id==="besitz" ? !stand.frei : i>0 && !stand.geschafft[b.ebenen[i-1].id]; }
 function bereich(id){
   const b=BEREICHE.find(b=>b.id===id); ort=id;
   if(stand.neuFrei?.includes(id)){ stand.neuFrei=stand.neuFrei.filter(x=>x!==id); merke(); }
@@ -561,7 +592,7 @@ function bereich(id){
   const liste=[fehlerKarte(id)];
   if(b.id==="besitz") liste.unshift({t:"Die Tabelle",u:"I = my, you = your ...",st:stand.frei?"Geschafft":sitzt()?`${sitzt()} von 8 sitzen`:"",f:starteTabelle}),
     liste.push(...RUNDEN.map((x,n)=>({t:"Das "+x.kurz,u:x.was,f:()=>starte(n),zu:!stand.frei,st:stand.frei?standText(n):"noch gesperrt"})));
-  liste.push(...b.ebenen.map((e,i)=>{ const zu=ebeneZu(b,i); return {t:(b.id==="besitz"?"":`${i+1}. `)+e.name,u:e.was,zu,st:e.hoeren&&!hatStimme()?"keine englische Stimme":zu?"noch gesperrt":standX(e),f:()=>starteEbene(e)}; }));
+  liste.push(...b.ebenen.map((e,i)=>{ const zu=ebeneZu(b,i); return {t:(b.id==="besitz"?"":`${i+1}. `)+e.name,u:e.was,zu,st:e.hoeren&&!hatStimme()?"keine englische Stimme":ebeneSpaeter(e)?`ab Seite ${ebeneSpaeter(e)}`:zu?"noch gesperrt":(todoOffen(e.id)?"📌 dran ":"")+standX(e),f:()=>starteEbene(e)}; }));
   if(b.erkl) liste.unshift({t:"📖 Erklärung",u:`aus dem Buch, ${b.erkl.g}, Seite ${b.erkl.s}`,st:stand.erklaert?.[id]?"gelesen ✓":"noch nicht gelesen",f:()=>erklaerung(b,false)});
   karten(liste);
 }
@@ -571,7 +602,7 @@ const erklGezeigt=new Set();
 const erklFaellig=b=>!!b.erkl&&!stand.erklaert?.[b.id]&&stand.spaeter?.[b.id]!==KERN.heute()&&!erklGezeigt.has(b.id);
 function erklaerung(b,auto,weiter){
   weiter=weiter||(()=>bereich(b.id)); const e=b.erkl;
-  ruhe(b.name,`Erklärung aus dem Buch: ${e.g}, Grammatik Seite ${e.s}, geübt auf Seite ${e.l}.`); ort="@erkl:"+b.id; zeige("menue");
+  ruhe(b.name,e.kopf||`Erklärung aus dem Buch: ${e.g}, Grammatik Seite ${e.s}, geübt auf Seite ${e.l}.`); ort="@erkl:"+b.id; zeige("menue");
   const d=document.createElement("div"); d.className="einstellung erkl";
   d.innerHTML=`<section><h3>Wofür?</h3><p>${e.wozu}</p></section>`
     +e.teile.map(([h,l])=>`<section><h3>${h}</h3><ul>${l.map(x=>`<li>${x}</li>`).join("")}</ul></section>`).join("")
@@ -600,11 +631,43 @@ function themaFelder(){
   return mit.filter(x=>unit(x.b.ab||x.b.thema)===u).map(x=>x.b);
 }
 const themaKeys=()=>themaFelder().flatMap(b=>b.ebenen.filter((e,i)=>!e.hoeren&&e.typ!=="schreiben"&&e.keys.length&&!ebeneZu(b,i)).flatMap(e=>e.keys));
-function starteHeute(){ const keys=themaKeys(); if(!keys.length) return vokMenue(); ort="heute"; starteX(HEUTE,()=>ziehe(keys,Math.min(8,keys.length))); }
+function starteHeute(){ const keys=todoKeys().length?todoKeys():themaKeys(); if(!keys.length) return vokMenue(); ort="heute"; starteX(HEUTE,()=>ziehe(keys,Math.min(8,keys.length))); }
 window.grammatikHeute={
   info:()=>{ const f=themaFelder(); return {offen:stand.gTag!==KERN.heute()&&themaKeys().length>0,fertig:stand.gTag===KERN.heute(),name:f.map(b=>b.name).join(", ")}; },
-  start:()=>{ const b=themaFelder().find(erklFaellig); if(b){ erklGezeigt.add(b.id); return erklaerung(b,true,starteHeute); } starteHeute(); }
+  start:()=>{ const b=[...todoEbenen().map(e=>e.bereich),...themaFelder()].find(erklFaellig); if(b){ erklGezeigt.add(b.id); return erklaerung(b,true,starteHeute); } starteHeute(); }
 };
+// ---------- Heute dran: was die zuletzt erreichten Schulbuchseiten verlangen (E-230) ----------
+// stand.todo = {von, bis: Seiten, e: {Ebenen-Id: 0 offen | 1 geschafft}}. Eine Ebene ist erledigt nach einer Runde mit drei Vierteln auf Anhieb.
+const todoOffen=id=>stand.todo?.e?.[id]===0;
+const todoEbenen=()=>Object.keys(stand.todo?.e||{}).filter(todoOffen).map(id=>EBENE[id]).filter(e=>e&&bOffen(e.bereich));
+const todoKeys=()=>todoEbenen().filter(e=>!ebeneZu(e.bereich,e.bereich.ebenen.indexOf(e))&&!e.hoeren&&e.typ!=="schreiben").flatMap(e=>e.keys);
+const todoFeld=b=>b.ebenen.some(e=>todoOffen(e.id));
+function todoStand(){
+  const t=stand.todo; if(!t?.bis) return null;
+  const e=Object.keys(t.e||{}).filter(id=>EBENE[id]), w=window.vokNeu?vokNeu.zahl():0;
+  const erledigt=e.filter(id=>t.e[id]).length+(w?0:1), gesamt=e.length+1;
+  const seiten=t.von<t.bis?`Seite ${t.von}–${t.bis}`:`Seite ${t.bis}`;
+  const text=[w?`${w} neue Wörter`:"Wörter gelernt",...e.filter(todoOffen).slice(0,3).map(id=>EBENE[id].name)].join(" · ");
+  return {titel:seiten,text:sicher(text),erledigt,gesamt,fertig:erledigt>=gesamt,woerter:w,e};
+}
+function heuteDran(){
+  const t=stand.todo, td=todoStand(); if(!td) return menue();
+  ort="@dran"; ruhe(`Heute dran: ${td.titel}`,"Das kam im Unterricht neu dazu. Arbeite es von oben nach unten ab.");
+  const S=window.BUCHSEITE||{}, seiten=[]; for(let p=t.von;p<=t.bis;p++) if(S[p]) seiten.push(p);
+  const d=document.createElement("div"); d.className="einstellung erkl dran";
+  d.innerHTML=`<section><h3>Im Buch</h3><ul>${seiten.map(p=>`<li><b>Seite ${p}</b>: ${sicher(S[p][1])}${S[p][2]?` <small>(${sicher(S[p][2])})</small>`:""}${S[p][4]?`<br>${sicher(S[p][4])}`:""}</li>`).join("")||"<li>Für diese Seiten liegen noch keine Fotos vor.</li>"}</ul></section><div class="todo"></div>`;
+  const liste=d.querySelector(".todo");
+  const punkt=(fertig,titel,unter,f)=>{ const b=document.createElement("button"); b.type="button"; b.className="spiel"; b.disabled=!f;
+    b.innerHTML=`<span class="ic">${fertig?"✅":"📌"}</span><span class="tx"><b>${titel}</b><small>${unter}</small></span>`; b.onclick=f; liste.append(b); };
+  const w=window.vokNeu?vokNeu.woerter():[];
+  punkt(!w.length,"Neue Wörter",w.length?`${w.length} Wörter: ${sicher(w.slice(0,5).map(x=>x.en).join(", "))}${w.length>5?" …":""}`:"alle schon einmal gelernt",w.length?()=>vokNeu.start():null);
+  for(const id of td.e){ const e=EBENE[id], b=e.bereich, i=b.ebenen.indexOf(e), zu=ebeneZu(b,i), fertig=!!t.e[id];
+    const vor=zu&&!ebeneSpaeter(e)?b.ebenen.slice(0,i).find((x,k)=>!stand.geschafft[x.id]&&!ebeneZu(b,k)):null;
+    const los=()=>{ const ziel=vor||e; if(erklFaellig(b)){ erklGezeigt.add(b.id); return erklaerung(b,true,()=>starteEbene(ziel)); } starteEbene(ziel); };
+    punkt(fertig,`${b.icon} ${sicher(e.name)}`,`${sicher(b.name)}${fertig?", geschafft":vor?`, zuerst: ${sicher(vor.name)}`:", drei Viertel auf Anhieb richtig"}`,zu&&!vor?null:los); }
+  $("spiele").className=""; $("spiele").replaceChildren(d); scrollTo(0,0);
+}
+window.heuteDran=heuteDran; window.todoStand=todoStand;
 function standX(e){
   if(e.typ==="schreiben") return stand.geschafft[e.id]?"Geschafft":Object.values(stand.texte).some(t=>t)?"angefangen":"";
   const w=stand.weiter[e.id], g=stand.gespielt[e.id];
@@ -896,6 +959,7 @@ function bucheX(){
   stand.best[id]=Math.max(xr.alt,xr.gut);
   if(xr.e!==PROBE && xr.gut/xr.keys.length>=.75) stand.geschafft[id]=true;
   if(xr.e===HEUTE) stand.gTag=KERN.heute();
+  if(stand.todo?.e&&id in stand.todo.e&&xr.gut/xr.keys.length>=.75) stand.todo.e[id]=1;
   delete stand.weiter[id]; merke(); KERN.log((xr.e.bereich?xr.e.bereich.name+": ":"")+xr.e.name,xr.gut,xr.keys.length,xr.e.bereich?.id||(xr.e===HEUTE?"heute":"probe"));
 }
 function abschlussX(){
@@ -914,7 +978,7 @@ function abschlussX(){
   abschluss(`<h2>${a===g?"Alles auf Anhieb richtig!":"Runde geschafft."} <span class="sterne" aria-label="${st} von 3 Sternen">${"★".repeat(st)}${"☆".repeat(3-st)}</span></h2><p>${text}</p>`,
     [...(offen?[[`Weiter: ${next.name}`,"haupt",()=>starteEbene(next)]]:[["Noch einmal","haupt",wieder[2]]]),
      ...(fehlerOffen(fb)?[[`Nur meine Fehler üben (${offeneFehler(fb).length})`,"neben",()=>starteFehler(fb)]]:[]),
-     ...(offen?[wieder]:[]),["Zurück","neben",zurueck]]);
+     ...(offen?[wieder]:[]),...(todoStand()&&!todoStand().fertig?[["📌 Heute dran","neben",heuteDran]]:[]),["Zurück","neben",zurueck]]);
 }
 function huepfe(h){ if(h){ h.classList.remove("hilfe"); void h.offsetWidth; h.classList.add("hilfe"); h.addEventListener("animationend",()=>h.classList.remove("hilfe"),{once:true}); } }
 

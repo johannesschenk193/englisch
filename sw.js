@@ -1,5 +1,5 @@
 // Offline-Betrieb: Programm zuerst aus dem Netz, ohne Netz aus dem Speicher. Aufnahmen zuerst aus dem Speicher.
-const NAME="englisch-trainer-5";
+const NAME="englisch-trainer-6";
 const KERN=["./","index.html","stil.css","optik.css","kern.js","spiel.js","vokabelliste.js","vokabeln.js","mathe.js","app.js","audio/liste.js","manifest.webmanifest","icon-192.png"];
 self.addEventListener("install",e=>e.waitUntil(caches.open(NAME).then(c=>c.addAll(KERN)).then(()=>self.skipWaiting())));
 self.addEventListener("activate",e=>e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(n=>n.startsWith("englisch-trainer-")&&n!==NAME).map(n=>caches.delete(n)))).then(()=>self.clients.claim())));
