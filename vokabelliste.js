@@ -1,6 +1,8 @@
 // Vokabeln zum Ueben, Stand 25.11.2026
 // Zeile: englisch | deutsch | Zusatz bei Verwechslungsgefahr | auch richtig (Komma) | Merkhilfe
 // Ein Wort = schreiben, mehrere Woerter = Satz aus Schildern bauen.
+// Eine Zeile "@190" heisst: ab hier stehen die Woerter auf Seite 190 (fuer seitenweises Lernen).
+// Die Unit ist der Teil des Abschnittsnamens vor dem Doppelpunkt ("Unit 1: ...").
 window.VOKABELN = [
 ["a1","Pick-up A: Hallo","S. 184",`
 We're from …|Wir sind aus …

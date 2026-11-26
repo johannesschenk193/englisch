@@ -4,15 +4,23 @@
 // Steht ein Testtermin fest, werden die Abstaende auf 30 % der Restzeit gekuerzt, damit vor dem Test alles noch einmal kommt.
 (()=>{
 const ABSTAND=[0,1,3,7,14,30,90];           // Tage bis zur naechsten Abfrage, je Fach
-const SITZUNG=20, FRUEH=10;                 // Karten je Uebung, neue Woerter am Tag (ohne Testtermin)
+const SITZUNG=20, ZIEL=50;                  // Karten je Uebung, Woerter am Tag mindestens (Eltern koennen es aendern)
 const LEER="vok-karte";
 
 // ---------- Woerter ----------
-const W={}, ABSCHNITT=[];
+// Gruppen zum Lernen: nach Seite, nach Abschnitt, nach Unit. Eine Zeile "@190" im Abschnitt heisst: ab hier Seite 190.
+// Ohne solche Zeile gehoert ein Abschnitt ueber zwei Seiten als Ganzes zu "Seite 189–190".
+const W={}, ABSCHNITT=[], GRUPPEN={seite:[],abschnitt:[],unit:[]};
+const MODI=[["seite","Seitenweise"],["abschnitt","Abschnittsweise"],["unit","Unitweise"]];
 const glatt=s=>s.toLowerCase().replace(/[’`´]/g,"'").replace(/[….,!?;:"]/g," ").replace(/\s+/g," ").trim();
+const gruppe=(m,key,name,sub)=>{ let g=GRUPPEN[m].find(x=>x.key===key); if(!g){ g={key,name,sub,woerter:[],nr:GRUPPEN[m].length}; GRUPPEN[m].push(g); } return g; };
 for(const [id,name,seite,text] of window.VOKABELN){
   const a={id,name,seite,woerter:[]}; ABSCHNITT.push(a);
+  const unit=name.split(":")[0].trim(), seiten=(seite.match(/\d+/g)||[]).map(Number);
+  const ga=gruppe("abschnitt",id,name,seite), gu=gruppe("unit","unit:"+unit,unit,"");
+  let s=seiten.length>1&&!/^@/m.test(text)?seiten.join("–"):String(seiten[0]||"?");
   for(const z of text.trim().split("\n")){
+    if(/^@\d+/.test(z)){ s=z.slice(1).trim(); continue; }
     const [en,de,hint="",alt="",merk=""]=z.split("|"), k=glatt(en);
     const schon=Object.values(W).find(w=>w.k===k&&w.de===de); if(schon) throw Error("doppelt: "+z);
     const verb=/^to ./.test(en), teile=en.split(" ").filter(t=>/[a-z]/i.test(t)), eins=verb?teile.length===2:teile.length===1;
@@ -20,30 +28,49 @@ for(const [id,name,seite,text] of window.VOKABELN){
       formen:[verb?k.slice(3):k,...alt.split(",").map(glatt).filter(Boolean)].filter((x,i,l)=>l.indexOf(x)===i),
       gross:/^(I|I'm|English|Mr|Mrs|TV|OK)\b/.test(en)&&eins,
       ton:en.replace(/\s*…\s*/g," ").trim()};
-    W[w.id]=w; a.woerter.push(w);
+    const gs=gruppe("seite","seite:"+s,"Seite "+s,"");
+    w.g={seite:gs.key,abschnitt:ga.key,unit:gu.key};
+    W[w.id]=w; a.woerter.push(w); ga.woerter.push(w); gu.woerter.push(w); gs.woerter.push(w);
   }
 }
+GRUPPEN.seite.sort((x,y)=>parseInt(x.key.slice(6))-parseInt(y.key.slice(6))||x.nr-y.nr);
+for(const g of GRUPPEN.unit){ const n=g.woerter.flatMap(w=>w.g.seite.slice(6).split("–").map(Number)).filter(x=>x); g.sub=n.length?`S. ${Math.min(...n)}–${Math.max(...n)}`:""; }
+for(const g of GRUPPEN.seite) g.sub=[...new Set(g.woerter.map(w=>w.sec.name))].join(", ");
 const ALLE=Object.values(W);
 const NACH={}; ALLE.filter(w=>w.eins).forEach(w=>{ { const k=w.verb?w.k.slice(3):w.k; (NACH[k]=NACH[k]||[]).push(w); }; });
 // haeufige englische Woerter, die nur einen Buchstaben neben einer Vokabel liegen: das ist dann ein anderes Wort, kein Tippfehler
 const ANDERES=new Set("bad bet bit but bat big bag beg bug god got dig hot hat hit hut cut cup cap rot run rice nice mine dead deed read real seat set sit ball bell tall wall well will fall full fell free tree tea bee hair hear here there chain share horse house hose nose mouth moose loose lose low law raw row rod road load boot goat coat boat beat bear beer bird bread board broad word work warm form from front flood flow flower glass glad grass class clash close cloth clothes coat cook cooker cookie book look lock clock block black back pack park part dark bark bike like lake lane lone long song sing thing think thank tank bank pink pine wine fine fire five live love lone life give gave have hate late gate game name same come some home hope hole whole who how now new few knew know no not note nose toe two too top toy boy buy by my me men man many any all ill always away again against quit quite quiet kit kite bite white write while where were wear year yes yet pet pat put let get wet west vest test rest best east beast fast last past list lost most must dust just tall table cable able chair cheese chess choose class dad day dog door floor poor end and hand land sand send sent ant aunt uncle under other mother brother father rather feather farther her his its it in is at as an on or of off our out own only once one ten then than them they this these those that the there their so go do to for four fore far fur car card care cat can when went want wand wander hand rat rap red bed bid see sea she sick six mix fix film fill milk part port sport short shot shop ship sheep sleep slow blow blue glue grow brown crown green grey great greet street sweet".split(" "));
 
 // ---------- Lernstand ----------
-const leer=()=>({w:{},aus:[],test:"",neu:{tag:0,n:0},tage:[],tests:{}});
+const leer=()=>({w:{},aus:[],test:"",neu:{tag:0,n:0},tage:[],tests:{},heute:{tag:0,ids:[]}});
 let S={...leer(),...JSON.parse(JSON.stringify(KERN.D.vok))};
 const halte=()=>KERN.speichere("vok",S);
 const tagVon=d=>Math.floor((d.getTime()-d.getTimezoneOffset()*6e4)/864e5);
 let heute=()=>tagVon(new Date());
 const testTag=()=>S.test?Math.round(Date.parse(S.test+"T00:00:00Z")/864e5):0;
 const L=w=>S.w[w.id]||{f:0,d:0,s:0,r:0,h:0,x:0};   // f Fach, d faellig am, s Schwierigkeit, r richtig, h fast, x falsch
-const dran=()=>ALLE.filter(w=>!S.aus.includes(w.sec.id));
+// Auswahl: v.nach = seite | abschnitt | unit, v.wahl[nach] = gewaehlte Gruppen. Ohne Auswahl gilt die alte Liste "aus".
+const gewaehlt=(v,m)=>v.wahl?.[m]||(m==="abschnitt"?ABSCHNITT.filter(a=>!(v.aus||[]).includes(a.id)).map(a=>a.id):GRUPPEN[m].map(g=>g.key));
+const dranVon=v=>{ const m=v.nach||"abschnitt", sel=new Set(gewaehlt(v,m)); return ALLE.filter(w=>sel.has(w.g[m])); };
+const dran=()=>dranVon(S);
 const faellige=()=>dran().filter(w=>L(w).f>0&&L(w).d<=heute()).sort((a,b)=>L(a).d-L(b).d||L(a).f-L(b).f);
 const neue=()=>dran().filter(w=>!L(w).f);
 const schwere=()=>ALLE.filter(w=>L(w).s>0).sort((a,b)=>L(b).s-L(a).s);
 const neuHeute=()=>S.neu.tag===heute()?S.neu.n:0;
-function neuProTag(){
+const ziel=()=>S.ziel||ZIEL;
+const geuebt=()=>S.heute?.tag===heute()?S.heute.ids.length:0;
+// schon gelernt, heute nicht dran: zum Auffrischen, wenn die neuen Woerter der Auswahl nicht fuers Tagesziel reichen
+const auffrischen=()=>{ const h=new Set(S.heute?.tag===heute()?S.heute.ids:[]); return dran().filter(w=>L(w).f>0&&L(w).d>heute()&&!h.has(w.id)).sort((a,b)=>L(a).f-L(b).f||L(a).d-L(b).d); };
+function neuProTag(){ // nur mit Testtermin: so viele neue, dass bis zum Test alles einmal dran war
   const bis=testTag()-heute();
-  return bis>0 ? Math.min(25,Math.max(5,Math.ceil((neue().length+neuHeute())/Math.max(1,bis-1)))) : FRUEH;
+  return bis>0 ? Math.min(25,Math.max(5,Math.ceil((neue().length+neuHeute())/Math.max(1,bis-1)))) : 0;
+}
+// was heute noch offen ist: f faellig, n neu, x auffrischen. Zusammen mindestens bis zum Tagesziel.
+function offen(){
+  const f=faellige().length, rest=Math.max(0,ziel()-geuebt()-f);
+  const n=Math.min(neue().length,Math.max(rest,neuProTag()-neuHeute()));
+  const x=Math.min(auffrischen().length,Math.max(0,rest-n));
+  return {f,n,x,alle:f+n+x};
 }
 function faellig(fach){
   let iv=ABSTAND[fach]; const bis=testTag()-heute();
@@ -61,6 +88,8 @@ function buche(w,p,{zaehlt=true,sofort=false}={}){
     if(warNeu&&e.f){ if(S.neu.tag!==heute()) S.neu={tag:heute(),n:0}; S.neu.n++; }
   } else if(p<2&&e.f) e.d=Math.min(e.d,heute()+1);
   if(S.tage[S.tage.length-1]!==heute()) S.tage.push(heute());
+  if(S.heute?.tag!==heute()) S.heute={tag:heute(),ids:[]};
+  if(!S.heute.ids.includes(w.id)) S.heute.ids.push(w.id);
   halte();
 }
 function kette(){ let n=0,t=heute(); const m=new Set(S.tage); if(!m.has(t)) t--; while(m.has(t)){n++;t--;} return n; }
@@ -236,19 +265,23 @@ function schritt(){
     schritt();
   });
 }
+const tagesStand=()=>{ const g=geuebt(), z=ziel(); return `<div class="tagesziel"><span>Heute ${Math.min(g,z)} von ${z} Wörtern${g>z?` (${g} geübt)`:""}</span><span class="bar"><i style="width:${Math.min(100,Math.round(100*g/z))}%"></i></span></div>`; };
 function uebungFertig(){
   KERN.log(U.titel,U.gut,U.gut+U.fast+U.falsch,"vokabeln");
-  aus++; $("karte").replaceChildren(); const f=faellige().length, n=Math.min(neue().length,Math.max(0,neuProTag()-neuHeute()));
-  const k=document.createElement("div"); k.className="aufgabe"; k.innerHTML=`<p class="satzgross">Geschafft!</p>${kasten()}`; $("karte").append(k);
+  aus++; $("karte").replaceChildren(); const o=offen();
+  const k=document.createElement("div"); k.className="aufgabe"; k.innerHTML=`<p class="satzgross">Geschafft!</p>${tagesStand()}${kasten()}`; $("karte").append(k);
   $("runde").textContent=U.titel; $("punkte").textContent=""; sag("",""); piep([[523,0,.15],[659,.13,.15],[784,.26,.3]]);
-  abschluss(`<p>${U.gut} gleich richtig, ${U.fast} fast richtig, ${U.falsch} noch nicht. ${f||n?"":"Für heute bist du fertig."}</p>`,
-    f||n?[["Weiter üben","haupt",heuteUeben],["Zurück","neben",vokMenue]]:[["Zurück","haupt",vokMenue],...(neue().length?[["5 neue Wörter extra","neben",()=>neueUeben(5)]]:[])]);
+  const r=Math.max(0,ziel()-geuebt());
+  abschluss(`<p>${U.gut} gleich richtig, ${U.fast} fast richtig, ${U.falsch} noch nicht. ${o.alle?r?`Noch ${r} ${r===1?"Wort":"Wörter"} bis zum Tagesziel.`:"":"Für heute bist du fertig."}</p>`,
+    o.alle?[["Weiter üben","haupt",heuteUeben],["Zurück","neben",vokMenue]]:[["Zurück","haupt",vokMenue],...(neue().length?[["5 neue Wörter extra","neben",()=>neueUeben(5)]]:[])]);
 }
-// Bekanntes zuerst, neue Woerter in kleinen Portionen dazwischen
+// Bekanntes zuerst, neue Woerter in kleinen Portionen dazwischen; reicht beides nicht fuers Tagesziel, kommt Gelerntes zum Auffrischen
 function heuteUeben(){
+  const o=offen();
   const f=faellige().slice(0,SITZUNG).map(w=>({w,s:"abfrage"}));
-  const n=neue().slice(0,Math.max(0,Math.min(neuProTag()-neuHeute(),Math.max(5,SITZUNG-f.length),10))).map(w=>({w,s:"neu"}));
-  starteUebung([...mischen(f),...n],"Vokabeln: heute üben");
+  const nn=Math.min(o.n,Math.max(5,SITZUNG-f.length),10), n=neue().slice(0,nn).map(w=>({w,s:"neu"}));
+  const x=auffrischen().slice(0,Math.min(o.x,Math.max(0,SITZUNG-f.length-n.length))).map(w=>({w,s:"schwer"}));
+  starteUebung([...mischen([...f,...x]),...n],"Vokabeln: heute üben");
 }
 const neueUeben=n=>starteUebung(neue().slice(0,n).map(w=>({w,s:"neu"})),"Vokabeln: neue Wörter");
 const schwereUeben=()=>starteUebung(schwere().slice(0,12).map(w=>({w,s:"schwer"})),"Vokabeln: schwere Wörter");
@@ -283,7 +316,7 @@ function testMenue(){
   ort="vok"; ruhe("Vokabeltest","20 Wörter ohne Tipps. Einzelne Wörter schreibst du, Ausdrücke baust du aus Schildern.");
   const g=dran().filter(w=>L(w).f);
   karten([{t:"Alles Gelernte",u:`gemischt aus ${g.length} Wörtern`,zu:g.length<5,st:g.length<5?"ab 5 Wörtern":tst("gelernt"),f:()=>starteTest("gelernt","alles Gelernte",g)},
-    ...ABSCHNITT.map(a=>({t:a.name,u:`${a.seite}, ${a.woerter.length} Wörter`,st:tst(a.id),f:()=>starteTest(a.id,a.name,a.woerter)}))]);
+    ...GRUPPEN[S.nach||"abschnitt"].map(a=>({t:sicher(a.name),u:`${a.sub?sicher(a.sub)+", ":""}${a.woerter.length} Wörter`,st:tst(a.key),f:()=>starteTest(a.key,a.name,a.woerter)}))]);
 }
 
 // ---------- Menues ----------
@@ -292,25 +325,44 @@ function kasten(){
   const wann=["noch neu","jeden Tag","nach 3 Tagen","nach 7 Tagen","nach 14 Tagen","nach 30 Tagen","nach 90 Tagen"];
   return `<div class="kasten">${z.map((n,i)=>`<div class="fach"><b>${n}</b><span>${i?`Fach ${i}`:"Neu"}</span><small>${wann[i]}</small></div>`).join("")}</div>`;
 }
+const modusName=v=>({seite:"Seiten",abschnitt:"Abschnitte",unit:"Units"})[v.nach||"abschnitt"];
+const auswahlText=v=>{ const m=v.nach||"abschnitt", sel=gewaehlt(v,m); return sel.length===GRUPPEN[m].length?`alle ${modusName(v)}`:sel.length===1?GRUPPEN[m].find(g=>g.key===sel[0])?.name||"":`${sel.length} ${modusName(v)}`; };
 function vokMenue(){
-  aus++; ort="vok"; const f=faellige().length, n=Math.max(0,Math.min(neue().length,neuProTag()-neuHeute())), bis=testTag()-heute(), k=kette();
-  ruhe("Vokabeln",[bis>0?`Noch ${bis} ${bis===1?"Tag":"Tage"} bis zum Test.`:bis===0&&S.test?"Heute ist der Test.":"", k>1?`${k} Tage hintereinander geübt.`:"", "Jeden Tag ein bisschen hilft mehr als alles auf einmal."].filter(Boolean).join(" "));
-  karten([{t:"Heute üben",u:f||n?`${f} zum Wiederholen, ${n} neu`:"für heute fertig",st:f||n?"":"Fertig ✓",zu:!f&&!n,f:heuteUeben},
+  aus++; ort="vok"; const o=offen(), bis=testTag()-heute(), k=kette();
+  ruhe("Vokabeln",[bis>0?`Noch ${bis} ${bis===1?"Tag":"Tage"} bis zum Test.`:bis===0&&S.test?"Heute ist der Test.":"", k>1?`${k} Tage hintereinander geübt.`:"", `Jeden Tag mindestens ${ziel()} Wörter.`].filter(Boolean).join(" "));
+  karten([{t:"Heute üben",u:o.alle?[o.f&&`${o.f} wiederholen`,o.n&&`${o.n} neu`,o.x&&`${o.x} auffrischen`].filter(Boolean).join(", "):"für heute fertig",st:o.alle?`${Math.min(geuebt(),ziel())} von ${ziel()}`:"Fertig ✓",zu:!o.alle,f:heuteUeben},
+    {t:"Was lerne ich?",u:"seitenweise, abschnittsweise oder unitweise",st:auswahlText(S),f:einstellen},
     {t:"Schwere Wörter",u:"nur, was zuletzt nicht saß",st:schwere().length?`${schwere().length} offen`:"nichts offen",zu:!schwere().length,f:schwereUeben},
-    {t:"Vokabeltest",u:"20 Wörter wie in der Schule",f:testMenue},
+    {t:"Vokabeltest",u:"20 Wörter wie in der Schule",st:S.test&&bis>=0?`Test: ${S.test.split("-").reverse().join(".")}`:"",f:testMenue},
     {t:"Neue Wörter extra",u:"fünf neue Wörter",zu:!neue().length,f:()=>neueUeben(5)},
-    {t:"Wortliste",u:"alle Wörter nachsehen",f:wortliste},
-    {t:"Was ist dran?",u:"Abschnitte und Testtermin",st:S.test&&bis>=0?`Test: ${S.test.split("-").reverse().join(".")}`:"",f:einstellen}]);
-  $("spiele").insertAdjacentHTML("afterbegin",kasten());
+    {t:"Wortliste",u:"alle Wörter nachsehen",f:wortliste}]);
+  $("spiele").insertAdjacentHTML("afterbegin",tagesStand()+kasten());
+}
+// Auswahl der Gruppen, fuer das Kind (hier) und fuer die Eltern (app.js). v: Vokabelstand, speichern(v) nach jeder Aenderung.
+function wahlEl(v,speichern){
+  const d=document.createElement("div"); d.className="wahl";
+  const zeichne=()=>{ const m=v.nach||"abschnitt", sel=new Set(gewaehlt(v,m)), n=dranVon(v).length;
+    d.innerHTML=`<div class="modi" role="group" aria-label="Lernen nach">${MODI.map(([k,t])=>`<button type="button" data-m="${k}" aria-pressed="${k===m}">${t}</button>`).join("")}</div>
+      <p><small>${n} ${n===1?"Wort":"Wörter"} ausgewählt. Gelernte Wörter bleiben gespeichert, auch wenn sie gerade nicht dran sind.</small></p>
+      <div class="reihe2"><button type="button" class="neben" data-alle="1">Alle</button><button type="button" class="neben" data-alle="0">Keine</button></div>`
+      +GRUPPEN[m].map(g=>`<label><input type="checkbox" value="${sicher(g.key)}" ${sel.has(g.key)?"checked":""}> ${sicher(g.name)} <small>${g.sub?sicher(g.sub)+", ":""}${g.woerter.length} Wörter, ${g.woerter.filter(w=>v.w?.[w.id]?.f).length} gelernt</small></label>`).join(""); };
+  const setze=(m,keys)=>{ v.wahl={...(v.wahl||{}),[m]:keys}; speichern(v); zeichne(); };
+  d.addEventListener("click",e=>{ const b=e.target.closest("button"); if(!b) return; const m=v.nach||"abschnitt";
+    if(b.dataset.m&&b.dataset.m!==m){ const aktiv=new Set(dranVon(v).map(w=>w.id)); v.nach=b.dataset.m; setze(b.dataset.m,GRUPPEN[b.dataset.m].filter(g=>g.woerter.some(w=>aktiv.has(w.id))).map(g=>g.key)); }
+    else if(b.dataset.alle) setze(m,b.dataset.alle==="1"?GRUPPEN[m].map(g=>g.key):[]); });
+  d.addEventListener("change",e=>{ if(e.target.type!=="checkbox") return; const m=v.nach||"abschnitt";
+    setze(m,[...d.querySelectorAll("input[type=checkbox]:checked")].map(c=>c.value)); });
+  zeichne(); return d;
 }
 function einstellen(){
-  ruhe("Was ist dran?","Häkchen weg heißt: Dieser Abschnitt kommt gerade nicht. Gelernte Wörter bleiben gespeichert.");
+  ruhe("Was lerne ich?","Wähl, wie du lernst, und hak an, was gerade dran ist.");
   const d=document.createElement("div"); d.className="einstellung";
-  d.innerHTML=`<label class="termin">Nächster Vokabeltest am <input type="date" value="${S.test}"></label>`+ABSCHNITT.map(a=>`<label><input type="checkbox" value="${a.id}" ${S.aus.includes(a.id)?"":"checked"}> ${sicher(a.name)} <small>${a.seite}, ${a.woerter.length} Wörter, ${a.woerter.filter(w=>L(w).f).length} gelernt</small></label>`).join("")+`<p>Mit Termin verteilt das Spiel die neuen Wörter auf die Tage bis dahin und wiederholt öfter.</p><button type="button" class="spiel">Fertig</button>`;
+  d.innerHTML=`<label class="termin">Nächster Vokabeltest am <input type="date" value="${S.test}"></label><p>Mit Termin verteilt das Spiel die neuen Wörter auf die Tage bis dahin und wiederholt öfter.</p>`;
+  d.append(wahlEl(S,()=>halte()));
+  d.insertAdjacentHTML("beforeend",`<button type="button" class="spiel">Fertig</button>`);
   $("spiele").replaceChildren(d);
   d.querySelector("[type=date]").onchange=e=>{ S.test=e.target.value; halte(); };
-  d.querySelectorAll("[type=checkbox]").forEach(c=>c.onchange=()=>{ S.aus=S.aus.filter(x=>x!==c.value); if(!c.checked) S.aus.push(c.value); halte(); });
-  d.querySelector("button").onclick=vokMenue;
+  d.querySelector(".spiel:last-child").onclick=vokMenue;
 }
 function wortliste(){
   ruhe("Wortliste","Klick auf ein Wort, um es zu hören.");
@@ -320,6 +372,7 @@ function wortliste(){
   d.onclick=e=>{ const w=W[e.target.dataset?.w]; if(w) sprich(w.ton); };
 }
 window.vokMenue=vokMenue;
-window.vokKarte=()=>{ const f=faellige().length,n=Math.max(0,Math.min(neue().length,neuProTag()-neuHeute())); return {i:"📚",p:[ALLE.filter(w=>L(w).f).length,ALLE.length],t:"Vokabeln",u:"Karteikasten und Vokabeltest",st:f||n?`heute: ${f+n}`:"heute fertig ✓",f:vokMenue}; };
-window.vokPruef={leer,kasten,tausch:x=>{const a=S; if(x) S=x; return a;},W,ALLE,ABSCHNITT,bewerte,bewerteSatz,vergleich,faellig,ablenker,halbe,L,S:()=>S,setTag:t=>heute=()=>t,U:()=>U,faellige,neue,neuProTag}; // fuer Tests
+window.vokKarte=()=>{ const o=offen(); return {i:"📚",p:[ALLE.filter(w=>L(w).f).length,ALLE.length],t:"Vokabeln",u:"Karteikasten und Vokabeltest",st:o.alle?`heute ${Math.min(geuebt(),ziel())} von ${ziel()}`:"heute fertig ✓",f:vokMenue}; };
+window.vokWahl=wahlEl;
+window.vokPruef={leer,kasten,GRUPPEN,ZIEL,offen,geuebt,ziel,dran,auffrischen,auswahlText,tausch:x=>{const a=S; if(x) S=x; return a;},W,ALLE,ABSCHNITT,bewerte,bewerteSatz,vergleich,faellig,ablenker,halbe,L,S:()=>S,setTag:t=>heute=()=>t,U:()=>U,faellige,neue,neuProTag}; // fuer Tests
 })();

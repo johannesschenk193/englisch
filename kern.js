@@ -2,23 +2,29 @@
 // Kinder, Speicher und Abgleich. Ein Datensatz je Kind: {stand, vok, verlauf, zeit, reset}.
 // Abgleich (wahlfrei): private GitHub-Ablage, je Kind eine Datei. Ohne Abgleich bleibt alles auf dem Geraet.
 const KERN=(()=>{
-const ANZAHL=4;
 const lies=(k,d)=>{ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):d; }catch(e){ return d; } };
 const setz=(k,v)=>{ try{ v==null?localStorage.removeItem(k):localStorage.setItem(k,JSON.stringify(v)); }catch(e){} };
 const kopie=x=>x===undefined?undefined:JSON.parse(JSON.stringify(x));
 
 // ---------- Geraet und Familie ----------
 let geraet=Object.assign({token:"",repo:"johannesschenk193/englisch-spielstand",nur:0},lies("et:geraet",{}));
-const VOR={namen:{1:"Jonathan",2:"Kind 2",3:"Kind 3",4:"Kind 4"},bild:{1:"🦊",2:"🐼",3:"🐯",4:"🐸"},pin:"",salz:""};
+// kinder: alle je angelegten Nummern, weg: entfernte. Eine Nummer wird nie wieder vergeben, sonst kaeme ein alter Stand zurueck.
+const VOR={namen:{1:"Jonathan",2:"Kind 2",3:"Kind 3",4:"Kind 4"},bild:{1:"🦊",2:"🐼",3:"🐯",4:"🐸"},pin:"",salz:"",kinder:[1,2,3,4],weg:[]};
 let familie=lies("et:familie",null);
-const fam=()=>{ const f=familie||{}; return {...VOR,...f,namen:{...VOR.namen,...f.namen},bild:{...VOR.bild,...f.bild}}; };
+const fam=()=>{ const f=familie||{}; return {...VOR,...f,namen:{...VOR.namen,...f.namen},bild:{...VOR.bild,...f.bild},kinder:f.kinder||VOR.kinder,weg:f.weg||[]}; };
+const kinder=()=>{ const f=fam(); return f.kinder.filter(n=>!f.weg.includes(n)).sort((a,b)=>a-b); };
+const alleNummern=()=>{ const f=fam(); return [...new Set([...f.kinder,...f.weg])]; };
 function setzFamilie(x){ familie={...(familie||{}),...x}; setz("et:familie",familie); plane(1500); }
+function neuesKind(name,bild){ const f=fam(), n=Math.max(0,...alleNummern())+1;
+  setzFamilie({kinder:[...f.kinder,n],namen:{...f.namen,[n]:name},bild:{...f.bild,[n]:bild}}); return n; }
+function entferneKind(n){ const f=fam(); zuruecksetzen(n); setzFamilie({weg:[...new Set([...f.weg,n])]});
+  if(geraet.nur===n) setzGeraet({nur:0}); if(lies("et:kind",0)===n) setz("et:kind",null); }
 function setzGeraet(x){ geraet={...geraet,...x}; setz("et:geraet",geraet); }
 
 // ---------- Daten je Kind ----------
 const leer=()=>({stand:{},vok:{},verlauf:[],zeit:{},reset:0});
 const daten=n=>Object.assign(leer(),lies("et:k"+n,{}));
-let nr=geraet.nur||lies("et:kind",0); if(!(nr>=1&&nr<=ANZAHL)) nr=0;
+let nr=geraet.nur||lies("et:kind",0); if(!(kinder().includes(nr)||nr&&nr===geraet.nur&&!fam().weg.includes(nr))) nr=0;
 let D=nr?daten(nr):leer();
 const sichere=()=>{ if(nr) setz("et:k"+nr,D); };
 function speichere(teil,wert){ if(!nr) return; D[teil]=wert; sichere(); plane(20000); }
@@ -26,7 +32,12 @@ const heute=()=>{ const d=new Date(); return Math.floor((d.getTime()-d.getTimezo
 function log(was,gut,von,art){ if(!nr||!von) return; D.verlauf.push({t:Date.now(),w:was,g:gut,v:von,a:art||""}); D.verlauf=D.verlauf.slice(-400); sichere(); plane(3000); }
 function waehle(n){ setz("et:kind",n||null); location.reload(); }
 function ersetze(n,d){ setz("et:k"+n,d); if(n===nr){ D=daten(nr); neu(); } plane(1500); }
-function zuruecksetzen(n){ ersetze(n,{...leer(),reset:Date.now()}); }
+function zuruecksetzen(n,teil){ // teil: "stand" (Grammatik), "vok" (Vokabeln) oder leer fuer alles
+  const alt=n===nr?D:daten(n), x={...leer(),reset:Date.now()};
+  if(teil){ Object.assign(x,kopie(alt)); x[teil]={}; x.reset=Date.now(); x.verlauf=(alt.verlauf||[]).filter(v=>teil==="vok"?v.a!=="vokabeln"&&v.a!=="test":v.a==="vokabeln"||v.a==="test"); }
+  // Einstellungen der Eltern bleiben: Tagesziel, Auswahl, Testtermin
+  if(teil!=="stand") for(const k of ["ziel","nach","wahl","aus","test"]) if(alt.vok?.[k]!==undefined) x.vok[k]=kopie(alt.vok[k]);
+  ersetze(n,x); }
 let beiNeu=()=>{}; const neu=()=>{ try{ beiNeu(D); }catch(e){ console.error(e); } };
 addEventListener("storage",e=>{ if(nr&&e.key==="et:k"+nr&&e.newValue){ D=daten(nr); neu(); } });
 // Uebungszeit: nur, wenn die Seite offen ist und in der letzten Minute etwas passiert ist
@@ -42,6 +53,8 @@ function misch(b,l,r,p=[]){
   if(p0==="zeit"&&p.length===2) return (l||0)+(r||0)-(b||0);
   if(l===undefined) return r; if(r===undefined) return l;
   if(p0==="vok"&&p1==="w"&&p.length===3){ const s=x=>x.r+x.h+x.x; return s(l)>=s(r)?l:r; }
+  if((p0==="kinder"||p0==="weg")&&p.length===1&&Array.isArray(l)&&Array.isArray(r)) return [...new Set([...l,...r])].sort((x,y)=>x-y);
+  if(p0==="vok"&&p1==="heute"&&p.length===2) return l.tag!==r.tag?(l.tag>r.tag?l:r):{tag:l.tag,ids:[...new Set([...l.ids,...r.ids])]};
   if(p0==="vok"&&p1==="neu") return l.tag!==r.tag?(l.tag>r.tag?l:r):{tag:l.tag,n:Math.max(l.n,r.n)};
   if(p0==="stand"&&p1==="weiter"&&p.length===3) return l;
   if(Array.isArray(l)&&Array.isArray(r)){
@@ -93,7 +106,7 @@ async function abgleich(alle){
   laeuft=true; clearTimeout(uhr); uhr=0;
   try{
     await gleicheAb("familie",()=>familie||undefined,m=>{ familie=m; setz("et:familie",m); });
-    const liste=geraet.nur?[geraet.nur]:alle||!nr?[1,2,3,4]:[nr];
+    const liste=geraet.nur?[geraet.nur]:alle||!nr?alleNummern():[nr];
     for(const n of liste) await gleicheAb("kind"+n,()=>{ const d=n===nr?D:daten(n); return hatInhalt(d)?kopie(d):undefined; },
       m=>{ setz("et:k"+n,m); if(n===nr){ D=daten(nr); neu(); } });
     status={t:Date.now(),text:"abgeglichen",gut:true};
@@ -113,7 +126,7 @@ async function pruefe(token){ // darf der Schluessel die Ablage lesen und schrei
 const CODE="ET1.";
 const codeFuer=n=>CODE+zu64(J({t:geraet.token,r:geraet.repo,k:n})).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
 function ausCode(c){ try{ c=String(c).trim(); const i=c.indexOf(CODE); if(i<0) return null; const j=JSON.parse(von64(c.slice(i+CODE.length).replace(/-/g,"+").replace(/_/g,"/"))); return j.t?j:null; }catch(e){ return null; } }
-function trenne(){ setzGeraet({token:""}); setz("et:basis:familie",null); for(let n=1;n<=ANZAHL;n++) setz("et:basis:kind"+n,null); }
+function trenne(){ setzGeraet({token:""}); setz("et:basis:familie",null); for(const n of alleNummern()) setz("et:basis:kind"+n,null); }
 addEventListener("online",()=>plane(500));
 document.addEventListener("visibilitychange",()=>{ if(document.hidden){ if(uhr||laeuft) abgleich(); } else if(Date.now()-status.t>60000) plane(300); });
 addEventListener("load",()=>plane(400));
@@ -123,7 +136,7 @@ async function hash(pin,salz){ const b=await crypto.subtle.digest("SHA-256",new 
 async function setzPin(pin){ const salz=Math.random().toString(36).slice(2); setzFamilie({salz,pin:await hash(pin,salz)}); }
 const pinOk=async pin=>(await hash(pin,fam().salz))===fam().pin;
 
-return {ANZAHL,lies,setz,fam,setzFamilie,setzGeraet,daten,speichere,log,waehle,ersetze,zuruecksetzen,heute,misch,abgleich,pruefe,verbunden,codeFuer,ausCode,trenne,setzPin,pinOk,leer,hatInhalt,
+return {kinder,alleNummern,neuesKind,entferneKind,lies,setz,fam,setzFamilie,setzGeraet,daten,speichere,log,waehle,ersetze,zuruecksetzen,heute,misch,abgleich,pruefe,verbunden,codeFuer,ausCode,trenne,setzPin,pinOk,leer,hatInhalt,
   get nr(){return nr;}, get D(){return D;}, get geraet(){return geraet;}, get status(){return status;},
   set beiNeu(f){beiNeu=f;}, set melde(f){melde=f;}};
 })();
