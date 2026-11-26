@@ -1,6 +1,6 @@
 {
- "name": "Englisch-Trainer",
- "short_name": "Englisch",
+ "name": "Lern-Trainer",
+ "short_name": "Lernen",
  "lang": "de",
  "start_url": "./",
  "scope": "./",

@@ -1,5 +1,5 @@
 "use strict";
-// Kinder, Speicher und Abgleich. Ein Datensatz je Kind: {stand, vok, verlauf, zeit, reset}.
+// Kinder, Speicher und Abgleich. Ein Datensatz je Kind: {stand, vok, mathe, verlauf, zeit, reset}.
 // Abgleich (wahlfrei): private GitHub-Ablage, je Kind eine Datei. Ohne Abgleich bleibt alles auf dem Geraet.
 const KERN=(()=>{
 const lies=(k,d)=>{ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):d; }catch(e){ return d; } };
@@ -22,7 +22,7 @@ function entferneKind(n){ const f=fam(); zuruecksetzen(n); setzFamilie({weg:[...
 function setzGeraet(x){ geraet={...geraet,...x}; setz("et:geraet",geraet); }
 
 // ---------- Daten je Kind ----------
-const leer=()=>({stand:{},vok:{},verlauf:[],zeit:{},reset:0});
+const leer=()=>({stand:{},vok:{},mathe:{},verlauf:[],zeit:{},reset:0});
 const daten=n=>Object.assign(leer(),lies("et:k"+n,{}));
 let nr=geraet.nur||lies("et:kind",0); if(!(kinder().includes(nr)||nr&&nr===geraet.nur&&!fam().weg.includes(nr))) nr=0;
 let D=nr?daten(nr):leer();
@@ -32,12 +32,15 @@ const heute=()=>{ const d=new Date(); return Math.floor((d.getTime()-d.getTimezo
 function log(was,gut,von,art){ if(!nr||!von) return; D.verlauf.push({t:Date.now(),w:was,g:gut,v:von,a:art||""}); D.verlauf=D.verlauf.slice(-400); sichere(); plane(3000); }
 function waehle(n){ setz("et:kind",n||null); location.reload(); }
 function ersetze(n,d){ setz("et:k"+n,d); if(n===nr){ D=daten(nr); neu(); } plane(1500); }
-function zuruecksetzen(n,teil){ // teil: "stand" (Grammatik), "vok" (Vokabeln) oder leer fuer alles
+const gruppe=a=>a==="vokabeln"||a==="test"?"vok":a==="mathe"?"mathe":"stand";
+function zuruecksetzen(n,teil){ // teil: "stand" (Grammatik), "vok" (Vokabeln), "mathe" oder leer fuer alles
   const alt=n===nr?D:daten(n), x={...leer(),reset:Date.now()};
-  if(teil){ Object.assign(x,kopie(alt)); x[teil]={}; x.reset=Date.now(); x.verlauf=(alt.verlauf||[]).filter(v=>teil==="vok"?v.a!=="vokabeln"&&v.a!=="test":v.a==="vokabeln"||v.a==="test"); }
+  if(teil){ Object.assign(x,kopie(alt)); x[teil]={}; x.reset=Date.now(); x.verlauf=(alt.verlauf||[]).filter(v=>gruppe(v.a)!==teil); }
   // Einstellungen der Eltern bleiben: Tagesziel, Auswahl, Testtermin
   if(teil!=="stand") for(const k of ["ziel","nach","wahl","aus","test"]) if(alt.vok?.[k]!==undefined) x.vok[k]=kopie(alt.vok[k]);
   if(alt.stand?.buch) x.stand={...(x.stand||{}),buch:kopie(alt.stand.buch)}; // wo die Klasse im Buch ist, bleibt
+  if(alt.mathe?.buch) x.mathe={...(x.mathe||{}),buch:kopie(alt.mathe.buch)}; // ebenso im Mathebuch und der Schwerpunkt
+  if(alt.mathe?.fokus!==undefined) x.mathe={...(x.mathe||{}),fokus:alt.mathe.fokus};
   ersetze(n,x); }
 let beiNeu=()=>{}; const neu=()=>{ try{ beiNeu(D); }catch(e){ console.error(e); } };
 addEventListener("storage",e=>{ if(nr&&e.key==="et:k"+nr&&e.newValue){ D=daten(nr); neu(); } });
@@ -57,6 +60,8 @@ function misch(b,l,r,p=[]){
   if((p0==="kinder"||p0==="weg")&&p.length===1&&Array.isArray(l)&&Array.isArray(r)) return [...new Set([...l,...r])].sort((x,y)=>x-y);
   if(p0==="vok"&&p1==="heute"&&p.length===2) return l.tag!==r.tag?(l.tag>r.tag?l:r):{tag:l.tag,ids:[...new Set([...l.ids,...r.ids])]};
   if(p0==="stand"&&p1==="buch"&&p.length===2) return (l.i||0)!==(r.i||0)?((l.i||0)>(r.i||0)?l:r):((l.frage||0)>=(r.frage||0)?l:r); // weiter im Buch gewinnt
+  if(p0==="mathe"&&p1==="buch"&&p.length===2) return (l.i||0)!==(r.i||0)?((l.i||0)>(r.i||0)?l:r):((l.frage||0)>=(r.frage||0)?l:r);
+  if(p0==="mathe"&&p1==="weiter"&&p.length===3) return l;
   if(p0==="vok"&&p1==="neu") return l.tag!==r.tag?(l.tag>r.tag?l:r):{tag:l.tag,n:Math.max(l.n,r.n)};
   if(p0==="stand"&&p1==="weiter"&&p.length===3) return l;
   if(Array.isArray(l)&&Array.isArray(r)){
@@ -101,7 +106,7 @@ async function gleicheAb(d,lesenLokal,schreibLokal){
   }
   throw Error("Zu viele Geräte gleichzeitig, gleich noch einmal.");
 }
-const hatInhalt=d=>d&&(d.reset||d.verlauf?.length||Object.keys(d.stand||{}).length||Object.keys(d.vok||{}).length);
+const hatInhalt=d=>d&&(d.reset||d.verlauf?.length||Object.keys(d.stand||{}).length||Object.keys(d.vok||{}).length||Object.keys(d.mathe||{}).length);
 async function abgleich(alle){
   if(!verbunden()) return false;
   if(laeuft){ nochmal=true; return false; }

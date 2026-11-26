@@ -1,5 +1,5 @@
 "use strict";
-// Startseite, Kinderwahl, Elternbereich. Nutzt KERN (kern.js) und die Spielfunktionen aus spiel.js und vokabeln.js.
+// Startseite, Kinderwahl, Fachwahl, Elternbereich. Nutzt KERN (kern.js), die Spielfunktionen aus spiel.js und vokabeln.js und MATHE (mathe.js).
 const BILDER=["🦊","🐼","🐯","🐸","🦁","🐨","🐵","🐶","🐱","🦉","🦖","🚀","⚽","🎸"];
 const esc=t=>String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");
 const kname=n=>KERN.fam().namen[n], kbild=n=>KERN.fam().bild[n];
@@ -9,11 +9,14 @@ const balken=(g,v)=>`<span class="bar"><i style="width:${prozent(g,v)}%"></i></s
 const datum=t=>new Date(t).toLocaleDateString("de-DE",{day:"2-digit",month:"2-digit"});
 const zeitpunkt=t=>new Date(t).toLocaleString("de-DE",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});
 
-function kopf(){ $("titel").textContent=KERN.nr?`${kbild(KERN.nr)} ${kname(KERN.nr)}`:"Englisch-Trainer"; }
+function kopf(){ $("titel").textContent=KERN.nr?`${kbild(KERN.nr)} ${kname(KERN.nr)}`:"Lern-Trainer"; }
+const heim=()=>KERN.nr?fachWahl():startseite();
 function appZurueck(){
-  if(ort==="@eltern") return elternKind?elternStart():(elternAuf=false,KERN.nr?menue():startseite());
+  if(ort?.startsWith("@m")) return MATHE.zurueck();
+  if(ort==="@fach") return startseite();
+  if(ort==="@eltern") return elternKind?elternStart():(elternAuf=false,heim());
   if(ort==="@geraet"||ort==="@neu") return elternStart();
-  return KERN.nr?menue():startseite();
+  return heim();
 }
 function blatt(html){ const d=document.createElement("div"); d.className="einstellung eltern"; d.innerHTML=html; $("spiele").className=""; $("spiele").replaceChildren(d); scrollTo(0,0); return d; }
 
@@ -26,7 +29,15 @@ function startseite(){
 }
 function fussleiste(l){ const d=document.createElement("div"); d.className="fussleiste"; l.forEach(([t,f])=>{ const b=document.createElement("button"); b.type="button"; b.textContent=t; b.onclick=f; d.append(b); }); $("spiele").append(d); }
 // unter dem Hauptmenue eines Kindes
-function hauptFuss(){ fussleiste([["📖 Im Buch weiter?",frageBuch],...(KERN.geraet.nur?[]:[["Kind wechseln",startseite]]),["🔒 Eltern",elternTor]]); }
+function hauptFuss(){ fussleiste([["📖 Im Buch weiter?",frageBuch],["Fach wechseln",fachWahl],...(KERN.geraet.nur?[]:[["Kind wechseln",startseite]]),["🔒 Eltern",elternTor]]); }
+// ---------- Fachwahl: nach der Kinderwahl, bei jedem Start ----------
+function fachWahl(){
+  if(!KERN.nr) return startseite();
+  ort="@fach"; ruhe(`Hallo ${kname(KERN.nr)}!`,"Was übst du jetzt?"); kopf(); $("bMenue").hidden=!!KERN.geraet.nur;
+  const vk=window.vokKarte?vokKarte():null, mk=MATHE.karte();
+  karten([{i:"📚",t:"Englisch",u:"Vokabeln und Grammatik",p:vk?.p,st:vk?vk.st:"",f:englischStart},{i:"🧮",...mk,f:MATHE.start}]);
+  fussleiste([...(KERN.geraet.nur?[]:[["Kind wechseln",startseite]]),["🔒 Eltern",elternTor]]);
+}
 
 function codeEingeben(){
   ort="@code"; ruhe("Gerät einrichten","Füge den Code ein, den du im Elternbereich auf dem ersten Gerät bekommen hast.");
@@ -73,7 +84,7 @@ function elternStart(){
   const nr=KERN.geraet.nur?[KERN.geraet.nur]:KERN.kinder();
   karten(nr.map(n=>{ const z=kennzahlen(n); return {i:esc(kbild(n)),t:esc(kname(n)),u:z.letzte?`7 Tage: ${z.min} min, ${z.uebungen} Übungen${z.uebungen?`, ${z.quote} % richtig`:""}`:z.g||z.vok?`${z.g} Ebenen geschafft, ${z.vok} Vokabeln gelernt`:"noch nicht angefangen",
     st:z.letzte?`zuletzt ${datum(z.letzte)}`:"",p:[z.g,z.ges],f:()=>elternDetail(n)}; }));
-  fussleiste([...(KERN.geraet.nur?[]:[["＋ Kind hinzufügen",kindNeu]]),["Geräte und Abgleich",geraete],["PIN ändern",pinAendern],["Elternbereich schließen",()=>{elternAuf=false;KERN.nr?menue():startseite();}]]);
+  fussleiste([...(KERN.geraet.nur?[]:[["＋ Kind hinzufügen",kindNeu]]),["Geräte und Abgleich",geraete],["PIN ändern",pinAendern],["Elternbereich schließen",()=>{elternAuf=false;heim();}]]);
   if(KERN.verbunden()&&Date.now()-KERN.status.t>15000) KERN.abgleich(true).then(()=>{ if(ort==="@eltern"&&!elternKind) elternStart(); });
 }
 const statusText=()=>!KERN.verbunden()?"Ohne Abgleich: Jedes Gerät merkt sich seinen eigenen Stand.":KERN.status.t?`Abgleich: ${KERN.status.text} (${zeitpunkt(KERN.status.t)})`:"Abgleich läuft ...";
@@ -96,7 +107,7 @@ function zweimal(b,frage,warnung,meld,tu){ b.onclick=async()=>{ if(!b.dataset.si
   setTimeout(()=>{ if(b.isConnected&&b.dataset.sicher){ delete b.dataset.sicher; b.textContent=b.dataset.alt; meld(""); } },8000); return; }
   b.disabled=true; meld("Einen Moment ..."); if(KERN.verbunden()) await KERN.abgleich(true); await tu(); }; }
 function elternDetail(n){
-  elternKind=n; ort="@eltern"; const z=kennzahlen(n);
+  elternKind=n; ort="@eltern"; const z=kennzahlen(n), me=MATHE.eltern(n);
   ruhe(`${kbild(n)} ${kname(n)}`,z.letzte?`Zuletzt geübt ${zeitpunkt(z.letzte)}.`:z.g||z.vok?"Seit dem Umzug noch nicht geübt, der alte Stand ist da.":"Noch nicht angefangen.");
   const tests=Object.entries(z.tests), testName=id=>id==="gelernt"?"Alles Gelernte":Object.values(vokPruef.GRUPPEN).flat().find(a=>a.key===id)?.name||id;
   const texte=Object.entries(z.d.stand.texte||{}).filter(x=>x[1]);
@@ -109,18 +120,20 @@ function elternDetail(n){
    <section><details><summary>Offene Fehler Grammatik (${z.fehler.length})</summary><ul>${z.fehler.slice(0,30).map(f=>`<li>${esc(f.t)}</li>`).join("")||"<li>keine</li>"}</ul></details>
      <details><summary>Verlauf (${z.d.verlauf.length})</summary><table><thead><tr><th>Wann</th><th>Übung</th><th>Richtig</th></tr></thead><tbody>${[...z.d.verlauf].reverse().slice(0,60).map(v=>`<tr><td>${zeitpunkt(v.t)}</td><td>${esc(v.w)}</td><td>${v.g} von ${v.v}</td></tr>`).join("")||"<tr><td>noch leer</td></tr>"}</tbody></table></details>
      ${texte.length?`<details><summary>Eigene Texte (${texte.length})</summary>${texte.map(([t,x])=>`<p><b>${esc(t)}</b><br>${esc(x)}</p>`).join("")}</details>`:""}</section>
-   <section><h3>📖 Stand im Buch</h3><p><small>Bis hierhin kommen Vokabeln und Grammatik dran. ${esc(kname(n))} wird an Schultagen beim Start gefragt, ob es weiterging.</small></p>
+   <section><h3>📖 Stand im Englischbuch</h3><p><small>Bis hierhin kommen Vokabeln und Grammatik dran. ${esc(kname(n))} wird an Schultagen beim Start gefragt, ob es weiterging.</small></p>
      <label>Zuletzt im Unterricht <select id="buch">${BUCH.ABSCHNITT.map(a=>`<option value="${a.id}" ${a.id===z.buch?"selected":""}>${esc(a.name)}</option>`).join("")}</select></label></section>
+   ${me.html}
    <section id="dran"><h3>Vokabeln: Was ist dran?</h3><label>Tagesziel <input type="number" id="ziel" min="5" max="300" step="5" value="${z.ziel}"> Wörter am Tag</label>
      <label>Nächster Vokabeltest am <input type="date" id="termin" value="${esc(z.test||"")}"></label></section>
    <section><h3>Einstellungen</h3><label>Name <input type="text" id="name" maxlength="20" value="${esc(kname(n))}" autocomplete="off"></label>
      <div class="bilder">${BILDER.map(b=>`<button type="button" aria-pressed="${b===kbild(n)}">${b}</button>`).join("")}</div>
      <div class="reihe2"><button type="button" class="neben" id="alsKind">Als ${esc(kname(n))} üben</button><button type="button" class="neben" id="sichern">Sicherung speichern</button><label class="neben datei">Sicherung laden<input type="file" id="laden" accept=".json" hidden></label></div></section>
    <section><h3>Spielstand</h3><p><small>Zurücksetzen fängt von vorn an, das Kind bleibt. Entfernen nimmt das Kind ganz heraus. Beides gilt auf allen verbundenen Geräten. Vorher am besten eine Sicherung speichern.</small></p>
-     <div class="reihe2"><button type="button" class="neben" id="nullG">Grammatik zurücksetzen</button><button type="button" class="neben" id="nullV">Vokabeln zurücksetzen</button><button type="button" class="neben rot" id="null">Alles zurücksetzen</button>${KERN.kinder().length>1&&!KERN.geraet.nur?`<button type="button" class="neben rot" id="weg">Kind entfernen</button>`:""}</div><p class="meld" id="emeld"></p></section>`);
+     <div class="reihe2"><button type="button" class="neben" id="nullG">Grammatik zurücksetzen</button><button type="button" class="neben" id="nullV">Vokabeln zurücksetzen</button><button type="button" class="neben" id="nullM">Mathe zurücksetzen</button><button type="button" class="neben rot" id="null">Alles zurücksetzen</button>${KERN.kinder().length>1&&!KERN.geraet.nur?`<button type="button" class="neben rot" id="weg">Kind entfernen</button>`:""}</div><p class="meld" id="emeld"></p></section>`);
   const q=s=>d.querySelector(s), meld=t=>q("#emeld").textContent=t;
   const vokAendern=f=>{ const x=JSON.parse(JSON.stringify(n===KERN.nr?KERN.D:KERN.daten(n))); x.vok={...vokPruef.leer(),...x.vok}; f(x.vok); KERN.ersetze(n,x); };
   const vokJetzt=()=>({...vokPruef.leer(),...JSON.parse(JSON.stringify((n===KERN.nr?KERN.D:KERN.daten(n)).vok))});
+  me.verdrahte(d,meld);
   q("#dran").append(vokWahl(vokJetzt(),v=>vokAendern(x=>{ x.nach=v.nach; x.wahl=v.wahl; })));
   q("#termin").onchange=e=>vokAendern(v=>v.test=e.target.value);
   q("#buch").onchange=e=>{ const id=e.target.value, x=JSON.parse(JSON.stringify(n===KERN.nr?KERN.D:KERN.daten(n))); x.stand=x.stand||{}; x.vok=x.vok||{};
@@ -132,18 +145,20 @@ function elternDetail(n){
   q("#name").onchange=e=>{ const t=e.target.value.trim(); if(t){ KERN.setzFamilie({namen:{...KERN.fam().namen,[n]:t}}); kopf(); meld("Name gespeichert."); } };
   d.querySelectorAll(".bilder button").forEach(b=>b.onclick=()=>{ KERN.setzFamilie({bild:{...KERN.fam().bild,[n]:b.textContent}}); d.querySelectorAll(".bilder button").forEach(x=>x.setAttribute("aria-pressed",x===b)); kopf(); });
   q("#alsKind").onclick=()=>KERN.waehle(n);
-  q("#sichern").onclick=()=>{ const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([JSON.stringify(n===KERN.nr?KERN.D:KERN.daten(n))],{type:"application/json"})); a.download=`englisch-${kname(n)}-${new Date().toISOString().slice(0,10)}.json`; a.click(); };
+  q("#sichern").onclick=()=>{ const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([JSON.stringify(n===KERN.nr?KERN.D:KERN.daten(n))],{type:"application/json"})); a.download=`lernen-${kname(n)}-${new Date().toISOString().slice(0,10)}.json`; a.click(); };
   q("#laden").onchange=async e=>{ try{ const x=JSON.parse(await e.target.files[0].text()); if(!x.stand||!x.vok) throw 0; KERN.ersetze(n,{...KERN.leer(),...x,reset:Date.now()}); elternDetail(n); }catch(_){ meld("Das ist keine Sicherung dieses Spiels."); } };
   const k=kname(n);
   zweimal(q("#nullG"),"Wirklich Grammatik zurücksetzen?",`Alle Ebenen, Fehler und eigenen Texte von ${k} gehen verloren. Die Vokabeln bleiben.`,meld,()=>{ KERN.zuruecksetzen(n,"stand"); elternDetail(n); $("emeld").textContent=("Grammatik zurückgesetzt."); });
   zweimal(q("#nullV"),"Wirklich Vokabeln zurücksetzen?",`Karteikasten und Tests von ${k} fangen von vorn an. Die Grammatik bleibt.`,meld,()=>{ KERN.zuruecksetzen(n,"vok"); elternDetail(n); $("emeld").textContent=("Vokabeln zurückgesetzt."); });
+  zweimal(q("#nullM"),"Wirklich Mathe zurücksetzen?",`Alle Mathe-Ebenen und Fehler von ${k} gehen verloren. Englisch bleibt, der Stand im Mathebuch auch.`,meld,()=>{ KERN.zuruecksetzen(n,"mathe"); elternDetail(n); $("emeld").textContent=("Mathe zurückgesetzt."); });
   zweimal(q("#null"),"Wirklich alles zurücksetzen?",`Der ganze Spielstand von ${k} geht verloren, Name und Bild bleiben.`,meld,()=>{ KERN.zuruecksetzen(n); elternDetail(n); $("emeld").textContent=("Alles zurückgesetzt."); });
   if(q("#weg")) zweimal(q("#weg"),`Wirklich ${k} entfernen?`,`${k} verschwindet von allen Geräten, der Spielstand wird gelöscht.`,meld,async()=>{ KERN.entferneKind(n); if(KERN.verbunden()) await KERN.abgleich(true); if(KERN.nr===n) return location.reload(); elternStart(); });
 }
 // ---------- Startfrage: Englisch heute? Wo seid ihr im Buch? ----------
-// Montag bis Freitag einmal am Tag. Jede Antwort zaehlt als gefragt, auch "Weiß ich nicht".
+// Montag bis Freitag einmal am Tag. Jede Antwort zaehlt als gefragt, auch "Weiß ich nicht". Mathe fragt in mathe.js genauso.
 const schultag=()=>{ const d=new Date().getDay(); return d>=1&&d<=5; };
-function startFrage(){ if(!KERN.nr||!schultag()||stand.buch?.frage===KERN.heute()) return menue(); frageEnglisch(); }
+function startFrage(){ if(!KERN.nr) return menue(); fachWahl(); }
+function englischStart(){ if(!schultag()||stand.buch?.frage===KERN.heute()) return menue(); frageEnglisch(); }
 function gefragt(){ stand.buch={...(stand.buch||{}),pos:BUCH.pos(),i:BUCH.idx(BUCH.pos()),frage:KERN.heute()}; merke(); }
 const kurz=a=>esc(a.name.replace(/^([^:]+): /,"$1 · "));
 function antworten(d,l){ const f=document.createElement("div"); f.className="frage"; l.forEach(([t,k,fn,sub])=>{ const b=document.createElement("button"); b.type="button"; b.className=k; b.innerHTML=t+(sub?`<small>${sub}</small>`:""); b.onclick=fn; f.append(b); }); d.append(f); return f; }
@@ -198,7 +213,7 @@ function geraete(){
   if(q("#trennen")) q("#trennen").onclick=()=>{ KERN.trenne(); geraete(); };
   const kopiere=async t=>{ try{ await navigator.clipboard.writeText(t); q("#m2").textContent="Kopiert."; }catch(e){ q("#m2").textContent=t; } };
   if(q("#kcode")) q("#kcode").onclick=()=>kopiere(KERN.codeFuer(+q("#fuer").value));
-  if(q("#teilen")) q("#teilen").onclick=async()=>{ const link=location.origin+location.pathname+"#geraet="+KERN.codeFuer(+q("#fuer").value); if(navigator.share){ try{ return await navigator.share({title:"Englisch-Trainer",url:link}); }catch(e){ if(e.name==="AbortError") return; } } kopiere(link); };
+  if(q("#teilen")) q("#teilen").onclick=async()=>{ const link=location.origin+location.pathname+"#geraet="+KERN.codeFuer(+q("#fuer").value); if(navigator.share){ try{ return await navigator.share({title:"Lern-Trainer",url:link}); }catch(e){ if(e.name==="AbortError") return; } } kopiere(link); };
 }
 
 // ---------- Start ----------
