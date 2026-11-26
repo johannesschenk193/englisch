@@ -1,4 +1,4 @@
-// Vokabeln zum Ueben, Stand 25.11.2026
+// Vokabeln zum Ueben, Stand 26.11.2026 (Unit 1 bis 3, Vokabelliste S. 184 bis 211; S. 202 und 203 fehlen noch)
 // Zeile: englisch | deutsch | Zusatz bei Verwechslungsgefahr | auch richtig (Komma) | Merkhilfe
 // Ein Wort = schreiben, mehrere Woerter = Satz aus Schildern bauen.
 // Eine Zeile "@190" heisst: ab hier stehen die Woerter auf Seite 190 (fuer seitenweises Lernen).
@@ -147,7 +147,7 @@ double|Doppel-; zweimal
 to rap|rappen
 like me|wie ich
 `],
-["u1","Unit 1: Check-in, zu Hause","S. 189 und 190",`
+["u1","Unit 1: Check-in, It's fun at home","S. 189 und 190",`
 at home|zu Hause
 to live|wohnen; leben
 flat|Wohnung||apartment
@@ -160,6 +160,7 @@ TV|Fernseher; Fernsehen||television,tv
 shower|Dusche
 chair|Stuhl; Sessel
 cupboard|Küchenschrank; Schrank|||Aus cup und board. Das p hört man nicht.
+@190
 toilet|Toilette
 bed|Bett
 clock|Uhr|an der Wand
@@ -175,10 +176,11 @@ good|gut
 biscuit|Keks||cookie|Das u hört man nicht: bisc-u-it.
 under|unter
 `],
-["s1","Unit 1: Station 1, Familie","S. 190 und 191",`
+["s1","Unit 1: Station 1, This is my family","S. 190 und 191",`
 sister|Schwester
 little|klein|jünger, zum Beispiel ein Bruder|small
 brother|Bruder
+@191
 father|Vater
 English|englisch; Englisch
 mother|Mutter
@@ -202,13 +204,14 @@ children|Kinder
 boring|langweilig
 lucky number|Glückszahl
 `],
-["s2","Unit 1: Station 2, das Haus","S. 191 und 192",`
+["s2","Unit 1: Station 2, What's the problem?","S. 191 bis 193",`
 problem|Problem
 part|Teil; Stadtteil
 end|Ende; Schluss||ending
 long|lang
 road|Straße||street
 garden|Garten
+@192
 in front of|vor|Ort
 behind|hinter
 only|nur; erst; bloß
@@ -239,8 +242,17 @@ when|wann; wenn
 to see|sehen
 Thanks.|Danke.|ein Wort
 home|Zuhause; Heim
+@193
+to want|wollen; mögen|||I want to play: Ich will spielen.
+music|Musik
+near|nahe; in der Nähe von|Our house is ___ my school.
+busy|belebt; beschäftigt
+centre|Zentrum; Center
+Don't worry!|Keine Sorge!
+or|oder
+address|Adresse
 `],
-["s3","Unit 1: Station 3 und Pronomen","S. 194",`
+["s3","Unit 1: Station 2 (Ende) und Pronouns","S. 194",`
 wall|Wand; Mauer
 newspaper|Zeitung|||news und paper, zusammen ein Wort.
 people|Leute; Menschen|||p-eo-ple.
@@ -258,7 +270,7 @@ with me|mit mir; bei mir
 from … to|von … bis
 pet|Haustier
 `],
-["st","Unit 1: Story","S. 194 und 195",`
+["st","Unit 1: Story, Where's Mr Fluff?!","S. 194 und 195",`
 model|Modell; Model
 Who … for?|Für wen …?
 to explore|erkunden; erforschen
@@ -268,12 +280,13 @@ after|nach|zeitlich
 visit|Besuch
 outside|draußen; nach draußen
 awful|schrecklich; furchtbar|||Ein l am Ende: aw-ful.
+@195
 sentence|Satz
 picture|Bild; Foto||photo
 right|richtig; korrekt|||Mit gh: ri-gh-t.
 ending|Ende; Schluss|einer Geschichte|end
 `],
-["ac","Unit 1: Action UK und Medien","S. 195",`
+["ac","Unit 1: Action UK! Around the house","S. 195",`
 around the house|rund ums Haus
 What about …?|Was ist mit …?; Wie wär's mit …?
 hair straightener|Haarglätter
@@ -289,5 +302,348 @@ poster|Poster
 smartphone|Smartphone
 tablet|Tablet
 to|zu; nach|Richtung, zum Beispiel nach London
+`],
+["pb","Pick-up B: This is fun!","S. 196 bis 198",`
+@196
+day|Tag
+skates|Inlineskates; Rollschuhe; Schlittschuhe
+can't|kann nicht; können nicht; darf nicht; dürfen nicht
+to meet|treffen; sich treffen
+to show|zeigen
+game|Spiel
+to be into|mögen; stehen auf|umgangssprachlich: I'm ___ football.
+@197
+to try|versuchen; probieren
+I'm sorry!|Tut mir leid!
+I'm fine.|Mir geht's gut.
+cute|niedlich; süß|I like Lou. She's ___!
+lucky charm|Glücksbringer; Talisman
+text message|SMS; Kurznachricht||text
+shirt|Hemd; Shirt
+wrong|falsch
+to do|machen; tun|It's a nice day. What can we ___? – We can go cycling!
+to swim|schwimmen|Verb, mit to
+to read|lesen|This text is in English. Can you ___ it?
+to skate|Inlineskates fahren; Schlittschuh laufen|||to skate → skates → skating
+to cross|überqueren; kreuzen
+traffic light|Ampel
+loud|laut
+bus|Bus
+to cycle|Fahrrad fahren|||cycle → cycling
+pavement|Bürgersteig
+to warn|warnen
+bell|Glocke; Klingel
+@198
+without|ohne
+light|Licht; Lampe
+free time|Freizeit
+to draw|zeichnen
+to paint|anmalen; malen
+piano|Klavier; Piano
+to take photos|fotografieren; Fotos machen
+to watch TV|fernsehen|Let's ___.
+to watch|beobachten; (sich) ansehen; zuschauen|beginnt mit w
+card|Karte; Spielkarte
+reading|Lesen|Nomen: das Lesen||reading → to read
+plan|Plan; Entwurf
+to be lucky|Glück haben
+to find|finden; herausfinden
+`],
+["pbk","Pick-up B: Clothes","S. 197",`
+belt|Gürtel
+boots|Stiefel
+cardigan|Strickjacke
+helmet|Helm
+jacket|Jacke
+jeans|Jeans
+jumper|Pullover; Pulli
+leggings|Leggings
+shoes|Schuhe
+skirt|Rock
+trousers|Hose
+T-shirt|T-Shirt
+`],
+["u2c","Unit 2: Check-in","S. 199",`
+planner|Handbuch; Kalender
+rule|Regel
+lunch|Mittagessen
+cafeteria|Cafeteria
+money|Geld
+machine|Automat; Maschine; Apparat; Gerät
+to pay|bezahlen|||to pay for: bezahlen für
+finger|Finger
+art|Kunst; Kunstunterricht
+to buy|kaufen
+sweets|Süßigkeiten; Bonbons
+shop|Geschäft; Laden
+pen|Füller
+pencil|Bleistift; Buntstift
+pencil case|Federmäppchen; Mäppchen
+exercise book|Übungsheft|||exercise book → book
+ruler|Lineal
+rubber|Radiergummi
+uniform|Uniform
+recording studio|Aufnahmestudio; Tonstudio
+classroom|Klassenzimmer|||classroom → class
+`],
+["u2s1","Unit 2: Station 1, Have you got questions for Jay?","S. 199 und 200",`
+@199
+to have got|besitzen; haben
+question|Frage
+an|ein/-e
+@200
+test|Test; Klassenarbeit; Prüfung
+today|heute|||today → day
+schoolbag|Schultasche|||schoolbag → bag
+tutor|Klassenlehrer/-in
+tutor group|Klasse (in einer englischen Schule)|Jay is new in Luke and Dave's ___.
+Good morning.|Guten Morgen.
+everyone|jeder; alle|Good morning! Is ___ here today?
+to call|nennen
+him|ihn; ihm
+no|kein/-e
+to sing|singen|Let's ___ a song.
+to dance|tanzen
+project|Projekt
+well|tja; nun|Are you happy with a school uniform? – ___, not always!
+something|etwas
+Wait and see!|Warte ab!
+to look at|anschauen; ansehen|___ that picture in your book.
+silly|dumm; doof; albern
+teacher|Lehrer/-in
+office|Büro
+job|Arbeit; Aufgabe; Job|What's your ___? – I'm a teacher.
+grandparents|Großeltern
+talent show|Talentwettbewerb
+to text|eine SMS schicken|||to text → text message
+food|Essen; Lebensmittel
+carrot|Karotte; Möhre
+pudding|Pudding; Nachtisch
+restaurant|Restaurant; Gaststätte
+to help|helfen
+pocket money|Taschengeld
+`],
+["u2s2","Unit 2: Station 2, Don't stare! It's rude.","S. 201",`
+to stare|starren; anstarren
+rude|unhöflich; unverschämt
+funny|lustig; witzig
+to sit|sitzen
+to use|benutzen; verwenden; gebrauchen
+lunch break|Mittagspause
+them|sie (Pl.); ihnen|Where are your friends? – I can see ___, they're in the school shop.
+more|mehr; weitere|beginnt mit m
+to forget|vergessen
+knife|Messer|||Mehrzahl: knives
+fork|Gabel
+spoon|Löffel
+to run|rennen; laufen
+`],
+["u2x","Unit 2: Seite 204 (Überschrift fehlt noch)","S. 204",`
+later|später|||later → late
+I hear …|Ich habe gehört, dass …
+to hear|hören
+just|gerade; nur; einfach|beginnt mit j
+joke|Witz
+really|wirklich
+much|viel|beginnt mit m
+time|Zeit
+to know|kennen; wissen
+to say|sagen; aufsagen; sprechen|beginnt mit s
+star|Star; Stern
+Get out of his way.|Geh ihm aus dem Weg.
+stage|Bühne
+net|Netz
+to follow|folgen; befolgen; hinterhergehen
+one day|eines Tages
+news|Nachricht(en); Neuigkeit(en)|||news → newspaper
+It's your turn.|Du bist dran.
+Stop it!|Hör auf!; Mach das aus!
+classmate|Klassenkamerad/-in; Mitschüler/-in|||classmate → class → classroom
+to laugh|lachen
+angry|wütend; zornig; verärgert; böse
+to give|geben; schenken
+to make trouble|Ärger machen; in Schwierigkeiten bringen
+to make|machen; tun; bilden|Can we ___ pizza for lunch?
+`],
+["u2adj","Unit 2: Adjectives","S. 205",`
+cool|cool; super|beginnt mit c
+crazy|verrückt
+fair|gerecht; fair
+jealous|eifersüchtig; neidisch
+nice|nett; schön; lieb|beginnt mit n
+polite|höflich
+popular|beliebt; populär
+`],
+["u2ac","Unit 2: Action UK! Making friends","S. 205",`
+to make friends|Freundschaft schließen
+club|Klub; Verein; AG
+to be good at|gut sein in
+to have a look|anschauen|Let's ___ at your new bike.
+chewing gum|Kaugummi
+mine|mein/-er/-e/-es
+different|anders; unterschiedlich; verschieden|Dogs and cats are ___.
+`],
+["u2co","Unit 2: Check-out","S. 205",`
+to write|schreiben
+sweet|süß|beginnt mit s||sweet → sweets
+to put|(hinein)setzen; (hinein)stellen; (hinein)legen
+box|Box; Kasten; Schachtel; Kiste
+`],
+["u3c","Unit 3: Check-in, I like my busy days","S. 206 und 207",`
+@206
+a.m.|vormittags (Uhrzeit)|||9 a.m. = 9 Uhr
+p.m.|nachmittags (Uhrzeit)|||9 p.m. = 21 Uhr
+still|noch; immer noch
+dog-tired|hundemüde
+tired|müde
+Time to get up!|Es ist Zeit aufzustehen!
+I'm on my way …|Ich bin auf dem Weg …; Ich bin unterwegs …
+usually|normalerweise; gewöhnlich; meistens
+@207
+by bike|mit (dem Fahrrad)
+to sit down|sich hinsetzen; sich setzen
+to have breakfast|frühstücken|||Have bedeutet hier „essen“.
+often|oft; häufig|At TTS there are ___ clubs after school.
+to start|anfangen; beginnen; starten
+too|zu|Sorry, but I'm ___ tired to play with you.
+early|früh|||early – late
+to practise|üben; trainieren
+saxophone|Saxofon|||Achtung Aussprache und Schreibung.
+sometimes|manchmal
+story|Story; Geschichte; Erzählung|||Mehrzahl: stories
+What's the time?|Wie spät ist es?; Wie viel Uhr ist es?
+`],
+["u3tag","Unit 3: Days of the week","S. 207",`
+Monday|Montag
+Tuesday|Dienstag
+Wednesday|Mittwoch
+Thursday|Donnerstag
+Friday|Freitag
+Saturday|Samstag; Sonnabend
+Sunday|Sonntag
+`],
+["u3zeit","Unit 3: The time","S. 207",`
+It's ten o'clock.|Es ist zehn Uhr.
+It's five past ten.|Es ist fünf nach zehn.
+It's ten oh six.|Es ist sechs nach zehn.
+It's quarter past ten.|Es ist viertel nach zehn.
+It's half past ten.|Es ist halb elf.
+It's quarter to eleven.|Es ist viertel vor elf.
+It's nine minutes to eleven.|Es ist neun (Minuten) vor elf.
+`],
+["u3s1","Unit 3: Station 1, I'm always busy","S. 208 und 209",`
+@208
+subject|Betreff (in E-Mails etc.); Thema
+never|nie; niemals
+every|jede/-r/-s
+morning|Morgen; Vormittag
+stepmum|Stiefmutter
+then|dann; danach|Erst Frühstück, ___ Schule.
+if|wenn; falls; ob|___ it's a nice day, we can go to the park.
+till|bis
+after that|danach|zwei Wörter
+on Mondays|montags|||on Mondays, on Tuesdays … = jeden Montag, jeden Dienstag … (regelmäßig etwas tun!)
+netball|Korbball
+other|anders; andere/-r/-s; weitere|beginnt mit o
+home|nach Hause
+right away|sofort; gleich
+to tidy|aufräumen; in Ordnung bringen|||to tidy a room: ein Zimmer aufräumen
+in the evenings|abends
+evening|Abend|||evening – morning
+afternoon|Nachmittag
+whole|ganz|Write ___ sentences.
+greeting|Gruß
+e.g.|z. B.||for example
+bye|tschüss|||bye – hello
+abbreviation|Abkürzung
+information|Information; Informationen
+emoji|Emoji
+weekday|Wochentag
+swimming|Schwimmen|Nomen: das Schwimmen
+singing|Gesang; Singen|Nomen: das Singen||singing → to sing
+dancing|Tanz|||dancing → to dance
+to organise|organisieren
+@209
+spring break|Frühlingsferien
+song|Song; Lied|||song → singing → to sing
+coach|Trainer/-in
+dinner|Abendessen
+dance move|Tanzschritt
+to talk about|sprechen über; erzählen von|||Achtung Aussprache: Das „l“ wird nicht gesprochen.
+to go to bed|ins Bett gehen|||to go to bed – to get up
+last|letzte/-r/-s|||last – first
+`],
+["u3s2","Unit 3: Station 2, She gets on my nerves","S. 209 und 210",`
+@209
+She gets on my nerves.|Sie geht mir auf die Nerven.
+granny|Oma; Omi|beginnt mit g||Granny wird nur als Name groß geschrieben: Hi, Granny! ABER: Where's Dave's granny?
+to look after|aufpassen auf; hüten; sich kümmern um
+to look|schauen; sehen; aussehen|Look! Oder: You ___ tired.
+to ask|fragen; bitten
+to talk|sprechen; reden|Listen! Don't ___!
+together|zusammen; miteinander; gemeinsam
+@210
+to chat|plaudern; chatten
+to explain|erklären
+even|sogar; selbst
+friendly|freundlich; nett|I always try to be ___ to everyone.||friendly → friend
+to leave|verlassen; lassen; abfahren
+work|Arbeit|This is a very nice text, Olivia. Good ___!||work → to work
+vet|Tierarzt/Tierärztin
+neighbour|Nachbar/-in
+to take|nehmen; mitnehmen; wegnehmen; bringen; mitbringen
+surgery|Arztpraxis; Praxis; Praxisräume
+why|warum
+surprise|Überraschung
+to sleep|schlafen
+cooking|Kochen
+routine|Routine|||Achtung Aussprache.
+speaker|Redner/-in; Sprecher/-in|||speaker → to speak
+to be about|sich handeln um; handeln von
+clever|schlau; klug
+owner|Besitzer/-in
+`],
+["u3sk","Unit 3: Skills, How to do a role play","S. 210",`
+clear|klar; deutlich
+No way!|Auf keinen Fall!; keineswegs
+`],
+["u3st","Unit 3: Story, Luke is my pet","S. 210 und 211",`
+@210
+to wash|waschen; sich waschen
+face|Gesicht
+goodbye|auf Wiedersehen|||goodbye – hello
+@211
+to bark|bellen
+to be scared|Angst haben (vor)|||scared of dogs: Angst vor Hunden
+to run away|wegrennen
+to have fun|Spaß haben; sich amüsieren
+to learn|lernen|You ___ different things at school.
+to listen for|horchen auf
+word|Wort
+Sit!|Sitz! (zum Hund)
+around|um … herum; umher
+to chase|jagen; nachjagen
+tail|Schwanz; Schweif
+You've got a lot to learn!|Du musst (noch) viel lernen!
+a lot|viel; oft|Has Sherlock got ___ to learn – or Luke?
+picnic|Picknick|||Achtung Schreibung.
+drink|Getränk
+to fall over|hinfallen; umkippen
+to throw|werfen (nach)
+to fall asleep|einschlafen
+`],
+["u3ac","Unit 3: Action UK! Who's the fastest?","S. 211",`
+heading|Überschrift; Titel
+surprising|überraschend|||surprising → surprise
+weather|Wetter|||Achtung Aussprache.
+transport|Verkehrsmittel; Transport
+map|Stadtplan; Landkarte
+studying|Lernen; Studieren|Nomen: das Lernen
+`],
+["u3co","Unit 3: Check-out","S. 211",`
+first|zuerst; als Erstes
 `]
 ];
+// Wo die Klasse im Buch steht, solange niemand etwas anderes sagt: Klassenarbeit am 25.11.2026 ueber Unit 1.
+// Neue Kinder starten auch hier. Danach fragt das Spiel an Schultagen nach.
+window.BUCH_START="ac";

@@ -49,12 +49,31 @@ const tagVon=d=>Math.floor((d.getTime()-d.getTimezoneOffset()*6e4)/864e5);
 let heute=()=>tagVon(new Date());
 const testTag=()=>S.test?Math.round(Date.parse(S.test+"T00:00:00Z")/864e5):0;
 const L=w=>S.w[w.id]||{f:0,d:0,s:0,r:0,h:0,x:0};   // f Fach, d faellig am, s Schwierigkeit, r richtig, h fast, x falsch
+// ---------- Stand im Buch ----------
+// stand.buch = {pos: Abschnitt-Id, i: Reihenfolge, frage: Tag der letzten Startfrage}. Steht im Grammatik-Stand (spiel.js),
+// damit mitKind() im Elternbereich ihn mittauscht. Ohne Angabe: BUCH_START aus vokabelliste.js.
+const REIHE=ABSCHNITT.map(a=>a.id), idx=id=>REIHE.indexOf(id);
+const buchPos=()=>{ const p=(typeof stand!=="undefined"?stand:null)?.buch?.pos; return idx(p)>=0?p:(idx(window.BUCH_START)>=0?window.BUCH_START:REIHE[REIHE.length-1]); };
+const erreicht=id=>!id||idx(id)<0||idx(id)<=idx(buchPos());
+const abschnitt=id=>ABSCHNITT[idx(id)];
+// neu erreichte Abschnitte: kommen in jede Auswahl und stehen beim Lernen vorn
+function buchSetzen(id){
+  const alt=buchPos(), von=idx(alt), bis=idx(id); if(bis<0) return {neu:[]};
+  stand.buch={...(stand.buch||{}),pos:id,i:bis,frage:heute(),seit:Date.now()};
+  if(bis<=von){ merke(); return {neu:[]}; }
+  const neu=REIHE.slice(von+1,bis+1); S.fokus=neu;
+  if(S.wahl) for(const m of Object.keys(S.wahl)){ const dazu=GRUPPEN[m].filter(g=>g.woerter.some(w=>neu.includes(w.sec.id))).map(g=>g.key); S.wahl[m]=[...new Set([...S.wahl[m],...dazu])]; }
+  merke(); halte(); return {neu,woerter:ALLE.filter(w=>neu.includes(w.sec.id)).length};
+}
 // Auswahl: v.nach = seite | abschnitt | unit, v.wahl[nach] = gewaehlte Gruppen. Ohne Auswahl gilt die alte Liste "aus".
+// Was im Buch noch nicht dran war, kommt nie vor, auch wenn es angehakt ist.
 const gewaehlt=(v,m)=>v.wahl?.[m]||(m==="abschnitt"?ABSCHNITT.filter(a=>!(v.aus||[]).includes(a.id)).map(a=>a.id):GRUPPEN[m].map(g=>g.key));
-const dranVon=v=>{ const m=v.nach||"abschnitt", sel=new Set(gewaehlt(v,m)); return ALLE.filter(w=>sel.has(w.g[m])); };
+const dranVon=v=>{ const m=v.nach||"abschnitt", sel=new Set(gewaehlt(v,m)); return ALLE.filter(w=>sel.has(w.g[m])&&erreicht(w.sec.id)); };
 const dran=()=>dranVon(S);
+const fokus=()=>(S.fokus||[]).filter(erreicht);
 const faellige=()=>dran().filter(w=>L(w).f>0&&L(w).d<=heute()).sort((a,b)=>L(a).d-L(b).d||L(a).f-L(b).f);
-const neue=()=>dran().filter(w=>!L(w).f);
+const neue=()=>{ const f=new Set(fokus()); return dran().filter(w=>!L(w).f).sort((a,b)=>(f.has(b.sec.id)-f.has(a.sec.id))); };
+const fokusNeu=()=>{ const f=new Set(fokus()); return neue().filter(w=>f.has(w.sec.id)); };
 const schwere=()=>ALLE.filter(w=>L(w).s>0).sort((a,b)=>L(b).s-L(a).s);
 const neuHeute=()=>S.neu.tag===heute()?S.neu.n:0;
 const ziel=()=>S.ziel||ZIEL;
@@ -330,7 +349,9 @@ const auswahlText=v=>{ const m=v.nach||"abschnitt", sel=gewaehlt(v,m); return se
 function vokMenue(){
   aus++; ort="vok"; const o=offen(), bis=testTag()-heute(), k=kette();
   ruhe("Vokabeln",[bis>0?`Noch ${bis} ${bis===1?"Tag":"Tage"} bis zum Test.`:bis===0&&S.test?"Heute ist der Test.":"", k>1?`${k} Tage hintereinander geübt.`:"", `Jeden Tag mindestens ${ziel()} Wörter.`].filter(Boolean).join(" "));
-  karten([{t:"Heute üben",u:o.alle?[o.f&&`${o.f} wiederholen`,o.n&&`${o.n} neu`,o.x&&`${o.x} auffrischen`].filter(Boolean).join(", "):"für heute fertig",st:o.alle?`${Math.min(geuebt(),ziel())} von ${ziel()}`:"Fertig ✓",zu:!o.alle,f:heuteUeben},
+  const fn=fokusNeu(), fa=fokus().map(abschnitt).filter(Boolean);
+  karten([...(fn.length?[{t:"Neu im Unterricht",u:fa.map(a=>sicher(a.name)).join(", "),st:`${fn.length} neue Wörter`,f:()=>starteUebung(fn.slice(0,10).map(w=>({w,s:"neu"})),"Vokabeln: neu im Unterricht")}]:[]),
+    {t:"Heute üben",u:o.alle?[o.f&&`${o.f} wiederholen`,o.n&&`${o.n} neu`,o.x&&`${o.x} auffrischen`].filter(Boolean).join(", "):"für heute fertig",st:o.alle?`${Math.min(geuebt(),ziel())} von ${ziel()}`:"Fertig ✓",zu:!o.alle,f:heuteUeben},
     {t:"Was lerne ich?",u:"seitenweise, abschnittsweise oder unitweise",st:auswahlText(S),f:einstellen},
     {t:"Schwere Wörter",u:"nur, was zuletzt nicht saß",st:schwere().length?`${schwere().length} offen`:"nichts offen",zu:!schwere().length,f:schwereUeben},
     {t:"Vokabeltest",u:"20 Wörter wie in der Schule",st:S.test&&bis>=0?`Test: ${S.test.split("-").reverse().join(".")}`:"",f:testMenue},
@@ -345,7 +366,8 @@ function wahlEl(v,speichern){
     d.innerHTML=`<div class="modi" role="group" aria-label="Lernen nach">${MODI.map(([k,t])=>`<button type="button" data-m="${k}" aria-pressed="${k===m}">${t}</button>`).join("")}</div>
       <p><small>${n} ${n===1?"Wort":"Wörter"} ausgewählt. Gelernte Wörter bleiben gespeichert, auch wenn sie gerade nicht dran sind.</small></p>
       <div class="reihe2"><button type="button" class="neben" data-alle="1">Alle</button><button type="button" class="neben" data-alle="0">Keine</button></div>`
-      +GRUPPEN[m].map(g=>`<label><input type="checkbox" value="${sicher(g.key)}" ${sel.has(g.key)?"checked":""}> ${sicher(g.name)} <small>${g.sub?sicher(g.sub)+", ":""}${g.woerter.length} Wörter, ${g.woerter.filter(w=>v.w?.[w.id]?.f).length} gelernt</small></label>`).join(""); };
+      +GRUPPEN[m].map(g=>{ const spaeter=!g.woerter.some(w=>erreicht(w.sec.id));
+        return `<label${spaeter?' class="spaeter"':""}><input type="checkbox" value="${sicher(g.key)}" ${sel.has(g.key)?"checked":""}> ${sicher(g.name)} <small>${spaeter?"kommt im Buch noch":`${g.sub?sicher(g.sub)+", ":""}${g.woerter.length} Wörter, ${g.woerter.filter(w=>v.w?.[w.id]?.f).length} gelernt`}</small></label>`; }).join(""); };
   const setze=(m,keys)=>{ v.wahl={...(v.wahl||{}),[m]:keys}; speichern(v); zeichne(); };
   d.addEventListener("click",e=>{ const b=e.target.closest("button"); if(!b) return; const m=v.nach||"abschnitt";
     if(b.dataset.m&&b.dataset.m!==m){ const aktiv=new Set(dranVon(v).map(w=>w.id)); v.nach=b.dataset.m; setze(b.dataset.m,GRUPPEN[b.dataset.m].filter(g=>g.woerter.some(w=>aktiv.has(w.id))).map(g=>g.key)); }
@@ -374,5 +396,8 @@ function wortliste(){
 window.vokMenue=vokMenue;
 window.vokKarte=()=>{ const o=offen(); return {i:"📚",p:[ALLE.filter(w=>L(w).f).length,ALLE.length],t:"Vokabeln",u:"Karteikasten und Vokabeltest",st:o.alle?`heute ${Math.min(geuebt(),ziel())} von ${ziel()}`:"heute fertig ✓",f:vokMenue}; };
 window.vokWahl=wahlEl;
+window.BUCH={ABSCHNITT,REIHE,idx,pos:buchPos,erreicht,abschnitt,setzen:buchSetzen,naechste:()=>ABSCHNITT[idx(buchPos())+1],
+  // Seite der Vokabelliste (ab 180) -> letzter Abschnitt, der auf dieser Seite steht
+  ausListenseite:n=>{ let t=null; for(const a of ABSCHNITT){ const s=(a.seite.match(/\d+/g)||[]).map(Number); if(s.length&&s[0]<=n) t=a; } return t; }};
 window.vokPruef={leer,kasten,GRUPPEN,ZIEL,offen,geuebt,ziel,dran,auffrischen,auswahlText,tausch:x=>{const a=S; if(x) S=x; return a;},W,ALLE,ABSCHNITT,bewerte,bewerteSatz,vergleich,faellig,ablenker,halbe,L,S:()=>S,setTag:t=>heute=()=>t,U:()=>U,faellige,neue,neuProTag}; // fuer Tests
 })();

@@ -37,6 +37,7 @@ function zuruecksetzen(n,teil){ // teil: "stand" (Grammatik), "vok" (Vokabeln) o
   if(teil){ Object.assign(x,kopie(alt)); x[teil]={}; x.reset=Date.now(); x.verlauf=(alt.verlauf||[]).filter(v=>teil==="vok"?v.a!=="vokabeln"&&v.a!=="test":v.a==="vokabeln"||v.a==="test"); }
   // Einstellungen der Eltern bleiben: Tagesziel, Auswahl, Testtermin
   if(teil!=="stand") for(const k of ["ziel","nach","wahl","aus","test"]) if(alt.vok?.[k]!==undefined) x.vok[k]=kopie(alt.vok[k]);
+  if(alt.stand?.buch) x.stand={...(x.stand||{}),buch:kopie(alt.stand.buch)}; // wo die Klasse im Buch ist, bleibt
   ersetze(n,x); }
 let beiNeu=()=>{}; const neu=()=>{ try{ beiNeu(D); }catch(e){ console.error(e); } };
 addEventListener("storage",e=>{ if(nr&&e.key==="et:k"+nr&&e.newValue){ D=daten(nr); neu(); } });
@@ -55,6 +56,7 @@ function misch(b,l,r,p=[]){
   if(p0==="vok"&&p1==="w"&&p.length===3){ const s=x=>x.r+x.h+x.x; return s(l)>=s(r)?l:r; }
   if((p0==="kinder"||p0==="weg")&&p.length===1&&Array.isArray(l)&&Array.isArray(r)) return [...new Set([...l,...r])].sort((x,y)=>x-y);
   if(p0==="vok"&&p1==="heute"&&p.length===2) return l.tag!==r.tag?(l.tag>r.tag?l:r):{tag:l.tag,ids:[...new Set([...l.ids,...r.ids])]};
+  if(p0==="stand"&&p1==="buch"&&p.length===2) return (l.i||0)!==(r.i||0)?((l.i||0)>(r.i||0)?l:r):((l.frage||0)>=(r.frage||0)?l:r); // weiter im Buch gewinnt
   if(p0==="vok"&&p1==="neu") return l.tag!==r.tag?(l.tag>r.tag?l:r):{tag:l.tag,n:Math.max(l.n,r.n)};
   if(p0==="stand"&&p1==="weiter"&&p.length===3) return l;
   if(Array.isArray(l)&&Array.isArray(r)){

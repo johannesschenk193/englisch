@@ -26,7 +26,7 @@ function startseite(){
 }
 function fussleiste(l){ const d=document.createElement("div"); d.className="fussleiste"; l.forEach(([t,f])=>{ const b=document.createElement("button"); b.type="button"; b.textContent=t; b.onclick=f; d.append(b); }); $("spiele").append(d); }
 // unter dem Hauptmenue eines Kindes
-function hauptFuss(){ fussleiste([...(KERN.geraet.nur?[]:[["Kind wechseln",startseite]]),["🔒 Eltern",elternTor]]); }
+function hauptFuss(){ fussleiste([["📖 Im Buch weiter?",frageBuch],...(KERN.geraet.nur?[]:[["Kind wechseln",startseite]]),["🔒 Eltern",elternTor]]); }
 
 function codeEingeben(){
   ort="@code"; ruhe("Gerät einrichten","Füge den Code ein, den du im Elternbereich auf dem ersten Gerät bekommen hast.");
@@ -61,12 +61,12 @@ function mitKind(n,f){
 }
 function kennzahlen(n){
   return mitKind(n,d=>{ const h=KERN.heute(), woche=[0,1,2,3,4,5,6].map(i=>d.zeit[h-i]||0), ab=Date.now()-7*864e5, v=d.verlauf.filter(x=>x.t>ab);
-    const ber=BEREICHE.map(b=>({b,f:fortschrittZahl(b)})), g=ber.reduce((a,x)=>a+x.f[0],0), ges=ber.reduce((a,x)=>a+x.f[1],0);
+    const ber=BEREICHE.filter(bOffen).map(b=>({b,f:fortschrittZahl(b)})), g=ber.reduce((a,x)=>a+x.f[0],0), ges=ber.reduce((a,x)=>a+x.f[1],0);
     return {d,ber,g,ges,min:Math.round(woche.reduce((a,b)=>a+b,0)/60),tage:woche.filter(x=>x>0).length,uebungen:v.length,quote:prozent(v.reduce((a,x)=>a+x.g,0),v.reduce((a,x)=>a+x.v,0)),
       fehler:offeneFehler().map(k=>({k,t:k.startsWith("x|")?loesung(ITEM[k]):k.replace(/^(\w+):(\w+)$/,(_,a,i)=>{const z=ZEILEN.find(z=>z.id===i);return `${z.en} = ${z.wort}`;}),r:rest(k)})),
       vok:vokPruef.ALLE.filter(w=>vokPruef.L(w).f).length,faellig:vokPruef.faellige().length,
       schwer:vokPruef.ALLE.filter(w=>vokPruef.L(w).s>0).sort((a,b)=>vokPruef.L(b).s-vokPruef.L(a).s).slice(0,15).map(w=>({en:w.en,de:w.de,e:vokPruef.L(w)})),kasten:vokPruef.kasten(),tests:JSON.parse(JSON.stringify(vokPruef.S().tests)),test:vokPruef.S().test,ziel:vokPruef.ziel(),heute:vokPruef.geuebt(),auswahl:vokPruef.auswahlText(vokPruef.S()),
-      letzte:d.verlauf[d.verlauf.length-1]?.t||0}; });
+      buch:BUCH.pos(),letzte:d.verlauf.filter(v=>v.a!=="buch").slice(-1)[0]?.t||0}; });
 }
 function elternStart(){
   elternKind=0; ort="@eltern"; ruhe("Elternbereich",statusText()); kopf();
@@ -109,6 +109,8 @@ function elternDetail(n){
    <section><details><summary>Offene Fehler Grammatik (${z.fehler.length})</summary><ul>${z.fehler.slice(0,30).map(f=>`<li>${esc(f.t)}</li>`).join("")||"<li>keine</li>"}</ul></details>
      <details><summary>Verlauf (${z.d.verlauf.length})</summary><table><thead><tr><th>Wann</th><th>Übung</th><th>Richtig</th></tr></thead><tbody>${[...z.d.verlauf].reverse().slice(0,60).map(v=>`<tr><td>${zeitpunkt(v.t)}</td><td>${esc(v.w)}</td><td>${v.g} von ${v.v}</td></tr>`).join("")||"<tr><td>noch leer</td></tr>"}</tbody></table></details>
      ${texte.length?`<details><summary>Eigene Texte (${texte.length})</summary>${texte.map(([t,x])=>`<p><b>${esc(t)}</b><br>${esc(x)}</p>`).join("")}</details>`:""}</section>
+   <section><h3>📖 Stand im Buch</h3><p><small>Bis hierhin kommen Vokabeln und Grammatik dran. ${esc(kname(n))} wird an Schultagen beim Start gefragt, ob es weiterging.</small></p>
+     <label>Zuletzt im Unterricht <select id="buch">${BUCH.ABSCHNITT.map(a=>`<option value="${a.id}" ${a.id===z.buch?"selected":""}>${esc(a.name)}</option>`).join("")}</select></label></section>
    <section id="dran"><h3>Vokabeln: Was ist dran?</h3><label>Tagesziel <input type="number" id="ziel" min="5" max="300" step="5" value="${z.ziel}"> Wörter am Tag</label>
      <label>Nächster Vokabeltest am <input type="date" id="termin" value="${esc(z.test||"")}"></label></section>
    <section><h3>Einstellungen</h3><label>Name <input type="text" id="name" maxlength="20" value="${esc(kname(n))}" autocomplete="off"></label>
@@ -121,6 +123,11 @@ function elternDetail(n){
   const vokJetzt=()=>({...vokPruef.leer(),...JSON.parse(JSON.stringify((n===KERN.nr?KERN.D:KERN.daten(n)).vok))});
   q("#dran").append(vokWahl(vokJetzt(),v=>vokAendern(x=>{ x.nach=v.nach; x.wahl=v.wahl; })));
   q("#termin").onchange=e=>vokAendern(v=>v.test=e.target.value);
+  q("#buch").onchange=e=>{ const id=e.target.value, x=JSON.parse(JSON.stringify(n===KERN.nr?KERN.D:KERN.daten(n))); x.stand=x.stand||{}; x.vok=x.vok||{};
+    const altI=BUCH.idx(x.stand.buch?.pos||window.BUCH_START), neuI=BUCH.idx(id);
+    x.stand.buch={...(x.stand.buch||{}),pos:id,i:neuI,seit:Date.now()};
+    if(neuI>altI){ x.vok.fokus=BUCH.REIHE.slice(altI+1,neuI+1); x.stand.neuFrei=[...new Set([...(x.stand.neuFrei||[]),...BEREICHE.filter(b=>b.ab&&x.vok.fokus.includes(b.ab)).map(b=>b.id)])]; }
+    KERN.ersetze(n,x); $("emeld").textContent=`Stand im Buch: ${BUCH.abschnitt(id).name}.`; };
   q("#ziel").onchange=e=>{ const w=Math.max(5,Math.min(300,Math.round(+e.target.value||vokPruef.ZIEL))); e.target.value=w; vokAendern(v=>v.ziel=w); };
   q("#name").onchange=e=>{ const t=e.target.value.trim(); if(t){ KERN.setzFamilie({namen:{...KERN.fam().namen,[n]:t}}); kopf(); meld("Name gespeichert."); } };
   d.querySelectorAll(".bilder button").forEach(b=>b.onclick=()=>{ KERN.setzFamilie({bild:{...KERN.fam().bild,[n]:b.textContent}}); d.querySelectorAll(".bilder button").forEach(x=>x.setAttribute("aria-pressed",x===b)); kopf(); });
@@ -132,6 +139,49 @@ function elternDetail(n){
   zweimal(q("#nullV"),"Wirklich Vokabeln zurücksetzen?",`Karteikasten und Tests von ${k} fangen von vorn an. Die Grammatik bleibt.`,meld,()=>{ KERN.zuruecksetzen(n,"vok"); elternDetail(n); $("emeld").textContent=("Vokabeln zurückgesetzt."); });
   zweimal(q("#null"),"Wirklich alles zurücksetzen?",`Der ganze Spielstand von ${k} geht verloren, Name und Bild bleiben.`,meld,()=>{ KERN.zuruecksetzen(n); elternDetail(n); $("emeld").textContent=("Alles zurückgesetzt."); });
   if(q("#weg")) zweimal(q("#weg"),`Wirklich ${k} entfernen?`,`${k} verschwindet von allen Geräten, der Spielstand wird gelöscht.`,meld,async()=>{ KERN.entferneKind(n); if(KERN.verbunden()) await KERN.abgleich(true); if(KERN.nr===n) return location.reload(); elternStart(); });
+}
+// ---------- Startfrage: Englisch heute? Wo seid ihr im Buch? ----------
+// Montag bis Freitag einmal am Tag. Jede Antwort zaehlt als gefragt, auch "Weiß ich nicht".
+const schultag=()=>{ const d=new Date().getDay(); return d>=1&&d<=5; };
+function startFrage(){ if(!KERN.nr||!schultag()||stand.buch?.frage===KERN.heute()) return menue(); frageEnglisch(); }
+function gefragt(){ stand.buch={...(stand.buch||{}),pos:BUCH.pos(),i:BUCH.idx(BUCH.pos()),frage:KERN.heute()}; merke(); }
+const kurz=a=>esc(a.name.replace(/^([^:]+): /,"$1 · "));
+function antworten(d,l){ const f=document.createElement("div"); f.className="frage"; l.forEach(([t,k,fn,sub])=>{ const b=document.createElement("button"); b.type="button"; b.className=k; b.innerHTML=t+(sub?`<small>${sub}</small>`:""); b.onclick=fn; f.append(b); }); d.append(f); return f; }
+function frageEnglisch(){
+  ort="@frage"; ruhe(`Hallo ${esc(kname(KERN.nr))}!`,"Hattest du heute Englisch in der Schule?"); kopf();
+  const d=blatt(""); antworten(d,[["Ja","haupt",frageBuch],["Nein","neben",()=>{ gefragt(); menue(); }],["Weiß ich nicht","neben",()=>{ gefragt(); menue(); }]]);
+}
+function frageBuch(){
+  ort="@frage"; const p=BUCH.abschnitt(BUCH.pos()), n=BUCH.naechste(), weiter=BUCH.ABSCHNITT.slice(BUCH.idx(BUCH.pos())+2,BUCH.idx(BUCH.pos())+8);
+  ruhe("Habt ihr im Buch weitergemacht?",`Zuletzt warst du bei ${p?p.name:"–"}.`);
+  const d=blatt("");
+  const f=antworten(d,[...(n?[[`Ja, weiter mit ${kurz(n)}`,"haupt",()=>weiterBis(n.id),`Diese Überschrift steht im Buch. Vokabeln ${esc(n.seite)}`]]:[]),
+    ["Nein, wir sind noch beim alten Abschnitt","neben",()=>{ gefragt(); menue(); }]]);
+  if(weiter.length){ const det=document.createElement("details"); det.innerHTML=`<summary>Noch weiter, und zwar bis ...</summary>`; f.append(det);
+    antworten(det,weiter.map(a=>[kurz(a),"neben",()=>weiterBis(a.id),esc(a.seite)])); }
+  const form=document.createElement("form"); form.innerHTML=`<label>Oder die Seite im Buch: <input type="number" inputmode="numeric" min="1" max="300" id="bseite"></label><button class="haupt">OK</button><p class="meld"></p>`; f.append(form);
+  form.onsubmit=e=>{ e.preventDefault(); const s=parseInt(form.querySelector("#bseite").value); if(!(s>0)) return form.querySelector(".meld").textContent="Gib eine Seitenzahl ein."; nachSeite(s); };
+  antworten(f,[["Weiß ich nicht","neben",()=>{ gefragt(); menue(); }]]);
+}
+// Seite der Vokabelliste (ab 180): steht dort. Seite im Schulbuch: einmal fragen, welche Ueberschrift dort steht, und fuer alle Kinder merken.
+function nachSeite(s){
+  if(s>=180){ const a=BUCH.ausListenseite(s); return a?weiterBis(a.id):menue(); }
+  const id=KERN.fam().seiten?.[s]; if(id&&BUCH.idx(id)>=0) return weiterBis(id);
+  ort="@frage"; ruhe(`Seite ${s}`,"Welche Überschrift steht auf dieser Seite oder davor? Dann merke ich mir die Seite.");
+  const d=blatt(""), ab=Math.max(0,BUCH.idx(BUCH.pos())-1);
+  antworten(d,[...BUCH.ABSCHNITT.slice(ab,ab+10).map(a=>[kurz(a),"neben",()=>{ KERN.setzFamilie({seiten:{...(KERN.fam().seiten||{}),[s]:a.id}}); weiterBis(a.id); },esc(a.seite)]),
+    ["Weiß ich nicht","neben",()=>{ gefragt(); menue(); }]]);
+}
+function weiterBis(id){
+  const r=BUCH.setzen(id);
+  if(!r.neu.length){ gefragt(); return menue(); }
+  const frei=BEREICHE.filter(b=>b.ab&&r.neu.includes(b.ab));
+  stand.neuFrei=[...new Set([...(stand.neuFrei||[]),...frei.map(b=>b.id)])]; merke();
+  KERN.log(`Im Buch weiter: ${BUCH.abschnitt(id).name}`,0,0,"buch");
+  ort="@frage"; ruhe("Super, dann geht's weiter!",`Neu dran: ${r.neu.map(x=>BUCH.abschnitt(x).name).join(", ")}`.replace(/([^.!?])$/,"$1."));
+  const d=blatt(`<section><h3>📚 Vokabeln</h3><p>${r.woerter} neue Wörter. Die lernst du jetzt zuerst, die alten wiederholst du nebenbei.</p></section>
+    ${frei.length?`<section class="neufrei"><h3>🔓 Neu freigeschaltet in Grammatik</h3><ul>${frei.map(b=>`<li>${b.icon} <b>${esc(b.name)}</b>: ${esc(b.was)}</li>`).join("")}</ul></section>`:""}`);
+  antworten(d,[["Los geht's","haupt",menue]]);
 }
 // ---------- Geraete ----------
 function geraete(){
@@ -167,6 +217,6 @@ KERN.beiNeu=d=>{ stand=Object.assign(leererStand(),JSON.parse(JSON.stringify(d.s
     try{ const x=JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(h.slice(7).replace(/-/g,"+").replace(/_/g,"/")),c=>c.charCodeAt(0))));
       const alt=KERN.daten(x.kind), neu={...KERN.leer(),stand:x.stand||{},vok:x.vok||{}};
       KERN.setz("et:k"+x.kind,KERN.hatInhalt(alt)?KERN.misch(undefined,alt,neu):neu); return KERN.waehle(x.kind); }catch(e){ console.error(e); } }
-  KERN.nr?menue():startseite();
+  KERN.nr?startFrage():startseite();
   if("serviceWorker" in navigator&&location.protocol==="https:") navigator.serviceWorker.register("sw.js").catch(()=>{});
 })();

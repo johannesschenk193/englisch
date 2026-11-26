@@ -110,6 +110,17 @@ th{color:var(--leise)}td{border-color:#e6ecdf}
 .modi button{flex:1;border:0;background:none;border-radius:9px;padding:10px 6px;font:inherit;font-size:15px;color:var(--leise);cursor:pointer;min-width:0}
 .modi button[aria-pressed="true"]{background:#fff;color:var(--gruen);font-weight:700;box-shadow:var(--schatten)}
 .eltern input[type=number]{font:inherit;width:5.5em;padding:9px 11px;border:2px solid var(--linie);border-radius:10px;margin:0 6px}
+.wahl label.spaeter{color:var(--leise);opacity:.75}
+/* Startfrage */
+.frage{display:grid;gap:10px;max-width:520px}
+.frage .haupt,.frage .neben{font-size:18px;padding:14px 18px;text-align:left;cursor:pointer}
+.frage button small{display:block;font-weight:400;font-size:14px;margin-top:4px;color:var(--leise)}
+.frage .haupt small{color:#e9f5dc}
+.frage form{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.frage input[type=number]{font:inherit;width:6em;padding:11px;border:2px solid var(--linie);border-radius:10px}
+.frage details{background:#fff;border-radius:12px;padding:8px 12px}.frage details[open]{display:grid;gap:8px}
+.neufrei{grid-column:1/-1;background:#fff6d6;border:2px solid #f0c14b;border-radius:15px;padding:12px 16px;font-size:16px}
+.spiel .neu{background:#f0c14b;color:#3b2c00;border-radius:8px;padding:1px 7px;font-size:13px;margin-left:6px;vertical-align:middle}
 @media (max-width:420px){.modi button{font-size:13px;padding:10px 2px}}
 @media (max-width:760px){
   body:not([data-modus="menue"]) #runde{white-space:normal;line-height:1.2;max-height:2.4em}
