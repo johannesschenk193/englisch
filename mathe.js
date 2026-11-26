@@ -146,6 +146,11 @@ const ZIMMER=["Das Kinderzimmer","Die Küche","Das Wohnzimmer","Der Flur","Das B
 const HAUS=["Das Haus","Der Garten","Das Handballfeld","Das Schwimmbecken"], WEGE=["Der Schulweg","Die Straße","Der Weg zum Park"];
 const ctxVon=(m,c,r)=>m<50?"Das Modell":r<=7?ZIMMER[c%ZIMMER.length]:r<=50?HAUS[c%HAUS.length]:r<=300?PLATZ[c%PLATZ.length]:WEGE[c%WEGE.length];
 const LPAARE=[["km","m"],["m","dm"],["dm","cm"],["cm","mm"],["m","cm"],["m","mm"]];
+// ueber zwei Stufen, wie 5c und 5d der Klassenarbeit: 4,5 km in dm, 2 400 000 cm in km
+const STUFEN=[["cm","m","km"],["km","m","dm"],["km","m","cm"],["mm","cm","m"],["dm","m","km"],["m","cm","mm"],["mm","m","km"]];
+// Holzstab wie Aufgabe 6: L cm, 2 Stuecke zu a cm, 1 m c mm, 2 Stuecke zu 2 dm e cm, 5 Saegeschnitte zu s mm; Rest 8 bis 41 cm
+function holzZieh(){ const a=R.pick([25,30,35,40,45]), c=R.pick([5,8,12,15,24,40,105]), e=R.int(1,9), s=R.pick([1,2,2,3]), sum=20*a+1000+c+2*(200+10*e)+5*s;
+  return {k:4,L:Math.ceil((sum+R.int(80,400))/10),a,c,e,s}; }
 const KPAARE=[["km","m",LG],["m","cm",LG],["m","mm",LG],["cm","mm",LG],["dm","cm",LG],["m","dm",LG],["t","kg",GW],["kg","g",GW],["g","mg",GW]];
 const KOMMA_AN=F=>Math.round(Math.log10(F));
 function kommaZahl(F){ const st=R.int(1,KOMMA_AN(F)), d=10**st; let x; do x=R.int(R.ja(.25)?1:d+1,99*d); while(x%10===0||x%d===0); return x/d; }
@@ -155,9 +160,13 @@ function laengeText(x,f){ // x in mm
   return x>=1000&&x%1000?`${Math.floor(x/1000)} m ${fz((x%1000)/10)} cm`:`${fz(x/10)} cm`; }
 const RST=[[10,"Zehner"],[100,"Hunderter"],[1000,"Tausender"],[10000,"Zehntausender"],[100000,"Hunderttausender"]];
 const rundeAuf=(n,k)=>Math.round(n/k)*k;
-function rundZieh(){ const s=R.int(0,4), k=RST[s][0]; let n=R.int(k*2,k*1000); const art=R.int(0,3);
+// Arten: knapp an der 5; eine 9 an der Rundungsstelle; Uebertrag ueber mehrere Stellen wie 1 999 541 auf Zehntausender (zweimal so
+// oft, Klassenarbeit 1.1, 4b); grosse Zahl auf eine kleine Stelle wie 256 173 auf Zehner, hinten nur Nullen (4c); sonst frei
+function rundZieh(){ const s=R.int(0,4), k=RST[s][0], hinten=()=>R.int(5,9)*k/10+R.int(0,k/10-1); let n=R.int(k*2,k*1000); const art=R.int(0,7);
   if(art===0) n=Math.floor(n/k)*k+R.pick([4,5])*k/10+R.int(0,k/10-1);
-  else if(art===1&&s<=3) n=(R.int(1,99)*10+9)*k+R.int(5,9)*k/10+R.int(0,k/10-1);
+  else if(art===1&&s<=3) n=(R.int(1,99)*10+9)*k+hinten();
+  else if(art===2||art===3){ const q=R.int(2,s<=2?3:2); n=(R.int(1,9)*10**q+10**q-1)*k+hinten(); }
+  else if((art===4||art===5)&&s<=2) n=R.int(100000,9999999);
   return {n,s}; }
 function rundTipp(n,s){ const [k,name]=RST[s]; return (i,v)=>{
   const a=rundeAuf(n,k), ab=Math.floor(n/k)*k, auf=ab+k, z=Math.floor(n/(k/10))%10;
@@ -166,9 +175,11 @@ function rundTipp(n,s){ const [k,name]=RST[s]; return (i,v)=>{
   let x=n; for(let kk=10;kk<=k;kk*=10) x=rundeAuf(x,kk);
   if(v===x&&x!==a) return "Nicht zweimal runden! Schau nur auf die eine Ziffer rechts neben der Rundungsstelle.";
   const andere=RST.find(([kk])=>kk!==k&&v===rundeAuf(n,kk)); if(andere) return `Das ist auf ${andere[1]} gerundet. Auf ${name} gerundet stehen am Ende ${NULLEN[s]}.`;
-  if(v%k) return "Alles rechts von der Rundungsstelle wird zu 0.";
+  if(v%k) return `Nach der Rundungsstelle gibt es nur Nullen! Auf ${name} gerundet stehen am Ende ${NULLEN[s]}.`;
+  const u=Math.floor(n/k); if(a===auf&&u%10===9) return `Die 9 an der Rundungsstelle wird zur 10: Dort steht dann 0, und 1 kommt zur Stelle links dazu. Aus ${fz(u)} ${name}n werden ${fz(u+1)} ${name}.`;
   return null; }; }
-const rundWeg=(n,s)=>{ const [k,name]=RST[s], z=Math.floor(n/(k/10))%10; return `Rundungsstelle: ${name}. Rechts daneben steht ${z}, also ${z>=5?"aufrunden":"abrunden"}: ${fz(n)} ≈ ${fz(rundeAuf(n,k))}.`; };
+const rundWeg=(n,s)=>{ const [k,name]=RST[s], z=Math.floor(n/(k/10))%10, u=Math.floor(n/k);
+  return `Rundungsstelle: ${name}. Rechts daneben steht ${z}, also ${z>=5?"aufrunden":"abrunden"}${z>=5&&u%10===9?`, mit Übertrag: Aus ${fz(u)} ${name}n werden ${fz(u+1)} ${name}`:""}. Nach der Rundungsstelle nur Nullen: ${fz(n)} ≈ ${fz(rundeAuf(n,k))}.`; };
 function vergleichWeg(a,b){ const s=String(a), t=String(b), z=`${fz(a)} ${a<b?"<":">"} ${fz(b)}`;
   if(s.length!==t.length) return `${fz(Math.max(a,b))} hat mehr Stellen, also ist sie größer: ${z}.`;
   let i=0; while(s[i]===t[i]) i++; return `Gleich viele Stellen. Die erste andere Ziffer steht bei den ${STW[s.length-1-i]}: ${s[i]} gegen ${t[i]}. Also ${z}.`; }
@@ -203,6 +214,27 @@ const vAlt=p=>p.l!==undefined?p:{l:fz(p.a),lw:p.a,r:fz(p.b),rw:p.b,w:vergleichWe
 const VTIPP="Erst in dieselbe Einheit oder Schreibweise bringen. Die Spitze zeigt zur kleineren Seite.";
 const vergleichAufgabe=p=>{ const x=vAlt(p); return {typ:"wahl",f:`${x.l} ___ ${x.r}`,a:rel(x.lw,x.rw),o:["<","=",">"],t:VTIPP,weg:x.w}; };
 
+// ---------- Rechnen mit Komma (Johannes' Zettel vom 26.11.2026; Regel wie Markus im Buch, S. 29 Aufgabe 8) ----------
+// x · F = y oder x : F = y mit F = 10, 100, 1000, 10 000. Hoechstens maxNk Stellen hinter dem Komma, meist ist eine Kommazahl dabei.
+const nk=x=>(Math.abs(x).toFixed(9).replace(/\.?0+$/,"").split(".")[1]||"").length; // nicht String(x): 4e-7
+const stellen=n=>n===1?"eine Stelle":`${["","eine","zwei","drei","vier"][n]} Stellen`;
+const kErg=({x,F,mal})=>rund(mal?x*F:x/F);
+function kommaAufgabe(maxNk){
+  const F=R.pick([10,10,100,100,1000,1000,10000]), mal=R.ja(.55);
+  for(;;){ const st=R.pick([1,1,2,2,3]); let m; do m=R.int(10**(st-1),10**st-1); while(m%10===0);
+    const x=rund(m*10**R.int(-4,2)), y=kErg({x,F,mal});
+    if(Math.max(nk(x),nk(y))<=maxNk&&x<1e5&&y<1e5&&(nk(x)||nk(y)||R.ja(.1))) return {x,F,mal}; } }
+const kommaWeg=p=>{ const n=KOMMA_AN(p.F); return `${fz(p.x)} ${p.mal?"·":":"} ${fz(p.F)} = ${fz(kErg(p))}: ${NULLEN[n-1]}, das Komma rückt ${stellen(n)} nach ${p.mal?"rechts":"links"}.`; };
+const KREGEL="Mal 10, 100, 1000: Das Komma rückt so viele Stellen nach rechts, wie die Zahl Nullen hat (Buch S. 29, Aufgabe 8). Geteilt: genauso viele nach links. Fehlende Stellen füllst du mit 0: 3 : 100 = 0,03.";
+// Malnehmen durch Zerlegen wie auf dem Zettel: 40 · 2,8 = 40 · 2 + 40 · 0,8 = 80 + 32 = 112
+function zerlZieh(){ const k=R.int(0,9);
+  if(k<6) return {a:R.int(2,9)*10,g:R.int(1,9),d:R.int(1,9)};
+  if(k<9){ const a=R.pick([2,4,5,6,8]); let d; do d=R.int(1,9); while(a*d%10); return {a,g:R.int(1,9),d}; }
+  return {a:R.int(2,9),g:R.int(1,9),d:R.int(1,9)}; }
+function zerl({a,g,d}){ const b=rund(g+d/10), z=fz(d/10), t1=a*g, t2=rund(a*d/10), s=rund(t1+t2);
+  const klein=a%10===0?`${a} · ${z}: rechne ${a/10} · ${d} = ${fz(t2)}.`:`${a} · ${z}: rechne ${a} · ${d} = ${a*d}, dann das Komma eine Stelle nach links: ${fz(t2)}.`;
+  return {b,z,t1,t2,s,klein,zer:`${a} · ${fz(b)} = ${a} · ${g} + ${a} · ${z}`,weg:`${a} · ${fz(b)} = ${a} · ${g} + ${a} · ${z} = ${fz(t1)} + ${fz(t2)} = ${fz(s)}`}; }
+
 // ---------- Ziehen: die erste Ebene eines Themas, wie die Tabelle in Englisch (Johannes, 26.11.2026) ----------
 // Aufgabe {typ:"ziehen", zeilen:[{vor|vorHtml, nach, a, t}], tiles, bleibt (Karten bleiben liegen), satz (Satz statt Tabelle)}
 const Z=(id,name,was,zieh,mach,n)=>({...E(id,name,was,zieh,mach,n||6),ziehen:true});
@@ -229,7 +261,7 @@ const ZIEHEN={
  r_zeichen:Z("r_zeichen","Die Zeichen","I, V, X … zuordnen",()=>({k:R.int(0,1),r:nAus(7,5)}),
   ({k,r})=>{ const z=r.slice(0,4).map(i=>ZR[i]), x=ZR[r[4]];
     return {typ:"ziehen",frage:k?"Welches Zeichen gehört zur Zahl?":"Wie viel ist das Zeichen wert?",zeilen:z.map(([c,w])=>k?zz(fz(w)+" =","",c):zz(c+" =","",fz(w))),tiles:[...z,x].map(([c,w])=>k?c:fz(w)),bleibt:false,t:"I 1, V 5, X 10, L 50, C 100, D 500, M 1000.",weg:z.map(([c,w])=>`${c} = ${fz(w)}`).join(", ")}; }),
- s_ziehen:Z("s_ziehen","Zahlen an den Strahl","A, B und C zuordnen",()=>{ const [st,L]=R.pick([[1,5],[1,10],[2,5],[5,10],[10,5],[10,10],[20,5],[25,4],[50,10],[100,5],[100,10],[1000,10]]), a=R.ja(.6)?0:R.int(1,20)*st*L;
+ s_ziehen:Z("s_ziehen","Zahlen an den Strahl","A, B und C zuordnen",()=>{ const [st,L]=R.pick([[1,5],[1,10],[2,5],[5,10],[10,5],[10,10],[20,5],[25,4],[25,4],[25,4],[250,4],[50,10],[100,5],[100,10],[1000,10]]), a=R.ja(.6)?0:R.int(1,20)*st*L;
     let m; do m=nAus(2*L-1,3).map(x=>x+1).sort((x,y)=>x-y); while(m.some(x=>x%L===0)||m[1]-m[0]<2||m[2]-m[1]<2); return {s:st,L,a,m}; },
   ({s:st,L,a,m})=>{ const w=m.map(x=>a+x*st), d=[...new Set([...m.map(x=>a+x),...m.map(x=>a+(x+1)*st)])].filter(v=>!w.includes(v)).slice(0,2);
     return {typ:"ziehen",bild:strahl(a,st,L,m.map((x,i)=>[x,"ABC"[i]])),frage:"Welche Zahl gehört zu A, B und C?",zeilen:w.map((v,i)=>zz(`${"ABC"[i]} =`,"",fz(v))),tiles:[...w,...d].map(fz),bleibt:false,
@@ -263,7 +295,7 @@ const ZIEHEN={
 };
 
 // Zahlkarten: Antworten plus Fallen (Faktor 10), keine doppelten, der Groesse nach
-const zahlKarten=(ans,extra)=>{ const t=new Map(); ans.forEach(x=>t.set(x,fz(x))); extra.forEach(x=>{ if(t.size<7&&Number.isInteger(x)&&x>0) t.set(x,fz(x)); }); return [...t.entries()].sort((a,b)=>a[0]-b[0]).map(e=>e[1]); };
+const zahlKarten=(ans,extra,komma)=>{ const t=new Map(); ans.forEach(x=>t.set(rund(x),fz(x))); extra.forEach(x=>{ x=rund(x); if(t.size<7&&(komma||Number.isInteger(x))&&x>0) t.set(x,fz(x)); }); return [...t.entries()].sort((a,b)=>a[0]-b[0]).map(e=>e[1]); };
 const WEG_GROSS=[["cm","m",100],["cm","m",100],["cm","m",100],["mm","cm",10],["m","km",1000],["dm","m",10]];
 const WEG_KLEIN=[["m","cm",100],["m","cm",100],["km","m",1000],["cm","mm",10],["m","dm",10]];
 Object.assign(ZIEHEN,{
@@ -288,7 +320,21 @@ Object.assign(ZIEHEN,{
     return {typ:"ziehen",schema:true,frage:`${ctx} ist in Wirklichkeit <b>${fz(r)} m</b> lang. Es wird im Maßstab 1 : ${fz(m)} gezeichnet. Wie lang wird es im Bild?`,
       zeilen:[{s:`Maßstab: 1 : ${fz(m)}`,as:[]},{s:`Länge in Wirklichkeit: ${fz(r)} m = {0} cm`,as:[fz(r*100)],t:"Erst in cm umwandeln: 1 m = 100 cm."},{s:`Länge im Bild: {0} cm : {1} = {2} cm`,as:[fz(r*100),fz(m),fz(b)],t:"Im Bild ist es kleiner: dividiere durch die Maßstabszahl."}],
       tiles:zahlKarten([r*100,m,b],[r*10,r*1000,b*10]),bleibt:true,hilfe:`1 cm im Bild entsprechen ${fz(m)} cm in der Wirklichkeit. Die Länge im Bild ist also ${fz(m)}-mal so klein. Dividiere daher durch ${fz(m)}. Vorher in cm umwandeln.`,
-      weg:`Länge in Wirklichkeit: ${fz(r)} m = ${fz(r*100)} cm. Länge im Bild: ${fz(r*100)} cm : ${fz(m)} = ${b} cm`}; })
+      weg:`Länge in Wirklichkeit: ${fz(r)} m = ${fz(r*100)} cm. Länge im Bild: ${fz(r*100)} cm : ${fz(m)} = ${b} cm`}; }),
+ // Rechnen mit Komma: die mittlere Zahl einsetzen wie auf dem Zettel (2,5 · [10] = 25, 3 : [100] = 0,03), mal und geteilt gemischt
+ rk_zieh:Z("rk_zieh","Welche Zahl fehlt?","2,5 · ▢ = 25 mit 10, 100, 1000",()=>({z:[0,1,2,3].map(()=>kommaAufgabe(4))}),
+  ({z})=>({typ:"ziehen",frage:"Welche Zahl fehlt? Zieh 10, 100, 1000 oder 10 000 in die Lücke. Achtung: mal und geteilt sind gemischt!",
+    zeilen:z.map(p=>zz(`${fz(p.x)} ${p.mal?"·":":"}`,`= ${fz(kErg(p))}`,fz(p.F),"Zähl, um wie viele Stellen das Komma gerückt ist. So viele Nullen hat die Zahl.")),
+    tiles:[10,100,1000,10000].map(fz),bleibt:true,hilfe:KREGEL,weg:z.map(kommaWeg).join(" ")})),
+ rk_zeichen:Z("rk_zeichen","Mal oder geteilt?","0,03 ▢ ▢ = 3: Zeichen und Zahl",()=>({z:[0,1,2].map(()=>kommaAufgabe(4))}),
+  ({z})=>({typ:"ziehen",frage:"Mal oder geteilt? Zieh das Rechenzeichen und die Zahl in die Lücken.",
+    zeilen:z.map(p=>({s:`${fz(p.x)} {0} {1} = ${fz(kErg(p))}`,as:[p.mal?"·":":",fz(p.F)],t:"Wird die Zahl größer, rechnest du mal. Wird sie kleiner, geteilt. Dann die Stellen zählen."})),
+    tiles:["·",":",...[10,100,1000,10000].map(fz)],bleibt:true,hilfe:KREGEL,weg:z.map(kommaWeg).join(" ")})),
+ rk_zerlegen:Z("rk_zerlegen","Zerlegen","40 · 2,8 = 40 · 2 + 40 · 0,8 wie auf dem Zettel",zerlZieh,
+  p=>{ const {a,g,d}=p, x=zerl(p);
+    return {typ:"ziehen",schema:true,frage:`Rechne ${a} · ${fz(x.b)} wie auf dem Zettel: erst zerlegen, dann zusammenzählen.`,
+      zeilen:[{s:x.zer,as:[]},{s:"= {0} + {1}",as:[fz(x.t1),fz(x.t2)],t:`Erst ${a} · ${g}, dann ${x.klein}`},{s:"= {0}",as:[fz(x.s)],t:"Jetzt die beiden Teile zusammenzählen."}],
+      tiles:zahlKarten([x.t1,x.t2,x.s],[a*d,x.t1+a*d,x.s/10,x.t2/10],true),bleibt:false,hilfe:x.klein,weg:x.weg}; })
 });
 
 // ---------- Erklaerseiten und Aufgaben, Reihenfolge wie im Buch ----------
@@ -353,9 +399,12 @@ const BEREICHE=[
    ({n})=>{ const b=bloecke(n), o=b.findIndex(x=>x>0), roh1=Number(b.slice(o).map(String).join("")), roh2=Number(b.slice(o).filter((x,k)=>x||!k).map(String).join(""));
      return {frage:`Schreib mit Ziffern: <b>${paeckchenText(n)}</b>`,f:"{0}",a:[n],weg:`Jedes Päckchen hinter dem ersten hat drei Ziffern: ${fz(n)}.`,
        tipp:(i,v)=>(v===roh1||v===roh2)&&v!==n?"Jedes Päckchen hinter dem ersten hat genau drei Ziffern. Fehlende füllst du mit 0 auf: 1 Tausend → 001.":null}; }),
-  E("g_wort","Zahlwort in Ziffern","wie im Diktat",()=>{ const L=R.int(4,9); let n=R.int(10**(L-1),10**L-1); if(R.ja(.5)&&L>3){ const b=bloecke(n); b[3]=R.pick([0,R.int(1,9),R.int(10,99)]); n=b[0]*1e9+b[1]*1e6+b[2]*1e3+b[3]; } return {n}; },
+  // bis Milliarden, Paeckchen mit Nullen vorn wie 18 025 003 804 (Klassenarbeit 1.1, Aufgabe 2a)
+  E("g_wort","Zahlwort in Ziffern","wie im Diktat, bis Milliarden",()=>{ const L=R.pick([4,5,6,7,8,9,10,10,11,11]); let n=R.int(10**(L-1),10**L-1); const b=bloecke(n), o=b.findIndex(x=>x>0);
+     for(let j=o+1;j<=3;j++) if(R.ja(.5)) b[j]=R.pick([0,R.int(1,9),R.int(10,99)]); n=b[0]*1e9+b[1]*1e6+b[2]*1e3+b[3]; return {n}; },
    ({n})=>({frage:`Schreib mit Ziffern:<br><b class="mwort">${zahlwort(n)}</b>`,f:"{0}",a:[n],weg:`${paeckchenText(n)} = ${fz(n)}`,
-     tipp:(i,v)=>String(v).length<String(n).length?"Da fehlt eine Stelle. Nach „tausend“ und nach „Millionen“ kommen immer drei Ziffern.":String(v).length>String(n).length?"Da ist eine Stelle zu viel. Zerleg das Wort an „Millionen“ und „tausend“.":null})),
+     hilfe:"Zerleg das Wort an „Milliarden“, „Millionen“ und „tausend“. Jedes Päckchen hinter dem ersten hat genau drei Ziffern: 25 Millionen → 025, 3 Tausend → 003.",
+     tipp:(i,v)=>String(v).length<String(n).length?"Da fehlt eine Stelle. Nach „Milliarden“, „Millionen“ und „tausend“ kommen immer drei Ziffern, fehlende füllst du mit 0.":String(v).length>String(n).length?"Da ist eine Stelle zu viel. Zerleg das Wort an „Milliarden“, „Millionen“ und „tausend“.":null})),
   E("g_nach","Vorgänger und Nachfolger","1 weniger, 1 mehr",()=>{ const k=R.int(0,2), e=R.int(2,6), z=R.int(1,9); return {n:k===0?z*10**e:k===1?z*10**e-1:R.int(10,999999)}; },
    ({n})=>({frage:"Schreib den Vorgänger und den Nachfolger.",f:`{0} < ${fz(n)} < {1}`,a:[n-1,n+1],weg:`${fz(n)} − 1 = ${fz(n-1)} und ${fz(n)} + 1 = ${fz(n+1)}.`,
      tipp:(i,v)=>i===0&&v===n+1?"Der Vorgänger kommt vorher, er ist 1 kleiner.":i===1&&v===n-1?"Der Nachfolger kommt danach, er ist 1 größer.":i===0&&n%10===0?"Bei −1 werden die Nullen am Ende zu Neunen: 10 000 − 1 = 9999.":i===1&&n%10===9?"Bei +1 werden die Neunen am Ende zu Nullen: 9999 + 1 = 10 000.":null})),
@@ -389,12 +438,13 @@ const BEREICHE=[
   achtung:["Ein Strahl mit ungleichen Abständen ist falsch gezeichnet (Stolperstelle S. 19).","Nicht einfach die Striche zählen: erst schauen, wie viel ein Schritt wert ist."],maus:"Erst die Einteilung, dann ablesen."},
  ebenen:[
   ZIEHEN.s_ziehen,
-  E("s_ablesen","Zahlenstrahl ablesen","welche Zahl zeigt der Pfeil?",()=>{ const [s,L]=R.pick([[1,5],[1,10],[2,5],[5,10],[10,5],[10,10],[20,5],[25,4],[50,10],[100,5],[100,10],[500,10],[1000,5],[1000,10],[10000,10],[100000,5]]);
+  // Schritt 25 haeufiger: Klassenarbeit 1.1, Aufgabe 3a ("4 Kaestchen fuer 100 Einheiten, 1 Kaestchen fuer 100 : 4 = 25")
+  E("s_ablesen","Zahlenstrahl ablesen","welche Zahl zeigt der Pfeil?",()=>{ const [s,L]=R.pick([[1,5],[1,10],[2,5],[5,10],[10,5],[10,10],[20,5],[25,4],[25,4],[25,4],[250,4],[50,10],[100,5],[100,10],[500,10],[1000,5],[1000,10],[10000,10],[100000,5]]);
      const a=R.ja(.6)?0:R.int(1,20)*s*L; let m; do m=R.int(1,2*L-1); while(m%L===0); return {s,L,a,m}; },
    ({s,L,a,m})=>({bild:strahl(a,s,L,m),frage:"Welche Zahl gehört an den Pfeil A?",f:"A = {0}",a:[a+m*s],
      hilfe:`Zwischen ${fz(a)} und ${fz(a+L*s)} liegen ${L} Schritte. Ein Schritt ist ${fz(L*s)} : ${L} = ${fz(s)}.`,
      weg:`Ein Schritt ist ${fz(s)}. Von ${fz(a+Math.floor(m/L)*L*s)} aus ${m%L} ${m%L===1?"Schritt":"Schritte"} weiter: ${fz(a+m*s)}.`,
-     tipp:(i,v)=>s>1&&(v===a+m||v===m)?"Nicht nur die Striche zählen: Wie viel ist ein Schritt wert?":null})),
+     tipp:(i,v)=>s>1&&(v===a+m||v===m)?"Nicht nur die Striche zählen: Wie viel ist ein Schritt wert?":L===4&&v!==a+m*s&&Math.abs(v-(a+m*s))<2*s?`4 Schritte sind ${fz(4*s)}, ein Schritt also ${fz(4*s)} : 4 = ${fz(s)}. Zähl in ${fz(s)}er-Schritten.`:null})),
   E("s_mitte","Die Mitte","genau in der Mitte zwischen zwei Zahlen",()=>{ const k=R.pick([1,10,100,1000,10000,100000]), a=R.int(1,40)*k, d=2*R.int(1,30)*k; return {a,b:a+d}; },
    ({a,b})=>({frage:`Welche Zahl liegt genau in der Mitte zwischen ${fz(a)} und ${fz(b)}?`,f:"{0}",a:[(a+b)/2],weg:`Abstand ${fz(b-a)}, die Hälfte davon ${fz((b-a)/2)}. ${fz(a)} + ${fz((b-a)/2)} = ${fz((a+b)/2)}.`,
      tipp:(i,v)=>v===(b-a)/2?"Das ist die Hälfte des Abstands. Zähl sie noch zur kleineren Zahl dazu.":v===a+b?"Das ist die Summe. Die Mitte ist die Hälfte davon.":v===b-a?"Das ist der Abstand. Die Mitte liegt nach der Hälfte davon.":null})),
@@ -446,8 +496,14 @@ const BEREICHE=[
   E("l_zahl","Die Umrechnungszahlen","1 m = ? cm",...liste([["1 m = {0} cm",100,"Zwischen m und cm liegt noch der dm: 1 m = 10 dm, 1 dm = 10 cm. Also 10 · 10 = 100."],["1 km = {0} m",1000,"Kilo heißt tausend."],["1 m = {0} dm",10,"Dezi heißt ein Zehntel."],["1 dm = {0} cm",10,"Ein Dezimeter ist so lang wie zehn Zentimeter."],["1 cm = {0} mm",10,"Auf dem Lineal: zehn kleine Striche pro Zentimeter."],["1 m = {0} mm",1000,"1 m = 100 cm und 1 cm = 10 mm: 100 · 10 = 1000."],["100 cm = {0} m",1,"100 cm sind genau ein Meter."],["10 mm = {0} cm",1,"10 mm sind genau ein Zentimeter."],["1000 m = {0} km",1,"1000 m sind genau ein Kilometer."],["10 dm = {0} m",1,"10 dm sind genau ein Meter."]].map(([f,a,t])=>({f,a:[a],hilfe:t,tipp:()=>t,weg:f.replace("{0}",fz(a))})),10)),
   E("l_mcm","Meter in Zentimeter","mal 100",()=>({q:R.ja(.7)?R.int(1,20):R.pick([25,30,40,50,75,120,250])}),({q})=>um(q,"m","cm",LG,mcmTipp)),
   E("l_cmm","Zentimeter in Meter","geteilt durch 100",()=>({q:R.ja(.7)?R.int(1,20):R.pick([25,30,40,50,75,120,250])}),({q})=>um(q*100,"cm","m",LG,mcmTipp)),
-  E("l_gemischt","Meter und Zentimeter","3 m 45 cm = 345 cm",()=>({m:R.int(1,9),c:R.ja(.35)?R.int(1,9):R.int(10,99),r:R.ja()}),
-   ({m,c,r})=>{ const t=m*100+c;
+  // mm dazu: In der Klassenarbeit las Jonathan 1 m 12 mm als 1,12 (Aufgabe 6)
+  E("l_gemischt","Meter und cm oder mm","3 m 45 cm = 345 cm, 1 m 12 mm = 1012 mm",()=>{ const r=R.ja(), m=R.int(1,9); if(R.ja(.4)) return {m,c:R.ja(.6)?R.int(1,99):R.int(101,999),r,u:"mm"}; return {m,c:R.ja(.35)?R.int(1,9):R.int(10,99),r}; },
+   ({m,c,r,u})=>{ if(u==="mm"){ const t=m*1000+c;
+       return r?{f:`${fz(t)} mm = {0} m {1} mm`,a:[m,c],hilfe:"1000 mm sind 1 m. Wie viele ganze Meter stecken drin, und was bleibt übrig?",weg:`${fz(t)} mm = ${fz(m*1000)} mm + ${c} mm = ${m} m ${c} mm`,
+           tipp:(i,v)=>i===0&&v===Math.floor(t/100)?"1 m sind 1000 mm, nicht 100 mm.":i===1&&v===t?"Die ganzen Meter stehen schon vorn. Hier kommt nur der Rest hin.":null}
+         :{f:`${m} m ${c} mm = {0} mm`,a:[t],hilfe:`${m} m sind ${fz(m*1000)} mm. Dann kommen die ${c} mm dazu.`,weg:`${m} m ${c} mm = ${fz(m*1000)} mm + ${c} mm = ${fz(t)} mm`,
+           tipp:(i,v)=>v===Number(`${m}${c}`)?`${m} m sind ${fz(m*1000)} mm. Dazu kommen ${c} mm.`:v===m*100+c?"1 m sind 1000 mm, nicht 100.":gleich(v,m+c/100)||v===m*1000+10*c?`${m} m ${c} mm ist nicht ${fz(m+c/100)} m. Gefragt ist in mm: ${fz(m*1000)} mm + ${c} mm.`:v===m*1000?`Die ${c} mm fehlen noch.`:null}; }
+     const t=m*100+c;
      return r?{f:`${t} cm = {0} m {1} cm`,a:[m,c],hilfe:"100 cm sind 1 m. Wie viele ganze Meter stecken drin, und was bleibt übrig?",weg:`${t} cm = ${m*100} cm + ${c} cm = ${m} m ${c} cm`,
          tipp:(i,v)=>i===0&&v===Math.floor(t/10)?"100 cm sind 1 m, nicht 10 cm.":i===1&&v===t?"Die ganzen Meter stehen schon vorn. Hier kommt nur der Rest hin.":null}
        :{f:`${m} m ${c} cm = {0} cm`,a:[t],hilfe:`${m} m sind ${m*100} cm. Dann kommen die ${c} cm dazu.`,weg:`${m} m ${c} cm = ${m*100} cm + ${c} cm = ${t} cm`,
@@ -460,8 +516,19 @@ const BEREICHE=[
      const a=rund(q*100), g=Math.floor(q), rest=rund(a-g*100);
      return {f:`${fz(q)} m = {0} cm`,a:[a],hilfe:`${fz(q)} m = ${g} m ${rest} cm. Ein Meter sind 100 cm.`,weg:`${fz(q)} m = ${g} m ${rest} cm = ${g*100} cm + ${rest} cm = ${fz(a)} cm`,
        tipp:(i,v)=>gleich(v,q*10)?(String(q).split(".")[1]?.length===1?`Hinten fehlt eine 0: ${fz(q)} m = ${fz(q)}0 m. Das Komma rückt zwei Stellen nach rechts.`:"Das Komma rückt zwei Stellen nach rechts, nicht eine."):gleich(v,q*1000)?"Das wären Millimeter. Für Zentimeter: mal 100.":null}; }),
-  E("l_text","Sachaufgaben","Längen im Alltag",()=>({k:R.int(0,3),x:R.int(0,99),y:R.int(0,99)}),
-   ({k,x,y})=>{
+  // Klassenarbeit 1.1, Aufgabe 5d: 2 400 000 cm in km, ohne Zwischenrechnung keine Teilpunkte
+  E("l_stufen","Über mehrere Stufen","2 400 000 cm = 24 000 m = 24 km",()=>({i:R.int(0,STUFEN.length-1),x:R.ja(.6)?R.int(2,60):R.int(11,99)/10}),
+   ({i,x})=>{ const [A,B,C]=STUFEN[i], gr=LG[A]>LG[C]?A:C, v=[A,B,C].map(u=>rund(x*LG[gr]/LG[u])), s1=um(v[0],A,B,LG,mcmTipp), s2=um(v[1],B,C,LG,mcmTipp);
+     return {frage:"Rechne über die Zwischenstufe. Schreib den Zwischenschritt hin, dafür gibt es in der Arbeit Teilpunkte.",f:`${fz(v[0])} ${A} = {0} ${B} = {1} ${C}`,a:[v[1],v[2]],
+       hilfe:`Stufe für Stufe: erst von ${A} nach ${B}, dann von ${B} nach ${C}. ${TREPPE}`,weg:`${s1.weg}. ${s2.weg}.`,tipp:(k,w)=>(k?s2:s1).tipp(0,w)}; }),
+  E("l_text","Sachaufgaben","Längen im Alltag, auch der Holzstab aus der Arbeit",()=>{ const k=R.int(0,4); return k<4?{k,x:R.int(0,99),y:R.int(0,99)}:holzZieh(); },
+   p=>{ const {k,x,y}=p;
+     if(k===4){ const {L,a,c,e,s}=p, st=2*(200+10*e), sum=20*a+1000+c+st+5*s, r=L*10-sum;
+       return {frage:`Ein Holzstab ist ${L} cm lang. Abgesägt werden 2 Stücke zu je ${a} cm, ein Stück von 1 m ${c} mm und 2 Stücke zu je 2 dm ${e} cm. Für jedes Stück gibt es einen Sägeschnitt, dabei gehen jedes Mal ${s} mm verloren. Wie lang ist das Reststück?`,
+         f:"{0} mm",a:[r],hilfe:"Rechne alles in mm um: 1 cm = 10 mm, 1 dm = 100 mm, 1 m = 1000 mm. Dann alles abziehen, auch die Sägeschnitte.",
+         weg:`Alles in mm: ${L} cm = ${fz(L*10)} mm. 2 · ${a} cm = 2 · ${a*10} mm = ${fz(20*a)} mm. 1 m ${c} mm = ${fz(1000+c)} mm. 2 · 2 dm ${e} cm = 2 · ${200+10*e} mm = ${st} mm. 5 Schnitte · ${s} mm = ${5*s} mm. ${fz(L*10)} − ${fz(20*a)} − ${fz(1000+c)} − ${st} − ${5*s} = ${fz(r)} mm.`,
+         tipp:(i,v)=>v===r+5*s?`Die Sägeschnitte fehlen: 5 Stücke, also 5 Schnitte zu je ${s} mm.`:v===r+200+10*e?`Es sind zwei Stücke zu je 2 dm ${e} cm.`:v===r+20*a/2?`Es sind zwei Stücke zu je ${a} cm.`
+           :c<100&&v===r+(1000+c)-(1000+10*c)?`1 m ${c} mm sind ${fz(1000+c)} mm, nicht ${fz(1000+10*c)} mm.`:gleich(v,r/10)?"Das sind Zentimeter. Gefragt ist in mm.":null}; }
      if(k===0){ const a=250+x, b2=a===250+y?a-7:250+y;
        return {frage:`Tim springt ${fz(a/100)} m weit, Lea ${b2} cm. Um wie viele Zentimeter springt der Bessere weiter?`,f:"{0} cm",a:[Math.abs(a-b2)],hilfe:`Erst in dieselbe Einheit: ${fz(a/100)} m = ${a} cm.`,weg:`${fz(a/100)} m = ${a} cm. ${Math.max(a,b2)} cm − ${Math.min(a,b2)} cm = ${Math.abs(a-b2)} cm.`}; }
      if(k===1){ const br=[20,25,30,40,50,60][x%6], n=2+y%6, L=br*n;
@@ -561,6 +628,31 @@ const BEREICHE=[
   E("k_ordnen","Längen ordnen","erst in dieselbe Einheit",()=>{ const s=new Set(); while(s.size<5) s.add(R.int(8,260)*10); return {w:[...s].map(x=>({x,f:R.int(0,4)}))}; },
    ({w})=>({typ:"ordnen",frage:"Tipp die Längen der Größe nach an, die kürzeste zuerst.",o:w.map(({x,f})=>({t:laengeText(x,f),w:x})),t:"Rechne alle Längen im Kopf in cm um.",weg:"In cm: "+[...w].sort((a,b)=>a.x-b.x).map(({x,f})=>`${laengeText(x,f)} = ${fz(x/10)} cm`).join(", ")}))]},
 
+// Nach der Klassenarbeit 1.1 (4+): Johannes' Zettel vom 26.11.2026, "Ich brauche noch eine Basic Uebung zum Mal und Teilen bzw.
+// Verschieben des Komma" und "Solche Aufgaben muss er auch mehr ueben" (40 · 2,8 zerlegen). Regel wie im Buch S. 29, Aufgabe 8.
+{id:"m_rkomma",kap:"1.7",icon:"✖️",name:"Rechnen mit Komma",was:"mal und geteilt durch 10, 100, 1000; zerlegen",
+ erkl:{s:"29",wozu:"Mit Kommazahlen rechnest du wie beim Umrechnen von Größen: Bei mal 10 rückt das Komma eine Stelle nach rechts. Das brauchst du beim Umrechnen, beim Maßstab und beim Malnehmen.",
+  teile:[["Mal 10, 100, 1000",["Das Komma rückt um so viele Stellen nach rechts, wie die Zahl Nullen hat. So steht es bei Markus im Buch (S. 29, Aufgabe 8).","2,5 · 10 = 25: eine Null, eine Stelle.","0,003 · 1000 = 3: drei Nullen, drei Stellen.","Fehlt hinten eine Stelle, hängst du eine 0 an: 2,8 · 100 = 2,80 · 100 = 280."]],
+   ["Geteilt durch 10, 100, 1000",["Das Komma rückt nach links, so viele Stellen, wie die Zahl Nullen hat.","299 : 100 = 2,99.","Fehlen vorn Stellen, füllst du mit 0 auf: 3 : 100 = 0,03."]],
+   ["Malnehmen mit Zerlegen",["Zerleg die Kommazahl in die ganze Zahl und den Rest: 2,8 = 2 + 0,8.","Nimm beide Teile einzeln mal und zähl zusammen: 40 · 2,8 = 40 · 2 + 40 · 0,8 = 80 + 32 = 112.","40 · 0,8 rechnest du als 4 · 8 = 32."]]],
+  tab:TAB(["Aufgabe","Komma rückt","Ergebnis"],[["2,58 · 10","1 Stelle nach rechts","25,8"],["0,03 · 100","2 Stellen nach rechts","3"],["0,0005 · 10 000","4 Stellen nach rechts","5"],["299 : 100","2 Stellen nach links","2,99"],["3 : 100","2 Stellen nach links","0,03"]]),
+  bsp:[["0,003 · 1000","1000 hat drei Nullen: das Komma rückt drei Stellen nach rechts. 0,003 → 3"],["3 : 100","100 hat zwei Nullen: zwei Stellen nach links. 3 = 3,0 → 0,03"],["40 · 2,8","40 · 2 + 40 · 0,8 = 80 + 32 = 112"]],
+  achtung:["Mal macht die Zahl größer, geteilt macht sie kleiner. Prüf am Ende: Passt das?","3 : 100 ist nicht 0,3. Zwei Nullen, zwei Stellen: 0,03.","40 · 0,8 ist nicht 320. Rechne 4 · 8 = 32."],maus:"So viele Nullen, so viele Stellen. Mal nach rechts, geteilt nach links."},
+ ebenen:[
+  ZIEHEN.rk_zieh,
+  ZIEHEN.rk_zeichen,
+  E("rk_tippen","Ausrechnen","2,58 · 10 = ? und 299 : 100 = ?",()=>kommaAufgabe(3),
+   p=>{ const y=kErg(p), n=KOMMA_AN(p.F);
+     return {f:`${fz(p.x)} ${p.mal?"·":":"} ${fz(p.F)} = {0}`,a:[y],hilfe:`${fz(p.F)} hat ${NULLEN[n-1]}: das Komma rückt ${stellen(n)} nach ${p.mal?"rechts":"links"}. Fehlende Stellen füllst du mit 0.`,weg:kommaWeg(p),
+       tipp:(i,v)=>gleich(v,p.mal?p.x/p.F:p.x*p.F)?(p.mal?"Mal heißt: Die Zahl wird größer, das Komma rückt nach rechts.":"Geteilt heißt: Die Zahl wird kleiner, das Komma rückt nach links.")
+         :gleich(v,y*10)||gleich(v,y/10)?`${fz(p.F)} hat ${NULLEN[n-1]}: Das Komma rückt genau ${stellen(n)}.`:null}; }),
+  ZIEHEN.rk_zerlegen,
+  E("rk_zerltipp","Malnehmen mit Komma","40 · 2,8 = ?",zerlZieh,
+   p=>{ const {a,g,d}=p, x=zerl(p);
+     return {f:`${a} · ${fz(x.b)} = {0}`,a:[x.s],hilfe:`Zerleg ${fz(x.b)} in ${g} + ${x.z}: ${x.zer}. ${x.klein}`,weg:x.weg,
+       tipp:(i,v)=>gleich(v,x.t1)?`Das ist nur ${a} · ${g}. Dazu kommt noch ${a} · ${x.z}.`:gleich(v,x.t2)?`Das ist nur ${a} · ${x.z}. Dazu kommt noch ${a} · ${g} = ${fz(x.t1)}.`
+         :gleich(v,x.t1+a*d)?`${a} · ${x.z} ist nicht ${fz(a*d)}. ${x.klein}`:`Zerleg ${fz(x.b)} = ${g} + ${x.z} und rechne beide Teile einzeln: ${x.zer}.`}; })]},
+
 {id:"m_mass",kap:"1.8",icon:"🗺️",name:"Maßstab",was:"1 : 50 auf Plänen und Karten",
  erkl:{s:"30–33",wozu:"Auf Karten und Plänen ist alles kleiner gezeichnet. Der Maßstab sagt, wievielmal.",
   teile:[["Was heißt 1 : 50?",["Links steht die Länge im Bild, rechts die Länge in Wirklichkeit, beide in cm.","1 : 50 heißt: 1 cm auf dem Plan sind 50 cm in Wirklichkeit.","1 : 500 ist eine 500-fache Verkleinerung. 2 : 1 ist eine Vergrößerung auf das Doppelte."]],
@@ -628,8 +720,10 @@ const letzteSeite=k=>Math.max(...ABS.filter(a=>a.k===k).map(a=>a.seite))+2;
 // weiter je Runde, fehler {schluessel: {e,p,rest,t}}, neuFrei, hTag (Heute geschafft am)
 const M=()=>{ const d=KERN.D; if(!d.mathe||typeof d.mathe!=="object") d.mathe={}; return d.mathe; };
 const halte=()=>KERN.speichere("mathe",M());
-// Schwerpunkt: Jonathan (Kind 1) faengt mit Laengen an, Johannes 26.11.2026
-const fokusVon=(m,n)=>m.fokus!==undefined?m.fokus:(n===1?"m_laenge":"");
+// Schwerpunkte als Liste (Eltern: Haekchen). Jonathan (Kind 1) nach der Klassenarbeit 1.1: Rechnen mit Komma, Laengen, Runden
+// (Johannes, 26.11.2026). Der alte Einzelwert (Text) liest sich als Liste; "m_laenge" war der alte Vorschlag und wird zum neuen.
+const FOKUS1=["m_rkomma","m_laenge","m_runden"];
+const fokusVon=(m,n)=>{ const f=m.fokus; if(Array.isArray(f)) return f.filter(id=>BEREICHE.some(b=>b.id===id)); if(n===1&&(f===undefined||f==="m_laenge")) return FOKUS1; return f?[f]:[]; };
 const ezu=(b,i,m)=>i>0&&!m.geschafft?.[b.ebenen[i-1].id]&&!m.gespielt?.[b.ebenen[i].id];
 const offeneEbenen=(b,m)=>b.ebenen.filter((e,i)=>!ezu(b,i,m));
 const fertigB=(b,m)=>b.ebenen.every(e=>m.geschafft?.[e.id]);
@@ -685,19 +779,20 @@ function weiterBis(id){
 }
 
 // ---------- Menues ----------
+// fo: die Schwerpunkte, die noch nicht fertig sind (Reihenfolge wie bei den Eltern), th: das aktuelle Thema im Buch
 function heuteTeile(m){
-  const fo=BEREICHE.find(b=>b.id===fokusVon(m,KERN.nr)&&erreichtVon(m,b.kap)&&!fertigB(b,m)), pos=posVon(m), k=abs(pos).k;
+  const fo=fokusVon(m,KERN.nr).map(id=>BEREICHE.find(b=>b.id===id)).filter(b=>b&&erreichtVon(m,b.kap)&&!fertigB(b,m)), pos=posVon(m), k=abs(pos).k;
   let th=BEREICHE.filter(b=>b.kap===pos); if(!th.length) th=BEREICHE.filter(b=>abs(b.kap).k===k&&erreichtVon(m,b.kap)); if(!th.length) th=offenB(m);
-  return {fo,th:th.filter(b=>b!==fo)};
+  return {fo,th:th.filter(b=>!fo.includes(b))};
 }
-function heuteText(m){ const {fo,th}=heuteTeile(m); return [fo&&fo.name,...th.slice(0,3).map(b=>b.name)].filter(Boolean).join(", ")+(th.length>3?" …":""); }
+function heuteText(m){ const {fo,th}=heuteTeile(m); return [...fo.map(b=>b.name),...th.slice(0,3).map(b=>b.name)].join(", ")+(th.length>3?" …":""); }
 function mMenue(){
   ort="@mathe"; const m=M(); ruhe("🧮 Mathe",`Im Buch: ${abs(posVon(m)).name}.`); kopf();
-  const off=offenB(m), zu=BEREICHE.filter(b=>!erreichtVon(m,b.kap)), neu=new Set(m.neuFrei||[]), fo=fokusVon(m,KERN.nr), z=off.map(b=>zahlB(b,m));
+  const off=offenB(m), zu=BEREICHE.filter(b=>!erreichtVon(m,b.kap)), neu=new Set(m.neuFrei||[]), z=off.map(b=>zahlB(b,m));
   const g=z.reduce((a,x)=>a+x[0],0), v=z.reduce((a,x)=>a+x[1],0), fe=offeneFehler(m).length, p=m.weiter?.probe, hw=m.weiter?.heute, k=abs(posVon(m)).k;
-  const reihe=[...off.filter(b=>b.id===fo&&!fertigB(b,m)),...off.filter(b=>!(b.id===fo&&!fertigB(b,m)))];
+  const fl=heuteTeile(m).fo, reihe=[...fl,...off.filter(b=>!fl.includes(b))];
   karten([{i:"⭐",t:"Heute üben",u:"Für heute: "+h(heuteText(m)),st:hw?`weiter: ${hw.nr} von ${hw.liste.length}`:m.hTag===heute()?"heute fertig ✓":"heute noch offen",f:heuteStart},
-    ...reihe.map(b=>{ const x=zahlB(b,m); return {i:b.icon,t:h(b.name)+(neu.has(b.id)?'<span class="neu">NEU</span>':b.id===fo&&!fertigB(b,m)?'<span class="neu start">START</span>':""),u:h(b.was),p:x,st:`${x[0]} von ${x[1]}`,f:()=>mBereich(b.id)}; }),
+    ...reihe.map(b=>{ const x=zahlB(b,m); return {i:b.icon,t:h(b.name)+(neu.has(b.id)?'<span class="neu">NEU</span>':fl.includes(b)?'<span class="neu start">START</span>':""),u:h(b.was),p:x,st:`${x[0]} von ${x[1]}`,f:()=>mBereich(b.id)}; }),
     ...zu.map(b=>({i:"🔒",t:h(b.name),u:`geht auf mit ${h(abs(b.kap).name)}`,zu:true,st:"noch nicht dran"})),
     ...(k>1?[{i:"📷",t:`Kapitel ${k}: ${KAPITEL[k]}`,u:"Dafür fehlen im Trainer noch die Buchseiten.",zu:true,st:"kommt bald"}]:[]),
     {i:"🎯",t:"Meine Fehler",u:"nur üben, was falsch war",st:fe?`${fe} offen`:"nichts offen",zu:!fe,f:()=>starteFehler(null)},
@@ -747,17 +842,18 @@ function plane(e,n,schon){ const l=[], s=new Set(schon||[]);
   for(let k=0;k<n;k++){ let p; for(let v=0;v<40;v++){ p=e.zieh(); if(!s.has(e.id+JSON.stringify(p))) break; } s.add(e.id+JSON.stringify(p)); l.push({e:e.id,p}); }
   return l; }
 function starteEbene(e){ ort="@mr:"+e.b.id; runde({art:"ebene",key:e.id,titel:e.name,e},()=>plane(e,e.n)); }
-// Heute: offene Fehler zuerst, dann der Schwerpunkt (etwa 6 Punkte), Rest aus dem aktuellen Thema bis etwa 10.
-// Gezaehlt wird nach Luecken: eine Zieh-Aufgabe mit vier Luecken zaehlt vier.
+// Heute: offene Fehler zuerst, dann die Schwerpunkte (6 Punkte, bei mehreren 9), Rest aus dem aktuellen Thema, mindestens 3 Punkte.
+// Gezaehlt wird nach Luecken: eine Zieh-Aufgabe mit vier Luecken zaehlt vier. Die Schwerpunkte kommen reihum dran: die naechste
+// Aufgabe bekommt immer der mit den wenigsten Punkten, jeder aus seiner aktuellen Ebene, jede dritte aus einer schon offenen.
 function heuteListe(){
-  const m=M(), {fo,th}=heuteTeile(m), l=[], w=()=>l.reduce((s,x)=>s+gewicht(mach(x)),0), schon=()=>l.map(x=>x.e+JSON.stringify(x.p));
+  const m=M(), {fo,th}=heuteTeile(m), l=[], wx=x=>gewicht(mach(x)), w=()=>l.reduce((s,x)=>s+wx(x),0), schon=()=>l.map(x=>x.e+JSON.stringify(x.p));
   offeneFehler(m).slice(0,2).forEach(x=>l.push({e:x.e,p:x.p}));
-  if(fo){ const off=offeneEbenen(fo,m), jetzt=off.find(e=>!m.geschafft?.[e.id])||off[off.length-1], alt=off.filter(e=>e!==jetzt), ziel=w()+6;
-    for(let i=0;w()<ziel&&i<12;i++) l.push(...plane(i%3===2&&alt.length?R.pick(alt):jetzt,1,schon())); }
-  const pool=th.flatMap(b=>offeneEbenen(b,m)); for(let i=0;w()<10&&pool.length&&i<20;i++) l.push(...plane(R.pick(pool),1,schon()));
+  if(fo.length){ const st=fo.map(b=>{ const off=offeneEbenen(b,m), jetzt=off.find(e=>!m.geschafft?.[e.id])||off[off.length-1]; return {jetzt,alt:off.filter(e=>e!==jetzt),p:0,i:0}; }), ziel=w()+(fo.length>1?9:6);
+    for(let n=0;w()<ziel&&n<24;n++){ const s=st.reduce((a,b)=>b.p<a.p?b:a), x=plane(s.i++%3===2&&s.alt.length?R.pick(s.alt):s.jetzt,1,schon()); s.p+=x.reduce((q,y)=>q+wx(y),0); l.push(...x); } }
+  const pool=th.flatMap(b=>offeneEbenen(b,m)), bis=Math.max(10,w()+3); for(let i=0;w()<bis&&pool.length&&i<20;i++) l.push(...plane(R.pick(pool),1,schon()));
   return mischen(l);
 }
-function heuteStart(){ const m=M(), {fo,th}=heuteTeile(m), b=[fo,...th].filter(Boolean).find(b=>erklFaellig(b,m)); if(b){ gezeigt.add(b.id); return erklaerung(b,true,starteHeute); } starteHeute(); }
+function heuteStart(){ const m=M(), {fo,th}=heuteTeile(m), b=[...fo,...th].find(b=>erklFaellig(b,m)); if(b){ gezeigt.add(b.id); return erklaerung(b,true,starteHeute); } starteHeute(); }
 function starteHeute(){ ort="@mr"; runde({art:"heute",key:"heute",titel:"Heute üben"},heuteListe); }
 function starteFehler(bid){ ort=bid?"@mr:"+bid:"@mr"; runde({art:"fehler",key:null,titel:"Meine Fehler"},()=>offeneFehler(M(),bid).slice(0,10).map(x=>({e:x.e,p:x.p}))); }
 function starteProbe(){ ort="@mr"; runde({art:"probe",key:"probe",titel:"Klassenarbeit üben"},()=>{ const m=M(), bs=mischen(offenB(m)), l=[];
@@ -922,15 +1018,16 @@ function eltern(n){
     ${z.map(([b,x,y])=>`<div class="zeile2"><span>${b.icon} ${h(b.name)}</span><small>${x} von ${y}</small>${balken(x,y)}</div>`).join("")}
     ${k>1?`<p class="rot"><small>Im Unterricht ist Kapitel ${k} dran. Im Trainer gibt es bisher nur Kapitel 1: bitte die Buchseiten ${abs(k+".0")?.seite||""} bis ${letzteSeite(k)} fotografieren.</small></p>`:""}
     <label>Stand im Mathebuch <select id="mbuch">${ABS.map(a=>`<option value="${a.id}" ${a.id===pos?"selected":""}>${h(a.name)} (S. ${a.seite})</option>`).join("")}</select></label>
-    <label>Schwerpunkt <select id="mfokus"><option value="">keiner, nur das aktuelle Thema</option>${BEREICHE.map(b=>`<option value="${b.id}" ${b.id===fo?"selected":""}>${h(b.name)}</option>`).join("")}</select></label>
-    <p><small>Der Schwerpunkt bekommt in „Heute üben“ gut die Hälfte der Aufgaben, bis alle seine Ebenen geschafft sind. ${h(kname(n))} wird an Schultagen gefragt, ob es im Mathebuch weiterging.</small></p>
+    <fieldset id="mfokus" style="border:0;padding:0;margin:10px 0"><legend style="padding:0;font-weight:600">Schwerpunkte</legend>${BEREICHE.map(b=>`<label style="display:flex;gap:8px;align-items:center;margin:4px 0"><input type="checkbox" value="${b.id}" ${fo.includes(b.id)?"checked":""}> ${b.icon} ${h(b.name)}</label>`).join("")}</fieldset>
+    <p><small>Die Schwerpunkte bekommen in „Heute üben“ gut die Hälfte der Aufgaben, reihum verteilt, bis alle ihre Ebenen geschafft sind. Ohne Häkchen gibt es nur das aktuelle Thema. ${h(kname(n))} wird an Schultagen gefragt, ob es im Mathebuch weiterging.</small></p>
     <details><summary>Offene Fehler Mathe (${fe.length})</summary><ul>${fe.slice(0,30).map(x=>`<li>${h(loesung(mach(x)))}</li>`).join("")||"<li>keine</li>"}</ul></details></section>`;
   const aendern=f=>{ const x=JSON.parse(JSON.stringify(n===KERN.nr?KERN.D:KERN.daten(n))); x.mathe=x.mathe||{}; f(x.mathe); KERN.ersetze(n,x); };
   return {html,verdrahte:(root,meld)=>{
     root.querySelector("#mbuch").onchange=e=>{ const id=e.target.value; aendern(mm=>{ const von=aidx(posVon(mm)), bis=aidx(id);
       if(bis>von) mm.neuFrei=[...new Set([...(mm.neuFrei||[]),...BEREICHE.filter(b=>RE.slice(von+1,bis+1).includes(b.kap)).map(b=>b.id)])];
       mm.buch={...(mm.buch||{}),pos:id,i:bis,seit:Date.now()}; }); meld(`Mathebuch: ${abs(id).name}.`); };
-    root.querySelector("#mfokus").onchange=e=>{ aendern(mm=>mm.fokus=e.target.value); meld(e.target.value?`Schwerpunkt: ${BEREICHE.find(b=>b.id===e.target.value).name}.`:"Kein Schwerpunkt."); };
+    root.querySelector("#mfokus").onchange=()=>{ const l=[...root.querySelectorAll("#mfokus input:checked")].map(x=>x.value); aendern(mm=>mm.fokus=l);
+      meld(l.length?`Schwerpunkte: ${l.map(id=>BEREICHE.find(b=>b.id===id).name).join(", ")}.`:"Kein Schwerpunkt, nur das aktuelle Thema."); };
   }};
 }
 
@@ -938,6 +1035,6 @@ function eltern(n){
 const altRegeln=$("bTabelle").onclick; $("bTabelle").onclick=e=>{ if(ort?.startsWith("@m")) return merkzettel(); altRegeln?.(e); };
 
 return {start:mStart,menue:mMenue,zurueck:mZurueck,karte,eltern,BEREICHE,EB,ABS,START,mach,loesung,lies,fz,zahlwort,roemisch,vonRoemisch,ausSeite,setzen,
-  posVon:()=>posVon(M()),plane,heuteListe,starteEbene,starteHeute,starteProbe,starteFehler,erklaerung,bereich:mBereich,frageBuch,weiterBis,
+  posVon:()=>posVon(M()),fokusVon:n=>fokusVon(M(),n??KERN.nr),plane,heuteListe,starteEbene,starteHeute,starteProbe,starteFehler,erklaerung,bereich:mBereich,frageBuch,weiterBis,
   get X(){return X;}, get A(){return A;}, pruefeEingabe};
 })();
