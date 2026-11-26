@@ -44,8 +44,8 @@ function zahlwort(n){
 }
 const bloecke=n=>[Math.floor(n/1e9),Math.floor(n/1e6)%1000,Math.floor(n/1e3)%1000,n%1000];
 function paeckchenText(n){ const b=bloecke(n), t=[];
-  if(b[0]) t.push(`${b[0]} ${b[0]===1?"Milliarde":"Milliarden"}`); if(b[1]) t.push(`${b[1]} ${b[1]===1?"Million":"Millionen"}`);
-  if(b[2]) t.push(`${b[2]} Tausend`); if(b[3]||!t.length) t.push(String(b[3])); return t.join(" "); }
+  if(b[0]) t.push(`${b[0]} ${b[0]===1?"Milliarde":"Milliarden"}`); if(b[1]) t.push(`${b[1]} ${b[1]===1?"Million":"Millionen"}`);
+  if(b[2]) t.push(`${b[2]} Tausend`); if(b[3]||!t.length) t.push(String(b[3])); return t.join(" "); }
 
 // Roemische Zahlen (Streifzug S. 16-17)
 const ROM=[[1000,"M"],[900,"CM"],[500,"D"],[400,"CD"],[100,"C"],[90,"XC"],[50,"L"],[40,"XL"],[10,"X"],[9,"IX"],[5,"V"],[4,"IV"],[1,"I"]];
@@ -77,7 +77,7 @@ function strahl(a,s,L,m){
   let g=`<line x1="${x0-12}" y1="50" x2="${W-6}" y2="50" stroke="#1f2a1a" stroke-width="2"/><path d="M${W-4} 50 l-10 -5 v10 z" fill="#1f2a1a"/>`;
   for(let i=0;i<=N;i++){ const x=x0+i*dx, lang=i%L===0; g+=`<line x1="${x}" x2="${x}" y1="${lang?37:43}" y2="${lang?63:57}" stroke="#1f2a1a" stroke-width="${lang?2.2:1.3}"/>`;
     if(lang) g+=`<text x="${x}" y="82" text-anchor="middle">${fz(a+i*s)}</text>`; }
-  const xm=x0+m*dx; g+=`<path d="M${xm} 35 l-7 -12 h14 z" fill="#c3262e"/><text x="${xm}" y="17" text-anchor="middle" font-weight="700" fill="#c3262e">A</text>`;
+  for(const [mm,lb] of Array.isArray(m)?m:[[m,"A"]]){ const xm=x0+mm*dx; g+=`<path d="M${xm} 35 l-7 -12 h14 z" fill="#c3262e"/><text x="${xm}" y="17" text-anchor="middle" font-weight="700" fill="#c3262e">${lb}</text>`; }
   return `<svg class="mbild" viewBox="0 0 ${W} 92" role="img" aria-label="Zahlenstrahl" font-size="13" fill="#1f2a1a">${g}</svg>`;
 }
 // Zahl mit markierter Rundungsstelle (unterstrichen) und der Ziffer daneben (fett)
@@ -170,6 +170,94 @@ function vergleichWeg(a,b){ const s=String(a), t=String(b), z=`${fz(a)} ${a<b?"<
   let i=0; while(s[i]===t[i]) i++; return `Gleich viele Stellen. Die erste andere Ziffer steht bei den ${STW[s.length-1-i]}: ${s[i]} gegen ${t[i]}. Also ${z}.`; }
 function aendereZiffer(a){ const s=String(a).split(""), i=R.int(0,s.length-1); let d; do d=R.int(i?0:1,9); while(String(d)===s[i]); s[i]=String(d); return Number(s.join("")); }
 
+// ---------- Vergleichen, gemischt (Johannes, 26.11.2026: "größer / kleiner ist zu einfach, muss mehr gemischt werden") ----------
+// sieben Arten: Ziffer weit hinten anders, Ziffern vertauscht, Falle mit mehr Stellen, Größen in zwei Einheiten,
+// Größe mit Komma, Zahlwort gegen Ziffern, römisch gegen Zahl. Immer mit "=" als Möglichkeit.
+const VPAARE=[["km","m",LG],["m","cm",LG],["m","dm",LG],["dm","cm",LG],["cm","mm",LG],["kg","g",GW],["t","kg",GW],["g","mg",GW],["h","min",ZT],["min","s",ZT],["d","h",ZT]];
+const VKOMMA=[["m","cm",LG],["km","m",LG],["kg","g",GW],["m","mm",LG]];
+const rel=(a,b)=>gleich(a,b)?"=":a<b?"<":">";
+function vergleichMix(k){
+  if(k===undefined) k=R.int(0,6);
+  const zahlen=(a,b)=>({l:fz(a),lw:a,r:fz(b),rw:b,w:vergleichWeg(a,b)});
+  const seiten=x=>R.ja()?x:{l:x.r,lw:x.rw,r:x.l,rw:x.lw,w:x.w};
+  if(k===0){ const L=R.int(4,8), a=R.int(10**(L-1),10**L-1), s=String(a).split(""), i=R.int(Math.min(2,L-1),L-1); let d; do d=R.int(0,9); while(String(d)===s[i]); s[i]=String(d); return zahlen(a,Number(s.join(""))); }
+  if(k===1){ const L=R.int(4,8); for(;;){ const a=R.int(10**(L-1),10**L-1), s=String(a).split(""), i=R.int(1,L-2); if(s[i]===s[i+1]) continue; [s[i],s[i+1]]=[s[i+1],s[i]]; return zahlen(a,Number(s.join(""))); } }
+  if(k===2){ const L=R.int(3,6); return seiten(R.ja()?zahlen(10**L+R.int(0,99),10**L-R.int(1,99)):zahlen(R.int(9*10**(L-1),10**L-1),R.int(10**L,Math.round(1.2*10**L)))); }
+  if(k===3){ const [g,kl,U]=R.pick(VPAARE), F=U[g]/U[kl], q=R.int(1,9), v=R.int(0,3), ex=q*F, h2=Math.max(1,Math.floor(F/2));
+    let x=v===0?ex-R.int(1,h2):v===1?ex+R.int(1,h2):v===2?ex:(U===ZT?q*100:ex/10); if(!Number.isInteger(x)||x<=0) x=ex+1;
+    return seiten({l:`${q} ${g}`,lw:q*U[g],r:`${fz(x)} ${kl}`,rw:x*U[kl],w:`Erst in dieselbe Einheit: ${q} ${g} = ${fz(ex)} ${kl}. ${fz(ex)} ${kl} ${rel(ex,x)} ${fz(x)} ${kl}.`}); }
+  if(k===4){ const [g,kl,U]=R.pick(VKOMMA), F=U[g]/U[kl], q=R.int(11,49)/10, ex=rund(q*F), v=R.int(0,2);
+    const x=v===0?Math.floor(q)*F+Math.round(q*10)%10:v===1?ex:ex+R.pick([-1,1])*R.int(1,F/10);
+    return seiten({l:`${fz(q)} ${g}`,lw:rund(q*U[g]),r:`${fz(x)} ${kl}`,rw:x*U[kl],w:`${fz(q)} ${g} = ${fz(ex)} ${kl}. ${fz(ex)} ${kl} ${rel(ex,x)} ${fz(x)} ${kl}.`}); }
+  if(k===5){ let n; do n=R.int(1001,9999); while(!String(n).includes("0")); const s=String(n), i=s.indexOf("0"); let m=Number(s.slice(0,i)+s.slice(i+1)); if(R.ja()||m===n) m=aendereZiffer(n);
+    return seiten({l:zahlwort(n),lw:n,r:fz(m),rw:m,w:`${zahlwort(n)} = ${fz(n)}, also ${fz(n)} ${rel(n,m)} ${fz(m)}.`}); }
+  const n=R.int(4,1999); let m=R.ja()?n+R.pick([-10,-1,1,10,40]):R.int(4,1999); if(m<1) m=n+1;
+  return seiten({l:roemisch(n),lw:n,r:fz(m),rw:m,w:`${roemisch(n)} = ${n}, also ${n} ${rel(n,m)} ${fz(m)}.`});
+}
+// alte gespeicherte Aufgaben {a,b} lesen sich weiter
+const vAlt=p=>p.l!==undefined?p:{l:fz(p.a),lw:p.a,r:fz(p.b),rw:p.b,w:vergleichWeg(p.a,p.b)};
+const VTIPP="Erst in dieselbe Einheit oder Schreibweise bringen. Die Spitze zeigt zur kleineren Seite.";
+const vergleichAufgabe=p=>{ const x=vAlt(p); return {typ:"wahl",f:`${x.l} ___ ${x.r}`,a:rel(x.lw,x.rw),o:["<","=",">"],t:VTIPP,weg:x.w}; };
+
+// ---------- Ziehen: die erste Ebene eines Themas, wie die Tabelle in Englisch (Johannes, 26.11.2026) ----------
+// Aufgabe {typ:"ziehen", zeilen:[{vor|vorHtml, nach, a, t}], tiles, bleibt (Karten bleiben liegen), satz (Satz statt Tabelle)}
+const Z=(id,name,was,zieh,mach,n)=>({...E(id,name,was,zieh,mach,n||6),ziehen:true});
+const nAus=(len,n)=>mischen([...Array(len).keys()]).slice(0,n);
+const zz=(vor,nach,a,t)=>({vor,nach,a:String(a),t});
+const ZL_ZAHL=[["1 km =","m","1000"],["1 m =","dm","10"],["1 dm =","cm","10"],["1 cm =","mm","10"],["1 m =","cm","100"],["1 m =","mm","1000"]];
+const ZL_EINH=[["1","= 1000 m","km"],["1","= 10 dm","m"],["1","= 100 cm","m"],["1","= 10 cm","dm"],["1","= 10 mm","cm"],["1 km = 1000","","m"],["1 m = 100","","cm"],["1 m = 10","","dm"],["1 cm = 10","","mm"],["1 dm = 10","","cm"]];
+const ZG=[["1 t =","kg","1000"],["1 kg =","g","1000"],["1 g =","mg","1000"],["1","= 1000 kg","t"],["1","= 1000 g","kg"],["1","= 1000 mg","g"],["1 t = 1000","","kg"],["1 kg = 1000","","g"],["1 g = 1000","","mg"]];
+const ZZ=[["1 d =","h","24"],["1 h =","min","60"],["1 min =","s","60"],["1 Woche =","Tage","7"],["1 Jahr =","Monate","12"],["½ h =","min","30"],["¼ h =","min","15"],["½ d =","h","12"]];
+const ZR=[["I",1],["V",5],["X",10],["L",50],["C",100],["D",500],["M",1000]];
+const ZM=[[50,"50 cm"],[100,"1 m"],[200,"2 m"],[500,"5 m"],[1000,"10 m"],[10000,"100 m"],[25000,"250 m"],[100000,"1 km"]];
+const TREPPE="Die Treppe: km → m → dm → cm → mm. Von km zu m ist es 1000, sonst immer 10. Von m zu cm also 10 · 10 = 100.";
+const weg3=([v,n,a])=>`${v} ${a} ${n}`.replace(/\s+/g," ").trim();
+const ZIEHEN={
+ f_zeichen:Z("f_zeichen","<, = oder > ziehen","gemischt: Zahlen, Größen, Zahlwörter",()=>({z:nAus(7,4).map(k=>vergleichMix(k))}),
+  ({z})=>({typ:"ziehen",satz:true,frage:"Zieh &lt;, = oder &gt; in die Lücken. Achtung, es ist gemischt!",zeilen:z.map(x=>zz(x.l,x.r,rel(x.lw,x.rw),VTIPP)),tiles:["<","=",">"],bleibt:true,t:VTIPP,weg:z.map(x=>x.w).join(" ")})),
+ d_tabelle:Z("d_tabelle","Strichliste in die Tabelle","Striche zählen und zuordnen",()=>{ const t=R.int(0,3), k=DTHEMA[t][1], s=new Set(); while(s.size<k.length) s.add(R.int(3,16)); return {t,w:[...s]}; },
+  ({t,w})=>{ const [titel,k]=DTHEMA[t], fa=w.map(n=>Math.floor(n/5)*4+n%5).find(x=>!w.includes(x));
+    return {typ:"ziehen",frage:`Umfrage: ${titel}. Zieh zu jeder Strichliste die passende Zahl.`,zeilen:k.map((x,i)=>({vorHtml:`${h(x)} ${striche(w[i]).replace('class="mbild"','class="mstrich"').replace(/ style="[^"]*"/,"")}`,vor:x,nach:"",a:String(w[i]),t:"Ein Bündel sind 5 Striche."})),
+      tiles:[...w.map(String),...(fa?[String(fa)]:[])],bleibt:false,hilfe:"Zähl in Fünferschritten: jedes Bündel 5, dann die einzelnen Striche dazu.",weg:k.map((x,i)=>`${x}: ${w[i]}`).join(", ")}; }),
+ g_paare:Z("g_paare","Paare finden","Wort und Ziffern zuordnen",()=>({d:R.int(2,9),r:nAus(6,4)}),
+  ({d,r})=>{ const V=[(100*d+d)*1e6,d*1e7+d*1e4,d*1e9+d*1e7,d*1e6+d*1e4,d*1e10+d*1e6,d*1e5+d], z=r.map(i=>V[i]);
+    return {typ:"ziehen",satz:true,frage:"Welche Zahl ist gemeint? Zieh sie zum passenden Wort.",zeilen:z.map(n=>zz(paeckchenText(n)+" =","",fz(n))),tiles:z.map(fz),bleibt:false,t:"Zähl die Päckchen: Milliarden, Millionen, Tausend, Einer.",weg:z.map(n=>`${paeckchenText(n)} = ${fz(n)}`).join(" · ")}; }),
+ r_zeichen:Z("r_zeichen","Die Zeichen","I, V, X … zuordnen",()=>({k:R.int(0,1),r:nAus(7,5)}),
+  ({k,r})=>{ const z=r.slice(0,4).map(i=>ZR[i]), x=ZR[r[4]];
+    return {typ:"ziehen",frage:k?"Welches Zeichen gehört zur Zahl?":"Wie viel ist das Zeichen wert?",zeilen:z.map(([c,w])=>k?zz(fz(w)+" =","",c):zz(c+" =","",fz(w))),tiles:[...z,x].map(([c,w])=>k?c:fz(w)),bleibt:false,t:"I 1, V 5, X 10, L 50, C 100, D 500, M 1000.",weg:z.map(([c,w])=>`${c} = ${fz(w)}`).join(", ")}; }),
+ s_ziehen:Z("s_ziehen","Zahlen an den Strahl","A, B und C zuordnen",()=>{ const [st,L]=R.pick([[1,5],[1,10],[2,5],[5,10],[10,5],[10,10],[20,5],[25,4],[50,10],[100,5],[100,10],[1000,10]]), a=R.ja(.6)?0:R.int(1,20)*st*L;
+    let m; do m=nAus(2*L-1,3).map(x=>x+1).sort((x,y)=>x-y); while(m.some(x=>x%L===0)||m[1]-m[0]<2||m[2]-m[1]<2); return {s:st,L,a,m}; },
+  ({s:st,L,a,m})=>{ const w=m.map(x=>a+x*st), d=[...new Set([...m.map(x=>a+x),...m.map(x=>a+(x+1)*st)])].filter(v=>!w.includes(v)).slice(0,2);
+    return {typ:"ziehen",bild:strahl(a,st,L,m.map((x,i)=>[x,"ABC"[i]])),frage:"Welche Zahl gehört zu A, B und C?",zeilen:w.map((v,i)=>zz(`${"ABC"[i]} =`,"",fz(v))),tiles:[...w,...d].map(fz),bleibt:false,
+      hilfe:`Zwischen ${fz(a)} und ${fz(a+L*st)} liegen ${L} Schritte. Ein Schritt ist ${fz(st)}.`,t:"Erst ausrechnen, wie viel ein Schritt wert ist.",weg:w.map((v,i)=>`${"ABC"[i]} = ${fz(v)}`).join(", ")}; }),
+ ru_aufab:Z("ru_aufab","Auf oder ab?","aufrunden oder abrunden",()=>({z:[0,1,2,3].map(()=>rundZieh())}),
+  ({z})=>({typ:"ziehen",satz:true,frage:"Aufrunden oder abrunden? Die rote Ziffer entscheidet.",zeilen:z.map(({n,s})=>{ const k=RST[s][0], d=Math.floor(n/(k/10))%10;
+      return {vorHtml:`<span class="mzahl">${markiert(n,k)}</span> auf ${RST[s][1]}:`,vor:`${fz(n)} auf ${RST[s][1]}:`,nach:"",a:d>=5?"aufrunden":"abrunden",t:"Bei 0, 1, 2, 3, 4 abrunden, bei 5, 6, 7, 8, 9 aufrunden."}; }),
+    tiles:["abrunden","aufrunden"],bleibt:true,weg:z.map(({n,s})=>rundWeg(n,s)).join(" ")})),
+ sc_einheit:Z("sc_einheit","Welche Einheit passt?","mm, cm, m, km … in die Lücke ziehen",()=>{ const fam=R.pick([["mm","cm","m","km"],["mg","g","kg","t"],["s","min","h","d"]]); return {r:mischen(SEINHEIT.map((x,k)=>k).filter(k=>fam.includes(SEINHEIT[k].a))).slice(0,3)}; },
+  ({r,i})=>{ const L=(r||[i]).map(k=>SEINHEIT[k]);
+    return {typ:"ziehen",satz:true,frage:"Welche Einheit passt? Zieh sie in die Lücke.",zeilen:L.map(x=>{ const [v,n]=x.f.split("___"); return zz(v.trim(),n.trim(),x.a,"Vergleiche mit etwas, das du kennst."); }),tiles:L[0].o,bleibt:true,weg:L.map(x=>x.weg).join(" ")}; }),
+ l_treppe:Z("l_treppe","Die Einheitentreppe","1 m = 10 dm zuordnen",()=>{ const k=R.int(0,1); return {k,r:nAus(k?ZL_EINH.length:ZL_ZAHL.length,4)}; },
+  ({k,r})=>{ const T=k?ZL_EINH:ZL_ZAHL; return {typ:"ziehen",frage:k?"Welche Einheit gehört in die Lücke?":"Welche Umrechnungszahl gehört in die Lücke?",zeilen:r.map(i=>zz(...T[i])),tiles:k?["km","m","dm","cm","mm"]:["10","100","1000"],bleibt:true,hilfe:TREPPE,t:"Denk an die Treppe: km, m, dm, cm, mm.",weg:r.map(i=>weg3(T[i])).join(", ")}; }),
+ w_treppe:Z("w_treppe","Gewichte zuordnen","1 kg = 1000 g",()=>({r:nAus(ZG.length,4)}),
+  ({r})=>({typ:"ziehen",frage:"Was gehört in die Lücke?",zeilen:r.map(i=>zz(...ZG[i])),tiles:["100","1000","t","kg","g","mg"],bleibt:true,hilfe:"t → kg → g → mg: jede Stufe ist 1000.",t:"Bei Gewichten ist es immer die 1000.",weg:r.map(i=>weg3(ZG[i])).join(", ")})),
+ z_treppe:Z("z_treppe","Zeiten zuordnen","1 h = 60 min",()=>({r:nAus(ZZ.length,4)}),
+  ({r})=>({typ:"ziehen",frage:"Welche Zahl gehört in die Lücke?",zeilen:r.map(i=>zz(...ZZ[i])),tiles:["7","12","15","24","30","60","100"],bleibt:true,hilfe:"1 d = 24 h, 1 h = 60 min, 1 min = 60 s, 1 Woche = 7 Tage, 1 Jahr = 12 Monate.",t:"Eine Stunde hat 60 Minuten, nicht 100.",weg:r.map(i=>weg3(ZZ[i])).join(", ")})),
+ ge_paare:Z("ge_paare","Euro und Cent zuordnen","Paare finden",()=>({z:mischen([[R.int(1,40),R.int(1,9)],[R.int(1,9),R.int(10,99)],[0,R.pick([25,50,75,90])],[R.int(2,60),0]])}),
+  ({z})=>{ const w=z.map(([e,c])=>e*100+c), kl=z.find(([e,c])=>e&&c&&c<10), d=kl?Number(`${kl[0]}${kl[1]}`):null;
+    return {typ:"ziehen",frage:"Wie viele Cent sind das?",zeilen:z.map(([e,c])=>zz(`${geld(e+c/100)} € =`,"ct",fz(e*100+c),"1 € = 100 ct. Nach dem Komma stehen zwei Stellen für die Cent.")),tiles:[...w,...(d&&!w.includes(d)?[d]:[])].map(fz),bleibt:false,
+      weg:z.map(([e,c])=>`${geld(e+c/100)} € = ${fz(e*100+c)} ct`).join(", ")}; }),
+ k_puzzle:Z("k_puzzle","Komma-Puzzle","6,7 km = 6 km 700 m",()=>{ const z=[]; while(z.length<3){ const i=R.int(0,KPAARE.length-1), [g,k,U]=KPAARE[i], q=kommaZahl(U[g]/U[k]); if(q>=1&&!z.some(x=>x[0]===i)) z.push([i,q]); } return {z}; },
+  ({z})=>{ const r=z.map(([i,q])=>{ const [g,k,U]=KPAARE[i], F=U[g]/U[k], ganz=Math.floor(q); return {g,k,q,F,ganz,rest:rund((q-ganz)*F),hinten:Number(String(q).split(".")[1])}; });
+    const t=new Set(r.map(x=>fz(x.rest))); r.forEach(x=>{ if(t.size<6&&x.hinten!==x.rest) t.add(fz(x.hinten)); if(t.size<6&&x.rest*10<x.F) t.add(fz(x.rest*10)); });
+    return {typ:"ziehen",frage:"Zerleg die Größen. Zieh die passende Zahl in die Lücke.",zeilen:r.map(x=>zz(`${fz(x.q)} ${x.g} = ${x.ganz} ${x.g}`,x.k,fz(x.rest),`Bei ${x.g} gehören ${KOMMA_AN(x.F)} Stellen hinter dem Komma zu den ${x.k}.`)),
+      tiles:[...t].sort((a,b)=>lies(a)-lies(b)),bleibt:true,hilfe:"Fehlende Stellen hinter dem Komma füllst du mit 0: 6,7 km = 6,700 km = 6 km 700 m.",weg:r.map(x=>`${fz(x.q)} ${x.g} = ${x.ganz} ${x.g} ${fz(x.rest)} ${x.k}`).join(", ")}; }),
+ ma_tabelle:Z("ma_tabelle","Maßstab-Tabelle","1 cm auf dem Plan sind …",()=>({r:nAus(ZM.length,4),x:R.int(0,4)}),
+  ({r,x})=>{ const z=r.map(i=>ZM[i]), d=["5 cm","10 cm","50 m","500 m","10 km"].filter(t=>!z.some(([m,l])=>l===t))[x%3];
+    return {typ:"ziehen",frage:"1 cm auf dem Plan sind in Wirklichkeit …",zeilen:z.map(([m,l])=>zz(`1 : ${fz(m)}`,"",l,"Die Zahl rechts sind Zentimeter. 100 cm = 1 m.")),tiles:[...z.map(([m,l])=>l),d],bleibt:false,
+      hilfe:"1 : 100 heißt: 1 cm sind 100 cm, also 1 m. 100 000 cm sind 1 km.",weg:z.map(([m,l])=>`1 : ${fz(m)}: 1 cm sind ${fz(m)} cm = ${l}`).join(" · ")}; })
+};
+
 // ---------- Erklaerseiten und Aufgaben, Reihenfolge wie im Buch ----------
 const BEREICHE=[
 {id:"m_fund",kap:"1.0",icon:"🧱",name:"Dein Fundament",was:"Stellenwerttafel, Wert einer Ziffer, vergleichen",
@@ -180,6 +268,7 @@ const BEREICHE=[
   bsp:[["Welche Zahl ist 4 T 5 H 0 Z 2 E?","4502. Die 0 bei den Zehnern nicht vergessen."],["Welchen Wert hat die 3 in 321?","300, denn die 3 steht bei den Hundertern."],["89 oder 98?","89 &lt; 98: beide haben zwei Stellen, und 8 Zehner sind weniger als 9 Zehner."]],
   achtung:["Die Null nicht weglassen: 4 T 2 E ist 4002, nicht 42."],maus:"Die Spitze von &lt; und &gt; zeigt immer zur kleineren Zahl."},
  ebenen:[
+  ZIEHEN.f_zeichen,
   E("f_tafel","Stellenwerttafel","Welche Zahl steht in der Tafel?",()=>{ const z=[R.int(1,9),R.int(0,9),R.int(0,9),R.int(0,9)]; if(R.ja(.6)) z[R.int(1,3)]=0; return {z}; },
    ({z})=>{ const n=z[0]*1000+z[1]*100+z[2]*10+z[3], ohne=Number(z.filter((x,i)=>x||!i).join(""));
      return {bild:tafel(["T","H","Z","E"],z),frage:"Welche Zahl steht in der Stellenwerttafel?",f:"{0}",a:[n],weg:`${z[0]} Tausender, ${z[1]} Hunderter, ${z[2]} Zehner, ${z[3]} Einer: ${fz(n)}.`,
@@ -187,9 +276,7 @@ const BEREICHE=[
   E("f_wert","Wert einer Ziffer","3, 30 oder 300?",()=>{ for(;;){ const n=R.int(100,99999), s=String(n), i=R.int(0,s.length-1), d=s[i]; if(d!=="0"&&s.split(d).length===2) return {n,i}; } },
    ({n,i})=>{ const s=String(n), d=+s[i], st=s.length-1-i, w=d*10**st;
      return wahl(`Welchen Wert hat die <b>${d}</b> in ${fz(n)}?`,fz(w),[...Array(s.length)].map((_,k)=>fz(d*10**k)),{t:"Schau, in welcher Spalte die Ziffer steht: Einer, Zehner, Hunderter …",weg:`Die ${d} steht bei den ${STW[st]}: ${fz(w)}.`}); }),
-  E("f_vergl","Größer oder kleiner?","&lt; oder &gt; einsetzen",()=>{ const a=R.ja(.5)?R.int(10,99):R.int(100,9999), k=R.int(0,2);
-     let b=k===0?Number(String(a).split("").reverse().join("")):k===1?aendereZiffer(a):R.int(10,9999); if(!(b>0)||b===a) b=a+1; return {a,b}; },
-   ({a,b})=>({typ:"wahl",f:`${fz(a)} ___ ${fz(b)}`,a:a<b?"<":">",o:["<",">"],t:"Die Spitze zeigt immer zur kleineren Zahl.",weg:vergleichWeg(a,b)}))]},
+  E("f_vergl","Größer, kleiner, gleich?","gemischt: Zahlen, Größen, Zahlwörter",()=>vergleichMix(),vergleichAufgabe)]},
 
 {id:"m_daten",kap:"1.1",icon:"📊",name:"Daten auswerten",was:"Strichliste, Häufigkeitstabelle, Säulendiagramm",
  erkl:{s:"8–12",wozu:"Du sammelst Antworten, zählst sie aus und stellst sie übersichtlich dar.",
@@ -200,6 +287,7 @@ const BEREICHE=[
   bsp:[["Gregor fragt 28 Kinder nach ihren Geschwistern (Beispiel 1, S. 8).","keine: 8, ein: 11, zwei: 6, drei: 2, vier: 1. Zusammen 8 + 11 + 6 + 2 + 1 = 28."],["Wie viele haben mehr als ein Geschwister?","zwei, drei oder vier: 6 + 2 + 1 = 9."],["Strichliste mit 2 Bündeln und 3 Strichen","5 + 5 + 3 = 13."]],
   achtung:["Beginnt die Skala nicht bei 0, sehen kleine Unterschiede riesig aus (Stolperstelle S. 10).","Durften die Kinder mehrere Antworten geben, kannst du aus dem Diagramm nicht ablesen, wie viele Kinder gefragt wurden."],maus:"Ein Bündel sind 5 Striche: zähl in Fünferschritten."},
  ebenen:[
+  ZIEHEN.d_tabelle,
   E("d_strich","Strichliste lesen","Bündel zu fünf zählen",()=>({n:R.int(4,29)}),
    ({n})=>({bild:striche(n),frage:"So viele Kinder kommen mit dem Fahrrad zur Schule. Wie viele sind es?",f:"{0} Kinder",a:[n],
      weg:`${Math.floor(n/5)} Bündel zu 5 sind ${Math.floor(n/5)*5}, dazu ${n%5}: ${n}.`,
@@ -226,6 +314,7 @@ const BEREICHE=[
   bsp:[["23 432 411 lesen","23 Millionen 432 Tausend 411"],["dreihundertfünfundsechzigtausendsiebenundzwanzig","365 Tausend 27 = 365 027, nicht 36 527 (Stolperstelle S. 15)"],["84 027 oder 84 072?","84 027 &lt; 84 072: erst bei den Zehnern verschieden, 2 &lt; 7."]],
   achtung:["Fehlt ein Päckchen, schreibst du drei Nullen: 5 Millionen 50 Tausend = 5 050 000.","Die kleinste sechsstellige Zahl ist 100 000, nicht 111 111."],maus:"Von rechts in Dreierpäckchen teilen, von links lesen."},
  ebenen:[
+  ZIEHEN.g_paare,
   E("g_pack","Päckchen schreiben","Millionen, Tausend, Einer",()=>{ const L=R.int(5,11); let n=R.int(10**(L-1),10**L-1);
      if(R.ja(.6)){ const b=bloecke(n), oben=b.findIndex(x=>x>0), j=R.int(oben+1,3); if(j<=3&&j>oben){ b[j]=R.pick([0,R.int(1,9),R.int(10,99)]); n=b[0]*1e9+b[1]*1e6+b[2]*1e3+b[3]; } } return {n}; },
    ({n})=>{ const b=bloecke(n), o=b.findIndex(x=>x>0), roh1=Number(b.slice(o).map(String).join("")), roh2=Number(b.slice(o).filter((x,k)=>x||!k).map(String).join(""));
@@ -237,10 +326,7 @@ const BEREICHE=[
   E("g_nach","Vorgänger und Nachfolger","1 weniger, 1 mehr",()=>{ const k=R.int(0,2), e=R.int(2,6), z=R.int(1,9); return {n:k===0?z*10**e:k===1?z*10**e-1:R.int(10,999999)}; },
    ({n})=>({frage:"Schreib den Vorgänger und den Nachfolger.",f:`{0} < ${fz(n)} < {1}`,a:[n-1,n+1],weg:`${fz(n)} − 1 = ${fz(n-1)} und ${fz(n)} + 1 = ${fz(n+1)}.`,
      tipp:(i,v)=>i===0&&v===n+1?"Der Vorgänger kommt vorher, er ist 1 kleiner.":i===1&&v===n-1?"Der Nachfolger kommt danach, er ist 1 größer.":i===0&&n%10===0?"Bei −1 werden die Nullen am Ende zu Neunen: 10 000 − 1 = 9999.":i===1&&n%10===9?"Bei +1 werden die Neunen am Ende zu Nullen: 9999 + 1 = 10 000.":null})),
-  E("g_vergl","Große Zahlen vergleichen","&lt; oder &gt;",()=>{ const a=R.int(10000,99999999), k=R.int(0,2); let b;
-     if(k===0) b=aendereZiffer(a); else if(k===1){ const s=String(a).split(""), i=R.int(0,s.length-2); [s[i],s[i+1]]=[s[i+1],s[i]]; b=Number(s.join("")); } else b=Math.round(a/10*R.pick([.9,1.1,1.5]));
-     if(!(b>0)||b===a) b=a+10; return {a,b}; },
-   ({a,b})=>({typ:"wahl",f:`${fz(a)} ___ ${fz(b)}`,a:a<b?"<":">",o:["<",">"],t:"Erst die Stellen zählen, dann von links vergleichen.",weg:vergleichWeg(a,b)})),
+  E("g_vergl","Große Zahlen vergleichen","&lt;, = oder &gt;",()=>vergleichMix(R.pick([0,1,2,5])),vergleichAufgabe),
   E("g_ordnen","Zahlen ordnen","von klein nach groß",()=>{ const L=R.int(4,6), base=R.int(10**(L-1),10**L-1), s=new Set([base]); while(s.size<5){ let x=aendereZiffer(base); if(R.ja(.4)) x=aendereZiffer(x); s.add(x); } return {z:[...s]}; },
    ({z})=>({typ:"ordnen",frage:"Tipp die Zahlen der Größe nach an, die kleinste zuerst.",o:z.map(w=>({t:fz(w),w})),t:"Von links vergleichen: Wo ist die erste Ziffer verschieden?",weg:[...z].sort((a,b)=>a-b).map(fz).join(" < ")}))]},
 
@@ -252,6 +338,7 @@ const BEREICHE=[
   bsp:[["XXVI","10 + 10 + 5 + 1 = 26"],["XCIV","100 − 10 + 5 − 1 = 94"],["38","30 + 8 = XXX + VIII = XXXVIII"],["91","90 + 1 = XC + I = XCI"]],
   achtung:["49 ist nicht IL, sondern 40 + 9 = XL + IX = XLIX.","4 ist IV, nicht IIII."],maus:"Zerleg die Zahl in Tausender, Hunderter, Zehner und Einer und schreib jeden Teil einzeln."},
  ebenen:[
+  ZIEHEN.r_zeichen,
   E("r_lesen","Römisch lesen","welche Zahl ist das?",()=>({n:R.ja(.4)?R.int(1,49):R.ja(.5)?R.int(50,499):R.int(1200,2026)}),
    ({n})=>({f:`${roemisch(n)} = {0}`,a:[n],l:`${roemisch(n)} = ${n}`,weg:rWeg(n),
      tipp:(i,v)=>{ const add=[...roemisch(n)].reduce((s,c)=>s+RW[c],0); return v===add&&add!==n?"Steht ein kleineres Zeichen vor einem größeren, ziehst du es ab: IX = 10 − 1 = 9.":null; }})),
@@ -268,6 +355,7 @@ const BEREICHE=[
   bsp:[["Zwischen 0 und 50 liegen 5 Schritte.","50 : 5 = 10, ein Schritt ist 10."],["Mitte zwischen 200 000 und 600 000","Abstand 400 000, die Hälfte davon 200 000. 200 000 + 200 000 = 400 000."],["Zahlen zwischen 8 und 16","9, 10, 11, 12, 13, 14, 15: das sind 7. Die 8 und die 16 zählen nicht mit."]],
   achtung:["Ein Strahl mit ungleichen Abständen ist falsch gezeichnet (Stolperstelle S. 19).","Nicht einfach die Striche zählen: erst schauen, wie viel ein Schritt wert ist."],maus:"Erst die Einteilung, dann ablesen."},
  ebenen:[
+  ZIEHEN.s_ziehen,
   E("s_ablesen","Zahlenstrahl ablesen","welche Zahl zeigt der Pfeil?",()=>{ const [s,L]=R.pick([[1,5],[1,10],[2,5],[5,10],[10,5],[10,10],[20,5],[25,4],[50,10],[100,5],[100,10],[500,10],[1000,5],[1000,10],[10000,10],[100000,5]]);
      const a=R.ja(.6)?0:R.int(1,20)*s*L; let m; do m=R.int(1,2*L-1); while(m%L===0); return {s,L,a,m}; },
    ({s,L,a,m})=>({bild:strahl(a,s,L,m),frage:"Welche Zahl gehört an den Pfeil A?",f:"A = {0}",a:[a+m*s],
@@ -289,6 +377,7 @@ const BEREICHE=[
   bsp:[["35 auf Zehner","Rechts von der 3 steht eine 5: aufrunden. 35 ≈ 40."],["1835 auf Hunderter","Rechts von der 8 steht eine 3: abrunden. 1835 ≈ 1800."],["79 835 auf Tausender","Rechts von der 9 steht eine 8: aufrunden. Aus 79 Tausend wird 80 Tausend: 80 000."]],
   achtung:["Nicht zweimal runden: 3549 auf Hunderter ist 3500. Falsch wäre 3549 → 3550 → 3600 (Stolperstelle S. 21).","1550 auf Hunderter ist 1600, nicht 2000. Erst die Stelle prüfen."],maus:"Nur die eine Ziffer rechts neben der Rundungsstelle entscheidet."},
  ebenen:[
+  ZIEHEN.ru_aufab,
   E("ru_mark","Runden mit Markierung","die Rundungsstelle ist unterstrichen",rundZieh,
    ({n,s})=>({frage:`Runde <span class="mzahl">${markiert(n,RST[s][0])}</span> auf <b>${RST[s][1]}</b>.<br><small>Grün unterstrichen: die Rundungsstelle. Rot: die Ziffer, die entscheidet.</small>`,f:`${fz(n)} ≈ {0}`,a:[rundeAuf(n,RST[s][0])],weg:rundWeg(n,s),tipp:rundTipp(n,s)})),
   E("ru_stelle","Runden","ohne Markierung",rundZieh,
@@ -307,7 +396,7 @@ const BEREICHE=[
   tab:TAB(["Länge","Gewicht","Zeit"],[["mm Millimeter","mg Milligramm","s Sekunde"],["cm Zentimeter","g Gramm","min Minute"],["dm Dezimeter","kg Kilogramm","h Stunde"],["m Meter","t Tonne","d Tag"],["km Kilometer","",""]]),
   bsp:[["Kiste mit 12 Ein-Liter-Flaschen (Beispiel 1, S. 22)","1 Liter Wasser wiegt etwa 1 kg. 12 Liter wiegen 12 kg, dazu Kiste und Flaschen: etwa 13 bis 15 kg."],["Haus mit 5 Etagen","Eine Etage ist etwa 2,50 m hoch, das Haus also etwa 12,50 m."]],
   achtung:["Ohne Einheit sagt eine Zahl nichts: 80 ist kein Tisch, 80 cm schon."],maus:"Vergleichen hilft beim Schätzen."},
- ebenen:[E("sc_einheit","Welche Einheit passt?","mm, cm, m, km …",...liste(SEINHEIT)),E("sc_wieviel","Wie schwer, wie lang?","eine Angabe passt",...liste(SWIEVIEL))]},
+ ebenen:[ZIEHEN.sc_einheit,E("sc_wieviel","Wie schwer, wie lang?","eine Angabe passt",...liste(SWIEVIEL))]},
 
 {id:"m_laenge",kap:"1.6",icon:"📐",name:"Längen umrechnen",was:"km, m, dm, cm, mm. Vor allem m und cm",
  erkl:{s:"24–27",wozu:"Zum Vergleichen und Rechnen müssen Längen in derselben Einheit stehen. Dafür brauchst du die Umrechnungszahlen.",
@@ -319,6 +408,7 @@ const BEREICHE=[
   achtung:["1 m sind 100 cm, nicht 10. Zwischen m und cm liegt noch der dm.","Sabrina rechnet 24 km = 2400 m. Richtig ist 24 · 1000 = 24 000 m (Stolperstelle S. 26).","Kleinere Einheit, größere Zahl. Größere Einheit, kleinere Zahl."],
   maus:"Meter in Zentimeter: zwei Nullen dran. Zentimeter in Meter: zwei Nullen weg."},
  ebenen:[
+  ZIEHEN.l_treppe,
   E("l_zahl","Die Umrechnungszahlen","1 m = ? cm",...liste([["1 m = {0} cm",100,"Zwischen m und cm liegt noch der dm: 1 m = 10 dm, 1 dm = 10 cm. Also 10 · 10 = 100."],["1 km = {0} m",1000,"Kilo heißt tausend."],["1 m = {0} dm",10,"Dezi heißt ein Zehntel."],["1 dm = {0} cm",10,"Ein Dezimeter ist so lang wie zehn Zentimeter."],["1 cm = {0} mm",10,"Auf dem Lineal: zehn kleine Striche pro Zentimeter."],["1 m = {0} mm",1000,"1 m = 100 cm und 1 cm = 10 mm: 100 · 10 = 1000."],["100 cm = {0} m",1,"100 cm sind genau ein Meter."],["10 mm = {0} cm",1,"10 mm sind genau ein Zentimeter."],["1000 m = {0} km",1,"1000 m sind genau ein Kilometer."],["10 dm = {0} m",1,"10 dm sind genau ein Meter."]].map(([f,a,t])=>({f,a:[a],hilfe:t,tipp:()=>t,weg:f.replace("{0}",fz(a))})),10)),
   E("l_mcm","Meter in Zentimeter","mal 100",()=>({q:R.ja(.7)?R.int(1,20):R.pick([25,30,40,50,75,120,250])}),({q})=>um(q,"m","cm",LG,mcmTipp)),
   E("l_cmm","Zentimeter in Meter","geteilt durch 100",()=>({q:R.ja(.7)?R.int(1,20):R.pick([25,30,40,50,75,120,250])}),({q})=>um(q*100,"cm","m",LG,mcmTipp)),
@@ -358,6 +448,7 @@ const BEREICHE=[
   bsp:[["5 t in kg","5 · 1000 = 5000 kg"],["24 000 mg in g","24 000 : 1000 = 24 g"],["2 kg 70 g in g","2000 g + 70 g = 2070 g"]],
   achtung:["Sabrina schreibt 3000 kg = 3 g. Richtig ist 3000 kg = 3 t (Stolperstelle S. 26)."],maus:"Bei Gewichten ist es immer die 1000."},
  ebenen:[
+  ZIEHEN.w_treppe,
   E("w_zahl","Die Umrechnungszahlen","1 kg = ? g",...liste([["1 t = {0} kg",1000],["1 kg = {0} g",1000],["1 g = {0} mg",1000],["1000 kg = {0} t",1],["1000 g = {0} kg",1],["1000 mg = {0} g",1]].map(([f,a])=>({f,a:[a],hilfe:"Bei Gewichten ist die Umrechnungszahl immer 1000.",weg:f.replace("{0}",fz(a))}))),6),
   E("w_klein","In die kleinere Einheit","mal 1000",()=>{ const [g,k]=R.pick([["t","kg"],["kg","g"],["g","mg"]]); return {g,k,q:R.ja(.7)?R.int(2,90):R.int(101,999)}; },({g,k,q})=>um(q,g,k,GW)),
   E("w_gross","In die größere Einheit","geteilt durch 1000",()=>{ const [g,k]=R.pick([["t","kg"],["kg","g"],["g","mg"]]); return {g,k,q:R.int(2,90)}; },({g,k,q})=>um(q*1000,k,g,GW)),
@@ -378,6 +469,7 @@ const BEREICHE=[
   bsp:[["5 h in min","5 · 60 = 300 min"],["72 h in d","72 : 24 = 3 d"],["Schule von 7:50 bis 12:55","7:50 → 8:00 sind 10 min, 8:00 → 12:00 sind 4 h, 12:00 → 12:55 sind 55 min. Zusammen 4 h 65 min = 5 h 5 min."]],
   achtung:["Sabrina schreibt 7 min = 70 s. Richtig ist 7 · 60 = 420 s (Stolperstelle S. 26).","Bei Zeiten gibt es kein Komma wie bei Metern: 1,7 h sind nicht 1 h 70 min."],maus:"Bei der Uhr ist die 60 die wichtige Zahl."},
  ebenen:[
+  ZIEHEN.z_treppe,
   E("z_zahl","Die Umrechnungszahlen","1 h = ? min",...liste([["1 d = {0} h",24],["1 h = {0} min",60],["1 min = {0} s",60],["1 Woche = {0} Tage",7],["1 Jahr = {0} Monate",12],["1 h = {0} s",3600],["eine halbe Stunde = {0} min",30],["eine Viertelstunde = {0} min",15],["eine Dreiviertelstunde = {0} min",45],["eineinhalb Stunden = {0} min",90],["ein halber Tag = {0} h",12],["eine halbe Minute = {0} s",30]].map(([f,a])=>({f,a:[a],hilfe:"1 h = 60 min, 1 min = 60 s, 1 d = 24 h.",weg:f.replace("{0}",fz(a)),tipp:(i,v)=>v===100||v===50||v===25||v===75||v===150?"Eine Stunde hat 60 Minuten, nicht 100.":null})))),
   E("z_um","Zeit umrechnen","min, s, h, d",()=>{ const k=R.int(0,4); if(k<2){ const [g,kl]=R.pick([["min","s"],["h","min"],["d","h"]]); return {k,g,kl,q:R.int(2,12)}; } return {k,h:R.int(1,5),m:R.int(5,55)}; },
    ({k,g,kl,q,h:hh,m})=>{ if(k===0) return um(q,g,kl,ZT,v=>v===q*100?{d:"Ein Tag hat 24 Stunden, nicht 100.",h:"Eine Stunde hat 60 Minuten, nicht 100.",min:"Eine Minute hat 60 Sekunden, nicht 100."}[g]:null);
@@ -400,6 +492,7 @@ const BEREICHE=[
   bsp:[["30,05 € in ct","30 € = 3000 ct, dazu 5 ct: 3005 ct"],["2 km + 300 m","2000 m + 300 m = 2300 m"],["3 h + 50 min","180 min + 50 min = 230 min"]],
   achtung:["30,05 € sind 3005 ct, nicht 305 ct: Nach dem Komma stehen immer zwei Stellen für die Cent."],maus:"Erst die gleiche Einheit, dann rechnen."},
  ebenen:[
+  ZIEHEN.ge_paare,
   E("ge_ct","Euro und Cent","1 € = 100 ct",()=>R.ja()?{e:R.int(1,60),c:R.pick([0,R.int(1,9),R.int(10,99),R.int(10,99)]),r:0}:{e:0,c:R.int(5,9999),r:1},
    ({e,c,r})=>r?{f:`${fz(c)} ct = {0} €`,a:[c/100],l:`${fz(c)} ct = ${geld(c/100)} €`,hilfe:"100 ct sind 1 €. Das Komma rückt zwei Stellen nach links.",weg:`${fz(c)} : 100 = ${geld(c/100)}, also ${geld(c/100)} €`,tipp:(i,v)=>gleich(v,c/10)?"100 ct sind 1 €: zwei Stellen nach links, nicht eine.":gleich(v,c)?"Euro sind größer, die Zahl wird kleiner: geteilt durch 100.":null}
      :{f:`${geld(e+c/100)} € = {0} ct`,a:[e*100+c],hilfe:"1 € = 100 ct. Erst die Euro umrechnen, dann die Cent dazu.",weg:`${e} € = ${e*100} ct${c?`, dazu ${c} ct: ${e*100+c} ct`:""}`,
@@ -418,6 +511,7 @@ const BEREICHE=[
   bsp:[["4,2 km in m","1 km = 1000 m hat drei Nullen: Komma drei Stellen nach rechts. 4,200 → 4200 m"],["250 cm in m","1 m = 100 cm hat zwei Nullen: Komma zwei Stellen nach links. 2,50 m = 2,5 m"],["23 mg in g","1 g = 1000 mg: drei Stellen nach links. 0,023 g"]],
   achtung:["Jan schreibt 3,7 km = 37 m. Richtig ist 3,7 km = 3 km 700 m = 3700 m (Stolperstelle S. 29).","0,6 m sind 60 cm, nicht 6 cm.","Zeiten schreibt man nicht mit Komma um: 1,7 h sind nicht 1 h 70 min."],maus:"So viele Nullen die Umrechnungszahl hat, so viele Stellen rückt das Komma."},
  ebenen:[
+  ZIEHEN.k_puzzle,
   E("k_ohne","Ohne Komma schreiben","in die kleinere Einheit",()=>{ const i=R.int(0,KPAARE.length-1), [g,k,U]=KPAARE[i]; return {i,q:kommaZahl(U[g]/U[k])}; },
    ({i,q})=>{ const [g,k,U]=KPAARE[i], F=U[g]/U[k], n=KOMMA_AN(F), roh=Number(String(q).replace(".","")); const x=um(q,g,k,U);
      return {...x,hilfe:`${fz(q)} ${g} = ${zerlegt(q,g,k,F)}. 1 ${g} = ${fz(F)} ${k}: das Komma rückt ${n} ${n===1?"Stelle":"Stellen"} nach rechts.`,weg:`${fz(q)} ${g} = ${zerlegt(q,g,k,F)} = ${fz(rund(q*F))} ${k}`,
@@ -442,6 +536,7 @@ const BEREICHE=[
   bsp:[["Stadtplan 1 : 10 000, 4 cm (Beispiel 1, S. 30)","4 cm · 10 000 = 40 000 cm = 400 m"],["Handballfeld 40 m lang, Plan 1 : 200 (Beispiel 2, S. 31)","40 m = 4000 cm. 4000 cm : 200 = 20 cm"],["Zimmer im Plan 1 : 50 ist 8 cm lang","8 cm · 50 = 400 cm = 4 m"]],
   achtung:["Tim rechnet beim Modellauto 1 : 5 so: 40 cm : 5 = 8 cm. Falsch! In Wirklichkeit ist das Auto größer, also mal 5: 200 cm = 2 m (Stolperstelle S. 33).","Vor dem Teilen erst in cm umrechnen."],maus:"Plan nach echt: mal. Echt nach Plan: geteilt."},
  ebenen:[
+  ZIEHEN.ma_tabelle,
   E("ma_worte","Maßstab verstehen","1 cm auf dem Plan sind …",()=>{ const k=R.int(0,3); return k===0?{k,m:R.pick([20,50,100,200,500,1000])}:k===1?{k,m:R.pick([100,200,500,1000,2000,5000,10000,25000,50000])}:k===2?{k,m:R.pick([100000,200000,250000,500000,1000000])}:{k,i:R.int(0,7)}; },
    ({k,m,i})=>{ if(k===3){ const [a,b]=[[1,50],[1,3],[2,1],[1,500],[500,1],[10,1],[1,25000],[3,1]][i], v=a<b;
        return wahl(`Ist der Maßstab <b>${a} : ${fz(b)}</b> eine Vergrößerung oder eine Verkleinerung?`,v?"Verkleinerung":"Vergrößerung",["Vergrößerung","Verkleinerung"],{t:"Links steht das Bild, rechts die Wirklichkeit.",weg:v?`1 cm im Bild sind ${fz(b)} cm in Wirklichkeit. Das Bild ist kleiner.`:`${a} cm im Bild sind 1 cm in Wirklichkeit. Das Bild ist größer.`}); }
@@ -497,18 +592,20 @@ const M=()=>{ const d=KERN.D; if(!d.mathe||typeof d.mathe!=="object") d.mathe={}
 const halte=()=>KERN.speichere("mathe",M());
 // Schwerpunkt: Jonathan (Kind 1) faengt mit Laengen an, Johannes 26.11.2026
 const fokusVon=(m,n)=>m.fokus!==undefined?m.fokus:(n===1?"m_laenge":"");
-const ezu=(b,i,m)=>i>0&&!m.geschafft?.[b.ebenen[i-1].id];
+const ezu=(b,i,m)=>i>0&&!m.geschafft?.[b.ebenen[i-1].id]&&!m.gespielt?.[b.ebenen[i].id];
 const offeneEbenen=(b,m)=>b.ebenen.filter((e,i)=>!ezu(b,i,m));
 const fertigB=(b,m)=>b.ebenen.every(e=>m.geschafft?.[e.id]);
 const zahlB=(b,m)=>[b.ebenen.filter(e=>m.geschafft?.[e.id]).length,b.ebenen.length];
 const offenB=m=>BEREICHE.filter(b=>erreichtVon(m,b.kap));
 const fKey=x=>x.e+"|"+JSON.stringify(x.p);
 const offeneFehler=(m,bid)=>Object.values(m.fehler||{}).filter(x=>x.rest>0&&EB[x.e]&&(!bid||EB[x.e].b.id===bid)&&erreichtVon(m,EB[x.e].b.kap)).sort((a,b)=>b.t-a.t);
+const gewicht=it=>it.typ==="ziehen"?it.zeilen.length:1;
 function mach(x){ const e=EB[x.e], it={typ:"eingabe",art:"zahl",...e.mach(x.p)}; it.e=e; return it; }
 function loesung(it){
   if(it.l) return it.l;
   if(it.typ==="wahl") return it.f?it.f.replace("___",it.a):ohneTags(it.a);
   if(it.typ==="ordnen") return [...it.o].sort((a,b)=>a.w-b.w).map(o=>o.t).join(" < ");
+  if(it.typ==="ziehen") return it.zeilen.map(z=>`${ohneTags(z.vor)} ${z.a}${z.nach?(/^[.,!?]/.test(z.nach)?"":" ")+z.nach:""}`).join(" · ");
   return it.f.replace(/\{(\d)\}/g,(_,k)=>it.art==="text"?it.a[k]:fz(it.a[k]));
 }
 
@@ -558,16 +655,16 @@ function mMenue(){
   const off=offenB(m), zu=BEREICHE.filter(b=>!erreichtVon(m,b.kap)), neu=new Set(m.neuFrei||[]), fo=fokusVon(m,KERN.nr), z=off.map(b=>zahlB(b,m));
   const g=z.reduce((a,x)=>a+x[0],0), v=z.reduce((a,x)=>a+x[1],0), fe=offeneFehler(m).length, p=m.weiter?.probe, hw=m.weiter?.heute, k=abs(posVon(m)).k;
   const reihe=[...off.filter(b=>b.id===fo&&!fertigB(b,m)),...off.filter(b=>!(b.id===fo&&!fertigB(b,m)))];
-  karten([{i:"⭐",t:"Heute üben",u:"10 Aufgaben: "+h(heuteText(m)),st:hw?`weiter: ${hw.nr} von ${hw.liste.length}`:m.hTag===heute()?"heute fertig ✓":"heute noch offen",f:heuteStart},
+  karten([{i:"⭐",t:"Heute üben",u:"Für heute: "+h(heuteText(m)),st:hw?`weiter: ${hw.nr} von ${hw.liste.length}`:m.hTag===heute()?"heute fertig ✓":"heute noch offen",f:heuteStart},
     ...reihe.map(b=>{ const x=zahlB(b,m); return {i:b.icon,t:h(b.name)+(neu.has(b.id)?'<span class="neu">NEU</span>':b.id===fo&&!fertigB(b,m)?'<span class="neu start">START</span>':""),u:h(b.was),p:x,st:`${x[0]} von ${x[1]}`,f:()=>mBereich(b.id)}; }),
     ...zu.map(b=>({i:"🔒",t:h(b.name),u:`geht auf mit ${h(abs(b.kap).name)}`,zu:true,st:"noch nicht dran"})),
     ...(k>1?[{i:"📷",t:`Kapitel ${k}: ${KAPITEL[k]}`,u:"Dafür fehlen im Trainer noch die Buchseiten.",zu:true,st:"kommt bald"}]:[]),
     {i:"🎯",t:"Meine Fehler",u:"nur üben, was falsch war",st:fe?`${fe} offen`:"nichts offen",zu:!fe,f:()=>starteFehler(null)},
-    {i:"🏆",t:"Klassenarbeit üben",u:"20 Aufgaben aus allem, was dran war, ohne Tipps",st:p?`weiter: ${p.nr} von ${p.liste.length}`:m.gespielt?.probe?`Bestes: ${m.best.probe} von 20`:"",f:starteProbe}]);
+    {i:"🏆",t:"Klassenarbeit üben",u:"20 Aufgaben aus allem, was dran war, ohne Tipps",st:p?`weiter: ${p.nr} von ${p.liste.length}`:m.gespielt?.probe?`Bestes: ${m.best.probe} von ${m.bestVon?.probe||20}`:"",f:starteProbe}]);
   $("spiele").insertAdjacentHTML("afterbegin",`<div class="gesamt"><span>Du hast <b>${g} von ${v}</b> Mathe-Ebenen geschafft.</span>${balken(g,v)}</div>`);
   fussleiste([["📖 Im Mathebuch weiter?",frageBuch],["Fach wechseln",fachWahl],...(KERN.geraet.nur?[]:[["Kind wechseln",startseite]]),["🔒 Eltern",elternTor]]);
 }
-function standE(e,m){ const w=m.weiter?.[e.id], g=m.gespielt?.[e.id]; if(w) return `weiter: ${w.nr} von ${w.liste.length}`; return g?`Bestes: ${m.best[e.id]} von ${e.n}${m.geschafft?.[e.id]?" ✓":""}`:""; }
+function standE(e,m){ const w=m.weiter?.[e.id], g=m.gespielt?.[e.id]; if(w) return `weiter: ${w.nr} von ${w.liste.length}`; return g?`Bestes: ${m.best[e.id]} von ${m.bestVon?.[e.id]||e.n}${m.geschafft?.[e.id]?" ✓":""}`:""; }
 function mBereich(id){
   const b=BEREICHE.find(x=>x.id===id), m=M(); if(!b) return mMenue();
   if(m.neuFrei?.includes(id)){ m.neuFrei=m.neuFrei.filter(x=>x!==id); halte(); }
@@ -575,7 +672,7 @@ function mBereich(id){
   ort="@mb:"+id; ruhe(`${b.icon} ${b.name}`,`Mathebuch Seite ${b.erkl.s}. Die nächste Ebene geht auf, wenn du drei Viertel auf Anhieb richtig hast.`); kopf();
   const fe=offeneFehler(m,id).length;
   karten([{t:"📖 Erklärung",u:`aus dem Buch, Seite ${b.erkl.s}`,st:m.erklaert?.[id]?"gelesen ✓":"noch nicht gelesen",f:()=>erklaerung(b,false)},
-    ...b.ebenen.map((e,i)=>{ const zu=ezu(b,i,m); return {t:`${i+1}. ${e.name}`,u:e.was,zu,st:zu?"noch gesperrt":standE(e,m),f:()=>starteEbene(e)}; }),
+    ...b.ebenen.map((e,i)=>{ const zu=ezu(b,i,m); return {t:`${i+1}. ${h(e.name)}`,u:e.was,zu,st:zu?"noch gesperrt":standE(e,m),f:()=>starteEbene(e)}; }),
     {t:"🎯 Meine Fehler",u:"nur üben, was falsch war",st:fe?`${fe} offen`:"nichts offen",zu:!fe,f:()=>starteFehler(id)}]);
 }
 function mZurueck(){ const o=ort||""; if(o.startsWith("@mr:")||o.startsWith("@me:")) return mBereich(o.slice(4)); if(o==="@mathe") return fachWahl(); mMenue(); }
@@ -609,23 +706,26 @@ function plane(e,n,schon){ const l=[], s=new Set(schon||[]);
   for(let k=0;k<n;k++){ let p; for(let v=0;v<40;v++){ p=e.zieh(); if(!s.has(e.id+JSON.stringify(p))) break; } s.add(e.id+JSON.stringify(p)); l.push({e:e.id,p}); }
   return l; }
 function starteEbene(e){ ort="@mr:"+e.b.id; runde({art:"ebene",key:e.id,titel:e.name,e},()=>plane(e,e.n)); }
+// Heute: offene Fehler zuerst, dann der Schwerpunkt (etwa 6 Punkte), Rest aus dem aktuellen Thema bis etwa 10.
+// Gezaehlt wird nach Luecken: eine Zieh-Aufgabe mit vier Luecken zaehlt vier.
 function heuteListe(){
-  const m=M(), {fo,th}=heuteTeile(m), l=[];
+  const m=M(), {fo,th}=heuteTeile(m), l=[], w=()=>l.reduce((s,x)=>s+gewicht(mach(x)),0), schon=()=>l.map(x=>x.e+JSON.stringify(x.p));
   offeneFehler(m).slice(0,2).forEach(x=>l.push({e:x.e,p:x.p}));
-  if(fo){ const off=offeneEbenen(fo,m), jetzt=off.find(e=>!m.geschafft?.[e.id])||off[off.length-1], alt=off.filter(e=>e!==jetzt);
-    l.push(...plane(jetzt,alt.length?4:6)); for(let i=0;i<(alt.length?2:0);i++) l.push(...plane(R.pick(alt),1)); }
-  const pool=th.flatMap(b=>offeneEbenen(b,m)); while(l.length<10&&pool.length) l.push(...plane(R.pick(pool),1,l.map(x=>x.e+JSON.stringify(x.p))));
-  return mischen(l).slice(0,10);
+  if(fo){ const off=offeneEbenen(fo,m), jetzt=off.find(e=>!m.geschafft?.[e.id])||off[off.length-1], alt=off.filter(e=>e!==jetzt), ziel=w()+6;
+    for(let i=0;w()<ziel&&i<12;i++) l.push(...plane(i%3===2&&alt.length?R.pick(alt):jetzt,1,schon())); }
+  const pool=th.flatMap(b=>offeneEbenen(b,m)); for(let i=0;w()<10&&pool.length&&i<20;i++) l.push(...plane(R.pick(pool),1,schon()));
+  return mischen(l);
 }
 function heuteStart(){ const m=M(), {fo,th}=heuteTeile(m), b=[fo,...th].filter(Boolean).find(b=>erklFaellig(b,m)); if(b){ gezeigt.add(b.id); return erklaerung(b,true,starteHeute); } starteHeute(); }
 function starteHeute(){ ort="@mr"; runde({art:"heute",key:"heute",titel:"Heute üben"},heuteListe); }
 function starteFehler(bid){ ort=bid?"@mr:"+bid:"@mr"; runde({art:"fehler",key:null,titel:"Meine Fehler"},()=>offeneFehler(M(),bid).slice(0,10).map(x=>({e:x.e,p:x.p}))); }
 function starteProbe(){ ort="@mr"; runde({art:"probe",key:"probe",titel:"Klassenarbeit üben"},()=>{ const m=M(), bs=mischen(offenB(m)), l=[];
-  for(let k=0;l.length<20&&k<200;k++){ const b=bs[k%bs.length], e=R.pick(offeneEbenen(b,m)); l.push(...plane(e,1,l.map(x=>x.e+JSON.stringify(x.p)))); } return l; }); }
+  for(let k=0;l.length<20&&k<200;k++){ const b=bs[k%bs.length], oe=offeneEbenen(b,m).filter(e=>!e.ziehen), e=oe.length?R.pick(oe):b.ebenen.find(e=>!e.ziehen); l.push(...plane(e,1,l.map(x=>x.e+JSON.stringify(x.p)))); } return l; }); }
 function runde(cfg,plan){
   lauf++; const m=M(), w=cfg.key&&m.weiter?.[cfg.key], ok=!!(w&&w.liste?.length&&w.nr<w.liste.length&&w.liste.every(x=>EB[x.e]));
   X={...cfg,...(ok?JSON.parse(JSON.stringify(w)):{liste:plan(),nr:0,gut:0,schlecht:[],f:0})};
   if(!X.liste.length) return mMenue();
+  X.n=X.liste.reduce((s,x)=>s+gewicht(mach(x)),0);
   zeige("karte"); $("schilder").replaceChildren(); $("schilder").hidden=true; $("bTabelle").hidden=false;
   frage(ok&&(w.nr||w.f));
 }
@@ -634,7 +734,7 @@ function frage(fort){
   const en=X.liste[X.nr], it=mach(en); A={it,en,f:X.f||0,fertig:false};
   $("runde").textContent=`${X.titel} · Aufgabe ${X.nr+1} von ${X.liste.length}`; $("punkte").textContent=`Auf Anhieb: ${X.gut}`;
   baueKarte(it);
-  sag(fort?"Hier hast du aufgehört. Mach weiter.":it.typ==="wahl"?"Tipp auf die richtige Antwort.":it.typ==="ordnen"?"Tipp der Reihe nach an, das Kleinste zuerst.":"Schreib das Ergebnis hinein. Dann Prüfen oder Enter.","");
+  sag(fort?"Hier hast du aufgehört. Mach weiter.":it.typ==="ziehen"?"Zieh die Karten unten in die Lücken. Oder tipp erst eine Karte, dann die Lücke.":it.typ==="wahl"?"Tipp auf die richtige Antwort.":it.typ==="ordnen"?"Tipp der Reihe nach an, das Kleinste zuerst.":"Schreib das Ergebnis hinein. Dann Prüfen oder Enter.","");
 }
 function feld(it,k){ const t=it.art==="text"; return `<input type="text" inputmode="${t?"text":"decimal"}" autocomplete="off" autocapitalize="${t?"characters":"off"}" autocorrect="off" spellcheck="false" enterkeyhint="done" style="width:${Math.max(2.3,String(t?it.a[k]:fz(it.a[k])).length*.68+1.3).toFixed(2)}em" data-k="${k}" aria-label="Lösung ${k+1}">`; }
 function baueKarte(it){
@@ -642,13 +742,50 @@ function baueKarte(it){
   let x=(it.bild||"")+(it.frage?`<p class="mfrage">${it.frage}</p>`:"");
   if(it.typ==="wahl") x+=(it.f?`<p class="satzgross">${h(it.f).replace("___",'<span class="platz mluecke"></span>')}</p>`:"")+`<div class="mwahl">${it.o.map((o,i)=>`<button type="button" data-i="${i}">${h(o)}</button>`).join("")}</div>`;
   else if(it.typ==="ordnen"){ A.ord=mischen(it.o); A.k=0; x+=`<p class="mreihe" aria-live="polite"></p><div class="mwahl">${A.ord.map((o,i)=>`<button type="button" data-i="${i}">${h(o.t)}</button>`).join("")}</div>`; }
+  else if(it.typ==="ziehen"){ A.gaps=it.zeilen.map(()=>({f:0,ok:false})); const P=i=>`<span class="platz" data-i="${i}" tabindex="0" role="button" aria-label="Lücke ${i+1}"></span>`, N=z=>z.nach?(/^[.,!?]/.test(z.nach)?"":" ")+h(z.nach):"";
+    x+=it.satz?`<div class="msaetze">${it.zeilen.map((z,i)=>`<p class="msatz">${z.vorHtml||h(z.vor)} ${P(i)}${N(z)}</p>`).join("")}</div>`
+      :`<div class="mtab">${it.zeilen.map((z,i)=>`<div class="mzeile"><span class="mvor">${z.vorHtml||h(z.vor)}</span>${P(i)}<span class="mnach">${h(z.nach||"")}</span></div>`).join("")}</div>`; }
   else x+=`<form><p class="satzgross">${h(it.f).replace(/\{(\d)\}/g,(_,k)=>feld(it,+k))}</p><button class="pruefen" type="submit">Prüfen</button></form>`;
   x+=`<p class="mweg" hidden></p><div class="knoepfe mweiter" hidden><button type="button" class="haupt">Weiter</button></div>`;
   el.innerHTML=x; $("karte").replaceChildren(el); A.el=el;
+  const S=$("schilder"); A.sel=null;
+  if(it.typ==="ziehen"){ A.tiles=(it.bleibt?it.tiles:mischen(it.tiles)).map(t=>({text:String(t)})); S.replaceChildren(...A.tiles.map(baueKachel)); S.hidden=false;
+    el.addEventListener("click",ev=>{ const p=ev.target.closest(".platz")||ev.target.closest(".mzeile,.msatz")?.querySelector(".platz:not(.voll)"); if(!p||A.fertig) return; if(A.sel) lege(A.sel,p); else sag("Nimm zuerst eine Karte unten.",""); });
+    el.addEventListener("keydown",ev=>{ if((ev.key==="Enter"||ev.key===" ")&&ev.target.classList?.contains("platz")){ ev.preventDefault(); ev.target.click(); } }); }
+  else { S.replaceChildren(); S.hidden=true; }
   el.querySelector("form")?.addEventListener("submit",e=>{ e.preventDefault(); pruefeEingabe(); });
   el.querySelectorAll(".mwahl button").forEach(b=>b.onclick=()=>it.typ==="wahl"?pruefeWahl(b):pruefeOrdnen(b));
   el.querySelector(".mweiter button").onclick=weiter;
   el.querySelector("input")?.focus({preventScroll:true});
+}
+
+// ---------- Karten ziehen (Finger, Maus, Stift) oder antippen ----------
+function baueKachel(t){
+  const b=document.createElement("button"); b.type="button"; b.className="wort"+(t.text.length>5?" breit":""); b.textContent=t.text; b.setAttribute("aria-pressed","false"); t.el=b;
+  let st=null, geist=null, ziel=null, gezogen=false;
+  const ende=()=>{ geist?.remove(); geist=null; b.classList.remove("gezogen"); ziel?.classList.remove("ziel"); ziel=null; st=null; };
+  b.addEventListener("pointerdown",e=>{ if(e.button>0||A.fertig) return; const r=b.getBoundingClientRect(); st={x:e.clientX,y:e.clientY,dx:e.clientX-r.left,dy:e.clientY-r.top}; gezogen=false; try{ b.setPointerCapture(e.pointerId); }catch(_){} });
+  b.addEventListener("pointermove",e=>{ if(!st) return;
+    if(!geist){ if(Math.hypot(e.clientX-st.x,e.clientY-st.y)<6) return; waehleK(null); gezogen=true; geist=b.cloneNode(true); geist.classList.add("geist"); document.body.append(geist); b.classList.add("gezogen"); }
+    geist.style.transform=`translate(${e.clientX-st.dx}px,${e.clientY-st.dy}px) rotate(-3deg)`;
+    const p=platzBei(e.clientX,e.clientY); if(p!==ziel){ ziel?.classList.remove("ziel"); ziel=p; ziel?.classList.add("ziel"); } });
+  b.addEventListener("pointerup",()=>{ const war=!!geist, p=ziel; ende(); if(war&&p) lege(t,p); });
+  b.addEventListener("pointercancel",ende);
+  b.addEventListener("click",()=>{ if(gezogen){ gezogen=false; return; } if(A.fertig) return; waehleK(A.sel===t?null:t); });
+  return b;
+}
+function platzBei(x,y){ const el=document.elementFromPoint(x,y); if(!el||!A?.el?.contains(el)) return null; const p=el.closest(".platz"); if(p&&!p.classList.contains("voll")) return p; return el.closest(".mzeile,.msatz")?.querySelector(".platz:not(.voll)")||null; }
+function waehleK(t){ if(A.sel){ A.sel.el.classList.remove("gewaehlt"); A.sel.el.setAttribute("aria-pressed","false"); } A.sel=t; if(t){ t.el.classList.add("gewaehlt"); t.el.setAttribute("aria-pressed","true"); sag(`${t.text}: Tipp jetzt auf die passende Lücke.`,""); } }
+function lege(t,p){
+  if(A.fertig||p.classList.contains("voll")) return; waehleK(null);
+  const i=+p.dataset.i, z=A.it.zeilen[i], g=A.gaps[i];
+  if(t.text===z.a){ p.textContent=t.text; p.classList.add("voll"); p.classList.remove("nein"); g.ok=true; if(!A.it.bleibt) t.el.classList.add("weg");
+    if(A.gaps.every(x=>x.ok)) return geloest(); piep([[523,0,.12]]); sag("Passt. Weiter mit der nächsten Lücke.","gut"); return; }
+  g.f++; p.classList.add("nein"); setTimeout(()=>p.classList.remove("nein"),1100);
+  if(falsch()) return;
+  if(A.f===2&&A.it.hilfe) zeigeWeg("💡 "+h(A.it.hilfe));
+  sag("Noch nicht. "+(z.t||A.it.t||""),"schlecht");
+  if(g.f>=2) huepfe(A.tiles.find(x=>x.text===z.a&&!x.el.classList.contains("weg"))?.el);
 }
 function zeigeWeg(t){ const p=A.el.querySelector(".mweg"); p.innerHTML=t; p.hidden=!t; }
 function wackel(){ A.el.classList.remove("falsch"); void A.el.offsetWidth; A.el.classList.add("falsch"); setTimeout(()=>A.el?.classList.remove("falsch"),500); piep([[220,0,.2],[175,.14,.25]]); }
@@ -698,7 +835,8 @@ function weiter(){ lauf++; if(X.nr>=X.liste.length) return abschlussM(); frage()
 function geloest(){
   A.fertig=true; const sauber=!A.f, m=M();
   piep([[523,0,.15],[784,.1,.25]]);
-  if(sauber){ X.gut++; const k=fKey(A.en); if(m.fehler?.[k]?.rest>0){ m.fehler[k]={...m.fehler[k],rest:m.fehler[k].rest-1,t:Date.now()}; halte(); } } else X.schlecht.push(A.en);
+  X.gut+=A.it.typ==="ziehen"?A.gaps.filter(g=>!g.f).length:sauber?1:0; if(A.it.typ==="ziehen") $("schilder").hidden=true;
+  if(sauber){ const k=fKey(A.en); if(m.fehler?.[k]?.rest>0){ m.fehler[k]={...m.fehler[k],rest:m.fehler[k].rest-1,t:Date.now()}; halte(); } } else X.schlecht.push(A.en);
   X.nr++; X.f=0; const ende=X.nr>=X.liste.length; if(ende) bucheRunde(); else merkeRunde();
   $("punkte").textContent=`Auf Anhieb: ${X.gut}`;
   sag(`Richtig! ${loesung(A.it)}`,"gut");
@@ -708,16 +846,16 @@ function geloest(){
   if(sauber){ const mein=lauf; setTimeout(()=>{ if(lauf===mein) weiter(); },wg?2600:1500); }
 }
 function bucheRunde(){
-  const m=M(), n=X.liste.length;
+  const m=M(), n=X.n;
   if(X.key&&m.weiter?.[X.key]){ m.weiter={...m.weiter}; delete m.weiter[X.key]; }
   if(X.art==="ebene"||X.art==="probe"){ const id=X.art==="probe"?"probe":X.e.id; X.alt=m.best?.[id]||0;
-    m.gespielt={...(m.gespielt||{}),[id]:(m.gespielt?.[id]||0)+1}; m.best={...(m.best||{}),[id]:Math.max(X.alt,X.gut)};
+    m.gespielt={...(m.gespielt||{}),[id]:(m.gespielt?.[id]||0)+1}; m.best={...(m.best||{}),[id]:Math.max(X.alt,X.gut)}; m.bestVon={...(m.bestVon||{}),[id]:n};
     if(X.art==="ebene"&&X.gut/n>=.75) m.geschafft={...(m.geschafft||{}),[id]:true}; }
   if(X.art==="heute") m.hTag=heute();
   halte(); KERN.log("Mathe: "+(X.e?`${X.e.b.name}: ${X.e.name}`:X.titel),X.gut,n,"mathe");
 }
 function abschlussM(){
-  const n=X.liste.length, a=X.gut, st=sterne(a,n), m=M(), e=X.e, b=e?.b, i=b?b.ebenen.indexOf(e):-1, next=b?.ebenen[i+1], fb=b?.id||null;
+  const n=X.n, a=X.gut, st=sterne(a,n), m=M(), e=X.e, b=e?.b, i=b?b.ebenen.indexOf(e):-1, next=b?.ebenen[i+1], fb=b?.id||null;
   piep([[523,0,.2],[659,.15,.2],[784,.3,.2],[1047,.45,.5]]);
   let text=`${a} von ${n} auf Anhieb richtig.`;
   if(X.alt&&a>X.alt) text+=" Das ist dein neuer Rekord."; else if(X.alt) text+=` Dein bestes Ergebnis: ${Math.max(X.alt,a)}.`;
@@ -742,7 +880,7 @@ function eltern(n){
     ${k>1?`<p class="rot"><small>Im Unterricht ist Kapitel ${k} dran. Im Trainer gibt es bisher nur Kapitel 1: bitte die Buchseiten ${abs(k+".0")?.seite||""} bis ${letzteSeite(k)} fotografieren.</small></p>`:""}
     <label>Stand im Mathebuch <select id="mbuch">${ABS.map(a=>`<option value="${a.id}" ${a.id===pos?"selected":""}>${h(a.name)} (S. ${a.seite})</option>`).join("")}</select></label>
     <label>Schwerpunkt <select id="mfokus"><option value="">keiner, nur das aktuelle Thema</option>${BEREICHE.map(b=>`<option value="${b.id}" ${b.id===fo?"selected":""}>${h(b.name)}</option>`).join("")}</select></label>
-    <p><small>Der Schwerpunkt bekommt in „Heute üben“ 6 von 10 Aufgaben, bis alle seine Ebenen geschafft sind. ${h(kname(n))} wird an Schultagen gefragt, ob es im Mathebuch weiterging.</small></p>
+    <p><small>Der Schwerpunkt bekommt in „Heute üben“ gut die Hälfte der Aufgaben, bis alle seine Ebenen geschafft sind. ${h(kname(n))} wird an Schultagen gefragt, ob es im Mathebuch weiterging.</small></p>
     <details><summary>Offene Fehler Mathe (${fe.length})</summary><ul>${fe.slice(0,30).map(x=>`<li>${h(loesung(mach(x)))}</li>`).join("")||"<li>keine</li>"}</ul></details></section>`;
   const aendern=f=>{ const x=JSON.parse(JSON.stringify(n===KERN.nr?KERN.D:KERN.daten(n))); x.mathe=x.mathe||{}; f(x.mathe); KERN.ersetze(n,x); };
   return {html,verdrahte:(root,meld)=>{

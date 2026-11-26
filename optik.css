@@ -184,4 +184,4 @@ dialog h3{margin:12px 0 4px;font-size:17px}
 .mathe .msatz .mzahl{font-size:inherit}
 .mathe .platz{min-width:76px;min-height:42px;font-size:21px;padding:0 8px;cursor:pointer;border-radius:8px}
 .mathe .platz.voll{border-style:solid;cursor:default}
-.mstrich{height:26px;width:auto;vertical-align:middle}
+.mathe svg.mstrich{height:34px;width:auto;vertical-align:middle}
