@@ -995,7 +995,7 @@ function bucheRunde(){
   if(X.key&&m.weiter?.[X.key]){ m.weiter={...m.weiter}; delete m.weiter[X.key]; }
   if(X.art==="ebene"||X.art==="probe"){ const id=X.art==="probe"?"probe":X.e.id; X.alt=m.best?.[id]||0;
     m.gespielt={...(m.gespielt||{}),[id]:(m.gespielt?.[id]||0)+1}; m.best={...(m.best||{}),[id]:Math.max(X.alt,X.gut)}; m.bestVon={...(m.bestVon||{}),[id]:n};
-    if(X.art==="ebene"&&X.gut/n>=.75) m.geschafft={...(m.geschafft||{}),[id]:true}; }
+    if(X.art==="ebene"&&X.gut/n>=.75){ if(!m.geschafft?.[id]) window.MEDIEN?.ebene("m",X.e,n); m.geschafft={...(m.geschafft||{}),[id]:true}; } }
   if(X.art==="heute") m.hTag=heute();
   halte(); KERN.log("Mathe: "+(X.e?`${X.e.b.name}: ${X.e.name}`:X.titel),X.gut,n,"mathe");
 }

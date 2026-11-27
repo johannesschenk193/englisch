@@ -107,12 +107,13 @@ function zweimal(b,frage,warnung,meld,tu){ b.onclick=async()=>{ if(!b.dataset.si
   setTimeout(()=>{ if(b.isConnected&&b.dataset.sicher){ delete b.dataset.sicher; b.textContent=b.dataset.alt; meld(""); } },8000); return; }
   b.disabled=true; meld("Einen Moment ..."); if(KERN.verbunden()) await KERN.abgleich(true); await tu(); }; }
 function elternDetail(n){
-  elternKind=n; ort="@eltern"; const z=kennzahlen(n), me=MATHE.eltern(n);
+  elternKind=n; ort="@eltern"; const z=kennzahlen(n), me=MATHE.eltern(n), md=MEDIEN.eltern(n);
   ruhe(`${kbild(n)} ${kname(n)}`,z.letzte?`Zuletzt geübt ${zeitpunkt(z.letzte)}.`:z.g||z.vok?"Seit dem Umzug noch nicht geübt, der alte Stand ist da.":"Noch nicht angefangen.");
   const tests=Object.entries(z.tests), testName=id=>id==="gelernt"?"Alles Gelernte":Object.values(vokPruef.GRUPPEN).flat().find(a=>a.key===id)?.name||id;
   const texte=Object.entries(z.d.stand.texte||{}).filter(x=>x[1]);
   const d=blatt(`
    <section><h3>Letzte 7 Tage</h3><div class="zahlen"><div><b>${z.min}</b><small>Minuten</small></div><div><b>${z.tage}</b><small>Tage geübt</small></div><div><b>${z.uebungen}</b><small>Übungen</small></div><div><b>${z.uebungen?z.quote+" %":"–"}</b><small>richtig</small></div></div></section>
+   ${md.html}
    <section><h3>Grammatik</h3>${z.ber.map(x=>`<div class="zeile2"><span>${x.b.icon} ${esc(x.b.name)}</span><small>${x.f[0]} von ${x.f[1]}</small>${balken(x.f[0],x.f[1])}</div>`).join("")}</section>
    <section><h3>Vokabeln</h3><p>${z.vok} von ${vokPruef.ALLE.length} gelernt, heute fällig: ${z.faellig}. Gerade dran: ${esc(z.auswahl)}.</p><div class="zeile2"><span>Heute geübt</span><small>${z.heute} von ${z.ziel} Wörtern</small>${balken(Math.min(z.heute,z.ziel),z.ziel)}</div>${z.kasten}
      ${tests.length?`<table><thead><tr><th>Vokabeltest</th><th>zuletzt</th><th>bestes</th><th>Anzahl</th></tr></thead><tbody>${tests.map(([id,t])=>`<tr><td>${esc(testName(id))}</td><td>${t.zuletzt} %</td><td>${t.best} %</td><td>${t.n}</td></tr>`).join("")}</tbody></table>`:"<p><small>Noch kein Vokabeltest.</small></p>"}
@@ -133,7 +134,7 @@ function elternDetail(n){
   const q=s=>d.querySelector(s), meld=t=>q("#emeld").textContent=t;
   const vokAendern=f=>{ const x=JSON.parse(JSON.stringify(n===KERN.nr?KERN.D:KERN.daten(n))); x.vok={...vokPruef.leer(),...x.vok}; f(x.vok); KERN.ersetze(n,x); };
   const vokJetzt=()=>({...vokPruef.leer(),...JSON.parse(JSON.stringify((n===KERN.nr?KERN.D:KERN.daten(n)).vok))});
-  me.verdrahte(d,meld);
+  me.verdrahte(d,meld); md.verdrahte(d,meld);
   q("#dran").append(vokWahl(vokJetzt(),v=>vokAendern(x=>{ x.nach=v.nach; x.wahl=v.wahl; })));
   q("#termin").onchange=e=>vokAendern(v=>v.test=e.target.value);
   q("#bseiteE").onchange=e=>{ const s=parseInt(e.target.value); if(!(s>0)) return;
@@ -146,7 +147,7 @@ function elternDetail(n){
   d.querySelectorAll(".bilder button").forEach(b=>b.onclick=()=>{ KERN.setzFamilie({bild:{...KERN.fam().bild,[n]:b.textContent}}); d.querySelectorAll(".bilder button").forEach(x=>x.setAttribute("aria-pressed",x===b)); kopf(); });
   q("#alsKind").onclick=()=>KERN.waehle(n);
   q("#sichern").onclick=()=>{ const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([JSON.stringify(n===KERN.nr?KERN.D:KERN.daten(n))],{type:"application/json"})); a.download=`lernen-${kname(n)}-${new Date().toISOString().slice(0,10)}.json`; a.click(); };
-  q("#laden").onchange=async e=>{ try{ const x=JSON.parse(await e.target.files[0].text()); if(!x.stand||!x.vok) throw 0; KERN.ersetze(n,{...KERN.leer(),...x,reset:Date.now()}); elternDetail(n); }catch(_){ meld("Das ist keine Sicherung dieses Spiels."); } };
+  q("#laden").onchange=async e=>{ try{ const x=JSON.parse(await e.target.files[0].text()); if(!x.stand||!x.vok) throw 0; const jetzt=n===KERN.nr?KERN.D:KERN.daten(n); KERN.ersetze(n,{...KERN.leer(),...x,medien:jetzt.medien||x.medien,reset:Date.now()}); elternDetail(n); }catch(_){ meld("Das ist keine Sicherung dieses Spiels."); } };
   const k=kname(n);
   zweimal(q("#nullG"),"Wirklich Grammatik zurücksetzen?",`Alle Ebenen, Fehler und eigenen Texte von ${k} gehen verloren. Die Vokabeln bleiben.`,meld,()=>{ KERN.zuruecksetzen(n,"stand"); elternDetail(n); $("emeld").textContent=("Grammatik zurückgesetzt."); });
   zweimal(q("#nullV"),"Wirklich Vokabeln zurücksetzen?",`Karteikasten und Tests von ${k} fangen von vorn an. Die Grammatik bleibt.`,meld,()=>{ KERN.zuruecksetzen(n,"vok"); elternDetail(n); $("emeld").textContent=("Vokabeln zurückgesetzt."); });

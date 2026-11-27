@@ -957,7 +957,7 @@ function bucheX(){
   const id=xr.e.id; xr.alt=stand.best[id]||0;
   stand.gespielt[id]=(stand.gespielt[id]||0)+1; if(xr.e!==PROBE) stand.runden[id]=(stand.runden[id]||0)+1;
   stand.best[id]=Math.max(xr.alt,xr.gut);
-  if(xr.e!==PROBE && xr.gut/xr.keys.length>=.75) stand.geschafft[id]=true;
+  if(xr.e!==PROBE && xr.gut/xr.keys.length>=.75){ if(xr.e.bereich&&!stand.geschafft[id]) window.MEDIEN?.ebene("g",xr.e,xr.keys.length); stand.geschafft[id]=true; }
   if(xr.e===HEUTE) stand.gTag=KERN.heute();
   if(stand.todo?.e&&id in stand.todo.e&&xr.gut/xr.keys.length>=.75) stand.todo.e[id]=1;
   delete stand.weiter[id]; merke(); KERN.log((xr.e.bereich?xr.e.bereich.name+": ":"")+xr.e.name,xr.gut,xr.keys.length,xr.e.bereich?.id||(xr.e===HEUTE?"heute":"probe"));
@@ -1011,7 +1011,7 @@ function pruefeText(still){
   $("pruefliste").replaceChildren(...erg.map(([n,ok])=>{ const li=document.createElement("li"); li.textContent=n; if(ok) li.className="ok"; return li; }));
   $("punkte").textContent=`Geschafft: ${n} von ${erg.length}`;
   sag(n===erg.length?"Alle Punkte erfüllt. Lies den Text noch einmal laut und zeig ihn deinen Eltern.":"Der Text wird gespeichert. Die Liste prüft Grammatikpunkte, nicht jedes einzelne Wort.",n===erg.length?"gut":"");
-  if(!still){ stand.texte[thema]=t; if(n===erg.length) stand.geschafft[schreibEbene.id]=true; merke(); }
+  if(!still){ stand.texte[thema]=t; if(n===erg.length){ if(!stand.geschafft[schreibEbene.id]) window.MEDIEN?.ebene("g",schreibEbene,0); stand.geschafft[schreibEbene.id]=true; } merke(); }
 }
 $("text").addEventListener("input",()=>pruefeText(false));
 function zeigeFrage(nr){

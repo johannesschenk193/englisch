@@ -133,6 +133,7 @@ function buche(w,p,{zaehlt=true,sofort=false}={}){
   if(S.tage[S.tage.length-1]!==heute()) S.tage.push(heute());
   if(S.heute?.tag!==heute()) S.heute={tag:heute(),ids:[]};
   if(!S.heute.ids.includes(w.id)) S.heute.ids.push(w.id);
+  window.MEDIEN?.wort(w.id);   // Medienzeit: verschiedene Woerter des Tages
   halte();
 }
 function kette(){ let n=0,t=heute(); const m=new Set(S.tage); if(!m.has(t)) t--; while(m.has(t)){n++;t--;} return n; }

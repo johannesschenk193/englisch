@@ -188,3 +188,50 @@ dialog h3{margin:12px 0 4px;font-size:17px}
 .mathe .mschema{justify-items:start;text-align:left;width:100%}.mathe .mschema .msatz{text-wrap:wrap;line-height:2.1}.mathe .msatz.mfest{line-height:1.4;font-weight:600}
 .mtreppe{display:flex;align-items:flex-end;justify-content:center;flex-wrap:wrap;gap:0 2px;font-weight:700;font-size:20px;margin:4px 0 12px}
 .mtreppe i{font-style:normal;font-size:14px;color:#1a6fb0;border-top:2px solid #1a6fb0;border-radius:50% 50% 0 0;padding:2px 8px 0;margin-bottom:16px}
+
+/* ---------- Medienzeit (medien.js, U-017) ---------- */
+#bMedien{order:10;position:relative;background:#fff;color:var(--gruen);border:0;border-radius:999px;padding:6px 12px;font:inherit;font-size:15px;line-height:1.2;white-space:nowrap;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+#bMedien[hidden]{display:none}
+#bMedien b{font-size:17px;font-variant-numeric:tabular-nums}#bMedien small{font-size:12px;color:var(--leise)}
+#bMedien.plus{animation:mplus .6s ease}
+#bMedien.plus::after{content:attr(data-plus);position:absolute;right:0;top:100%;margin-top:6px;background:#f0c14b;color:#3b2c00;font-weight:700;font-size:14px;border-radius:10px;padding:2px 8px;pointer-events:none}
+@keyframes mplus{40%{transform:scale(1.2)}}
+@media (prefers-reduced-motion:reduce){#bMedien.plus{animation:none}}
+@media (max-width:760px){
+  body:not([data-modus="menue"]) header::after{content:"";order:8;flex-basis:100%;height:0;margin-top:-4px}
+  #punkte{flex:1 1 auto}
+  #bMedien{margin-left:auto;padding:5px 10px}
+  /* im Spiel zweite Kopfzeile neben dem Punktestand: flach, damit der Kopf nicht waechst */
+  body:not([data-modus="menue"]) #bMedien{font-size:14px;line-height:1.1;padding:3px 10px;margin:-3px 0 -3px auto}
+  body:not([data-modus="menue"]) #bMedien b{font-size:16px}
+}
+.mdialog{width:min(440px,calc(100% - 24px))}
+.mdialog .mgross{font-size:20px;margin:2px 0 8px}.mdialog .mgross b{font-size:46px;color:var(--gruen);font-variant-numeric:tabular-nums}
+.mdialog ul{font-size:16px}.mdialog h3{font-size:17px}
+.meinloesen{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:6px 0 12px}
+.meinloesen label{font-size:17px}
+.meinloesen input{font:inherit;width:4.5em;padding:9px 11px;border:2px solid var(--linie);border-radius:10px;margin:0 6px}
+.meinloesen .haupt{padding:10px 18px;font-size:17px;cursor:pointer}.meinloesen .haupt:disabled{opacity:.5;cursor:default}
+.meinloesen .meld{flex-basis:100%;margin:0;min-height:1.3em;font-size:16px;color:var(--gruen)}
+.eltern summary{cursor:pointer}
+.mwoche,.mregeln{border-top:1px solid var(--linie);padding-top:9px}
+.mwoche>summary,.mregeln>summary{font-size:17px}
+.mzahlen{display:grid;grid-template-columns:repeat(auto-fit,minmax(88px,1fr));gap:6px;text-align:center;margin:8px 0}
+.mzahlen div{background:var(--bg);border-radius:10px;padding:6px 4px}.mzahlen b{display:block;font-size:20px;font-variant-numeric:tabular-nums}.mzahlen small{font-size:13px;color:var(--leise)}
+.mtag{background:var(--bg);border-radius:12px;padding:9px 11px;margin:6px 0}
+.mtag>summary{display:flex;flex-wrap:wrap;gap:2px 10px;align-items:baseline;list-style:none}
+.mtag>summary::-webkit-details-marker{display:none}
+.mtag>summary::before{content:"▸";color:var(--leise)}.mtag[open]>summary::before{content:"▾"}
+.mtag>summary span{color:var(--leise);font-size:15px}.mtag>summary .mplus{margin-left:auto;font-weight:700;color:var(--gruen);font-size:16px}
+.mtin{display:grid;gap:8px;padding-top:8px;min-width:0}
+.mrunden{width:100%;border-collapse:collapse;font-size:15px}.mrunden th,.mrunden td{padding:4px 6px;text-align:left;border-bottom:1px solid var(--linie)}
+.mrunden td+td,.mrunden th+th{white-space:nowrap}
+.mein .mstorno{font-size:14px;padding:4px 10px;margin-left:6px;cursor:pointer}
+.warum>summary{display:inline-block;background:#fff;border:2px solid var(--linie);border-radius:10px;padding:8px 12px;color:var(--gruen);font-weight:600;list-style:none}
+.warum>summary::-webkit-details-marker{display:none}
+.warum ol,.mregel{margin:8px 0 0;padding-left:22px;line-height:1.5}
+.mregel li+li{margin-top:4px}
+.eltern form.mform{box-shadow:none;padding:8px 0 0;max-width:none;display:grid;gap:8px}
+.mform label{display:flex;flex-wrap:wrap;align-items:center;gap:4px}
+.mform input[type=number]{margin:0 4px}
+.mform input[type=checkbox]{width:20px;height:20px;margin-right:6px}

@@ -29,7 +29,9 @@ let D=nr?daten(nr):leer();
 const sichere=()=>{ if(nr) setz("et:k"+nr,D); };
 function speichere(teil,wert){ if(!nr) return; D[teil]=wert; sichere(); plane(20000); }
 const heute=()=>{ const d=new Date(); return Math.floor((d.getTime()-d.getTimezoneOffset()*6e4)/864e5); };
-function log(was,gut,von,art){ if(!nr||!von) return; D.verlauf.push({t:Date.now(),w:was,g:gut,v:von,a:art||""}); D.verlauf=D.verlauf.slice(-400); sichere(); plane(3000); }
+// window.MEDIEN (medien.js) schreibt mit: Tageszusammenfassung, die die Kappung des Verlaufs ueberlebt, und Lernzeit je Fach
+const medien=(f,...a)=>{ try{ window.MEDIEN?.[f](...a); }catch(e){ console.error(e); } };
+function log(was,gut,von,art){ if(!nr||!von) return; D.verlauf.push({t:Date.now(),w:was,g:gut,v:von,a:art||""}); D.verlauf=D.verlauf.slice(-400); medien("runde",was,gut,von,art); sichere(); plane(3000); }
 function waehle(n){ setz("et:kind",n||null); location.reload(); }
 function ersetze(n,d){ setz("et:k"+n,d); if(n===nr){ D=daten(nr); neu(); } plane(1500); }
 const gruppe=a=>a==="vokabeln"||a==="test"?"vok":a==="mathe"?"mathe":"stand";
@@ -41,21 +43,25 @@ function zuruecksetzen(n,teil){ // teil: "stand" (Grammatik), "vok" (Vokabeln), 
   if(alt.stand?.buch) x.stand={...(x.stand||{}),buch:kopie(alt.stand.buch)}; // wo die Klasse im Buch ist, bleibt
   if(alt.mathe?.buch) x.mathe={...(x.mathe||{}),buch:kopie(alt.mathe.buch)}; // ebenso im Mathebuch und der Schwerpunkt
   if(alt.mathe?.fokus!==undefined) x.mathe={...(x.mathe||{}),fokus:alt.mathe.fokus};
+  if(alt.medien) x.medien=kopie(alt.medien); // Medienzeit: Konto, Einloesungen, Regeln und Tagesauswertung bleiben
   ersetze(n,x); }
 let beiNeu=()=>{}; const neu=()=>{ try{ beiNeu(D); }catch(e){ console.error(e); } };
 addEventListener("storage",e=>{ if(nr&&e.key==="et:k"+nr&&e.newValue){ D=daten(nr); neu(); } });
 // Uebungszeit: nur, wenn die Seite offen ist und in der letzten Minute etwas passiert ist
 let zuletzt=0; for(const e of ["pointerdown","keydown"]) addEventListener(e,()=>zuletzt=Date.now(),{passive:true,capture:true});
-setInterval(()=>{ if(nr&&!document.hidden&&Date.now()-zuletzt<60000&&document.body?.dataset.modus!=="menue"){ const h=heute(); D.zeit[h]=(D.zeit[h]||0)+15; sichere(); } },15000);
+setInterval(()=>{ if(nr&&!document.hidden&&Date.now()-zuletzt<60000&&document.body?.dataset.modus!=="menue"){ const h=heute(); D.zeit[h]=(D.zeit[h]||0)+15; medien("tick",h); sichere(); } },15000);
 
 // ---------- Zusammenfuehren zweier Staende (b = letzter gemeinsamer Stand, l = hier, r = Ablage) ----------
 const J=JSON.stringify, istObj=x=>x&&typeof x==="object"&&!Array.isArray(x);
 function misch(b,l,r,p=[]){
   if(J(l)===J(r)) return l; if(J(l)===J(b)) return r; if(J(r)===J(b)) return l;
-  if(p.length===0&&istObj(l)&&istObj(r)&&(l.reset||0)!==(r.reset||0)) return (l.reset||0)>(r.reset||0)?l:r;
+  if(p.length===0&&istObj(l)&&istObj(r)&&(l.reset||0)!==(r.reset||0)){ const w=(l.reset||0)>(r.reset||0)?l:r;
+    // Zuruecksetzen auf einem Geraet: die Medienzeit (Einloesungen!) des anderen geht trotzdem nicht verloren
+    return l.medien||r.medien?{...w,medien:misch(istObj(b)?b.medien:undefined,l.medien,r.medien,["medien"])}:w; }
   const [p0,p1]=p;
   if(p0==="zeit"&&p.length===2) return (l||0)+(r||0)-(b||0);
   if(l===undefined) return r; if(r===undefined) return l;
+  if(p0==="medien"&&p1==="start"&&p.length===2) return Math.min(l,r);
   if(p0==="vok"&&p1==="w"&&p.length===3){ const s=x=>x.r+x.h+x.x; return s(l)>=s(r)?l:r; }
   if((p0==="kinder"||p0==="weg")&&p.length===1&&Array.isArray(l)&&Array.isArray(r)) return [...new Set([...l,...r])].sort((x,y)=>x-y);
   if(p0==="vok"&&p1==="heute"&&p.length===2) return l.tag!==r.tag?(l.tag>r.tag?l:r):{tag:l.tag,ids:[...new Set([...l.ids,...r.ids])]};
@@ -106,7 +112,7 @@ async function gleicheAb(d,lesenLokal,schreibLokal){
   }
   throw Error("Zu viele Geräte gleichzeitig, gleich noch einmal.");
 }
-const hatInhalt=d=>d&&(d.reset||d.verlauf?.length||Object.keys(d.stand||{}).length||Object.keys(d.vok||{}).length||Object.keys(d.mathe||{}).length);
+const hatInhalt=d=>d&&(d.reset||d.verlauf?.length||Object.keys(d.stand||{}).length||Object.keys(d.vok||{}).length||Object.keys(d.mathe||{}).length||Object.keys(d.medien||{}).length);
 async function abgleich(alle){
   if(!verbunden()) return false;
   if(laeuft){ nochmal=true; return false; }
